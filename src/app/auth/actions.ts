@@ -33,6 +33,8 @@ export async function getUser(): Promise<(User & { role?: string }) | null> {
     };
   } catch (error) {
     console.error("Error verifying session cookie:", error);
+    // Clear the invalid cookie
+    cookies().delete("session");
     return null;
   }
 }
@@ -45,23 +47,26 @@ export async function logout() {
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  let userCredential;
 
   try {
-    const userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
-    const idToken = await userCredential.user.getIdToken();
-    const decodedToken = await getAuth().verifyIdToken(idToken);
-    await createSession(decodedToken.uid);
-
-    const role = decodedToken.role || "user";
-    const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-    redirect(redirectTo);
-
+    userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
   } catch (error: any) {
     console.error("Login failed:", error.message);
     const headers = new Headers();
     headers.set('X-Error-Message', 'Invalid email or password.');
-    redirect("/auth/login", headers as any); // Type assertion needed for redirect with headers
+    // The redirect needs to be outside the catch block to avoid unhandled promise rejection.
+    return redirect("/auth/login", headers as any);
   }
+
+  const idToken = await userCredential.user.getIdToken();
+  const decodedToken = await getAuth().verifyIdToken(idToken);
+  await createSession(decodedToken.uid);
+
+  const role = decodedToken.role || "user";
+  const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+  
+  redirect(redirectTo);
 }
 
 export async function signup(formData: FormData) {
@@ -76,10 +81,8 @@ export async function signup(formData: FormData) {
       
       await createSession(uid);
       
-      redirect("/user/dashboard");
     } catch (error: any) {
       console.error("Signup failed:", error.code, error.message);
-      const headers = new Headers();
       let errorMessage = "An unexpected error occurred.";
       if (error.code === 'auth/email-already-in-use') {
           errorMessage = "This email is already in use.";
@@ -87,7 +90,11 @@ export async function signup(formData: FormData) {
           errorMessage = "Password should be at least 6 characters.";
       }
       
+      const headers = new Headers();
       headers.set('X-Error-Message', errorMessage);
-      redirect("/auth/signup", headers as any); // Type assertion needed for redirect with headers
+      // The redirect needs to be outside the catch block to avoid unhandled promise rejection.
+      return redirect("/auth/signup", headers as any);
     }
+    
+    redirect("/user/dashboard");
 }
