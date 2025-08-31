@@ -1,7 +1,8 @@
 
+
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription } from "@/lib/types";
+import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification } from "@/lib/types";
 import { firestore } from "firebase-admin";
 
 const USERS_COLLECTION = "users";
@@ -9,6 +10,7 @@ const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
 const SUPPORT_TICKETS_COLLECTION = "supportTickets";
 const BRANDING_SETTINGS_COLLECTION = "branding";
+const NOTIFICATIONS_COLLECTION = "notifications";
 
 
 // User & Role Functions
@@ -220,4 +222,29 @@ export async function getBrandingSettings(): Promise<BrandingSettings | null> {
 
 export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
     await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').set(settings, { merge: true });
+}
+
+// Notification Functions
+export async function getUserNotifications(userId: string): Promise<Notification[]> {
+    const snapshot = await db.collection(NOTIFICATIONS_COLLECTION)
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+    if (snapshot.empty) {
+        return [];
+    }
+
+    return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            userId: data.userId,
+            title: data.title,
+            message: data.message,
+            type: data.type,
+            isRead: data.isRead,
+            createdAt: data.createdAt.toDate(),
+        };
+    });
 }

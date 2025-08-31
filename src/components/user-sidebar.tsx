@@ -1,4 +1,5 @@
 
+
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import {
   ChevronLeft, 
   ChevronRight,
   LayoutGrid,
+  Bell,
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -36,6 +38,7 @@ const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/user/dashboard" },
   { id: "plans", name: "Plans", icon: LayoutGrid, href: "/user/plans" },
   { id: "billing", name: "Billing", icon: ShoppingCart, href: "/user/billing" },
+  { id: "notifications", name: "Notifications", icon: Bell, href: "/user/notifications" },
   { id: "profile", name: "Profile", icon: Users, href: "/user/profile" },
 ];
 

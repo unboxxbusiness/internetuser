@@ -1,4 +1,5 @@
 
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -46,4 +47,14 @@ export interface Subscription {
     speed: number;
     dataLimit: number | 'Unlimited';
     nextBillingDate: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'billing' | 'plan-change' | 'general' | 'warning';
+  isRead: boolean;
+  createdAt: Date;
 }
