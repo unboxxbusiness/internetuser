@@ -1,3 +1,4 @@
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -8,6 +9,7 @@ export interface SubscriptionPlan {
 
 export interface Payment {
   id: string;
+  userId: string;
   customer: string;
   email: string;
   plan: string;
@@ -34,4 +36,14 @@ export interface BrandingSettings {
     brandName: string;
     icon: string;
     footerText: string;
+}
+
+export interface Subscription {
+    planId: string;
+    planName: string;
+    status: 'active' | 'inactive' | 'cancelled';
+    price: number;
+    speed: number;
+    dataLimit: number | 'Unlimited';
+    nextBillingDate: string;
 }

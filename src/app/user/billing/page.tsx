@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
+import { getUserPayments } from "@/lib/firebase/firestore";
 import { Download } from "lucide-react";
 
 export default async function UserBillingPage() {
@@ -26,16 +27,7 @@ export default async function UserBillingPage() {
     redirect("/auth/login");
   }
 
-  // --- Placeholder Data ---
-  const paymentHistory = [
-    { id: "INV-001", date: "June 30, 2024", amount: 79.99, status: "succeeded" },
-    { id: "INV-002", date: "May 30, 2024", amount: 79.99, status: "succeeded" },
-    { id: "INV-003", date: "April 30, 2024", amount: 79.99, status: "succeeded" },
-    { id: "INV-004", date: "March 30, 2024", amount: 79.99, status: "succeeded" },
-    { id: "INV-005", date: "February 29, 2024", amount: 79.99, status: "succeeded" },
-    { id: "INV-006", date: "January 30, 2024", amount: 79.99, status: "succeeded" },
-  ];
-  // --- End Placeholder Data ---
+  const paymentHistory = await getUserPayments(user.uid);
 
   return (
     <div className="space-y-6">
@@ -49,41 +41,47 @@ export default async function UserBillingPage() {
           <CardDescription>A complete record of your payments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentHistory.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">{payment.id}</TableCell>
-                  <TableCell>{payment.date}</TableCell>
-                  <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        payment.status === "succeeded" ? "secondary" : "destructive"
-                      }
-                    >
-                      {payment.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Invoice
-                    </Button>
-                  </TableCell>
+          {paymentHistory.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paymentHistory.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">{payment.id.substring(0,8)}...</TableCell>
+                    <TableCell>{payment.date.toLocaleDateString()}</TableCell>
+                    <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          payment.status === "succeeded" ? "secondary" : "destructive"
+                        }
+                      >
+                        {payment.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm">
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Invoice
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+             <div className="text-center text-muted-foreground py-12">
+                <p>No payment history found.</p>
+              </div>
+          )}
         </CardContent>
       </Card>
     </div>

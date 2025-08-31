@@ -1,6 +1,8 @@
+
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings } from "@/lib/types";
+import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription } from "@/lib/types";
+import { firestore } from "firebase-admin";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
@@ -88,6 +90,32 @@ export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
   };
 }
 
+// This is a placeholder until full subscription logic is implemented.
+// It fetches the first available plan and treats it as the user's subscription.
+export async function getUserSubscription(userId: string): Promise<Subscription | null> {
+    const plans = await getPlans();
+    if (plans.length === 0) {
+        return null;
+    }
+    const firstPlan = plans[0];
+
+    // In a real app, you'd fetch the user's specific subscription record.
+    // For now, we'll create a mock subscription object.
+    const nextBillingDate = new Date();
+    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+
+    return {
+        planId: firstPlan.id,
+        planName: firstPlan.name,
+        status: 'active',
+        price: firstPlan.price,
+        speed: firstPlan.speed,
+        dataLimit: firstPlan.dataLimit === 0 ? 'Unlimited' : firstPlan.dataLimit,
+        nextBillingDate: nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    };
+}
+
+
 // Payment Functions
 export async function getPayments(): Promise<Payment[]> {
   const snapshot = await db.collection(PAYMENTS_COLLECTION).orderBy("date", "desc").get();
@@ -95,6 +123,7 @@ export async function getPayments(): Promise<Payment[]> {
     const data = doc.data();
     return {
       id: doc.id,
+      userId: data.userId,
       customer: data.customer,
       email: data.email,
       plan: data.plan,
@@ -105,6 +134,32 @@ export async function getPayments(): Promise<Payment[]> {
     };
   });
 }
+
+export async function getUserPayments(userId: string): Promise<Payment[]> {
+    const snapshot = await db.collection(PAYMENTS_COLLECTION)
+        .where('userId', '==', userId)
+        .orderBy('date', 'desc')
+        .get();
+
+    if (snapshot.empty) {
+        return [];
+    }
+
+    return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            userId: data.userId,
+            customer: data.customer,
+            email: data.email,
+            plan: data.plan,
+            status: data.status,
+            amount: data.amount,
+            date: (data.date.toDate ? data.date.toDate() : new Date(data.date)),
+        };
+    });
+}
+
 
 // Support Ticket Functions
 export async function getSupportTickets(): Promise<SupportTicket[]> {
@@ -146,12 +201,22 @@ export async function getSupportTicket(id: string): Promise<SupportTicket | null
 
 // Branding Functions
 export async function getBrandingSettings(): Promise<BrandingSettings | null> {
-    const doc = await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').get();
-    if (!doc.exists) {
+    try {
+        const doc = await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').get();
+        if (!doc.exists) {
+            return null;
+        }
+        return doc.data() as BrandingSettings;
+    } catch (error) {
+        console.error("Error getting branding settings:", error);
+        if ((error as any).code === 'permission-denied' && process.env.NODE_ENV === 'development') {
+            console.warn("Firestore permission denied. This might be because you're running in the emulator without auth. Returning default branding.");
+            return null;
+        }
         return null;
     }
-    return doc.data() as BrandingSettings;
 }
+
 
 export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
     await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').set(settings, { merge: true });
