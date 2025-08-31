@@ -1,19 +1,49 @@
-import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle } from "lucide-react";
+import Link from "next/link";
+import { CustomerTable } from "@/components/customer-table";
+import { placeholderCustomers } from "@/lib/placeholder-data";
 
-export default function Home() {
+export default function DashboardPage() {
+  const stats = [
+    { title: "Total Customers", value: "1,250" },
+    { title: "Active Subscriptions", value: "1,180" },
+    { title: "Pending Payments", value: "70" },
+    { title: "Monthly Revenue", value: "$59,000" },
+  ];
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between text-center">
-        <h1 className="text-4xl font-bold">Welcome to the App</h1>
-        <p className="mt-4 text-lg">
-          Please log in to continue.
-        </p>
-        <div className="mt-8">
-          <Link href="/auth/login" className="rounded-md bg-primary px-4 py-2 text-primary-foreground">
-              Login
-          </Link>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        {stats.map((stat) => (
+          <Card key={stat.title}>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {stat.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{stat.value}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    </main>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Customers</CardTitle>
+          <Button asChild>
+            <Link href="/customers/add">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Customer
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <CustomerTable customers={placeholderCustomers} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
