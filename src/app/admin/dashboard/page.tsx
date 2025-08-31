@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import { getUser } from "@/app/auth/actions";
 import { getCustomers } from "@/lib/firebase/firestore";
 import { CustomerTable } from "@/components/customer-table";
 import { RecentSales } from "@/components/recent-sales";
+import { OverviewChart } from "@/components/overview-chart";
 
 export default async function AdminDashboardPage() {
   const user = await getUser();
@@ -42,21 +42,6 @@ export default async function AdminDashboardPage() {
   const monthlyRevenue = customers
     .filter((c) => c.paymentStatus !== "Canceled")
     .reduce((total, c) => total + (planPrices[c.plan] || 0), 0);
-
-  const graphData = [
-    { name: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Apr", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Aug", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Dec", total: Math.floor(Math.random() * 5000) + 1000 },
-  ];
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -192,30 +177,7 @@ export default async function AdminDashboardPage() {
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="pl-2">
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={graphData}>
-                    <XAxis
-                      dataKey="name"
-                      stroke="#888888"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke="#888888"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(value) => `$${value}`}
-                    />
-                    <Bar
-                      dataKey="total"
-                      fill="currentColor"
-                      radius={[4, 4, 0, 0]}
-                      className="fill-primary"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <OverviewChart />
               </CardContent>
             </Card>
             <Card className="col-span-4 md:col-span-3">
@@ -232,7 +194,7 @@ export default async function AdminDashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="customers" className="space-y-4">
-           <Card>
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>All Customers</CardTitle>
             </CardHeader>
