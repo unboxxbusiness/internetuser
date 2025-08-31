@@ -61,21 +61,6 @@ export function Footer({ branding }: { branding: BrandingSettings | null }) {
             <p>{footerText}</p>
           </div>
           
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-            <Link href="#" className="text-base font-medium hover:text-white transition-colors">
-              About
-            </Link>
-            <Link href="#" className="text-base font-medium hover:text-white transition-colors">
-              Contact
-            </Link>
-            <Link href="#" className="text-base font-medium hover:text-white transition-colors">
-              Privacy
-            </Link>
-            <Link href="#" className="text-base font-medium hover:text-white transition-colors">
-              Terms
-            </Link>
-          </div>
-
           <div className="flex justify-center gap-6">
             <SocialLink href="#" icon={TwitterIcon} />
             <SocialLink href="#" icon={FacebookIcon} />
