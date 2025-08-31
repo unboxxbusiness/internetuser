@@ -12,10 +12,7 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("session")?.value;
 
   if (!sessionCookie) {
-    if (pathname.startsWith("/admin") || pathname.startsWith("/user")) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   try {
@@ -26,23 +23,22 @@ export async function middleware(request: NextRequest) {
     const userRole = decodedToken.role || 'user';
 
     if (pathname.startsWith("/admin") && userRole !== "admin") {
+       // If a non-admin tries to access an admin route, send them to their correct dashboard
        return NextResponse.redirect(new URL("/user/dashboard", request.url));
     }
 
-    if (pathname.startsWith("/user") && userRole !== "user" && userRole !== "admin") {
-       return NextResponse.redirect(new URL("/auth/login", request.url));
+    if (pathname.startsWith("/user") && userRole === "admin") {
+      // If an admin accidentally lands on a user route, redirect them to the admin dashboard
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
-    
+
     return NextResponse.next();
 
   } catch (error) {
     // Session cookie is invalid or expired.
-    // Clear the cookie and redirect to login for protected routes.
-    if (pathname.startsWith("/admin") || pathname.startsWith("/user")) {
-      const response = NextResponse.redirect(new URL("/auth/login", request.url));
-      response.cookies.delete("session");
-      return response;
-    }
-    return NextResponse.next();
+    // Clear the cookie and redirect to login.
+    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    response.cookies.delete("session");
+    return response;
   }
 }
