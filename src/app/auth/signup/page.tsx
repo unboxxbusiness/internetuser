@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,19 +12,21 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { headers } from 'next/headers';
-import { signup, getUser } from "../actions";
-import { redirect } from "next/navigation";
+import { signup } from "../actions";
+import { Eye, EyeOff } from "lucide-react";
 
-export default async function SignupPage() {
-    const user = await getUser();
-    if (user) {
-      const redirectTo = user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
-      redirect(redirectTo);
+export default function SignupPage() {
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const result = await signup(formData);
+    if (result?.error) {
+      setError(result.error);
     }
-    
-  const headerList = headers();
-  const errorMessage = headerList.get('X-Error-Message');
+  };
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
@@ -33,7 +38,7 @@ export default async function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={signup} className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -46,9 +51,30 @@ export default async function SignupPage() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </button>
+              </div>
             </div>
-            {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+            {error && <p className="text-sm text-red-500">{error}</p>}
             <Button type="submit" className="w-full">
               Create an account
             </Button>

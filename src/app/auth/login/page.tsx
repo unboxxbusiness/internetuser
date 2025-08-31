@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,20 +12,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { login, getUser } from "../actions";
-import { redirect } from "next/navigation";
+import { login } from "../actions";
+import { Eye, EyeOff } from "lucide-react";
 
-export default async function LoginPage() {
-  const user = await getUser();
-  if (user) {
-    const redirectTo = user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
-    redirect(redirectTo);
-  }
+export default function LoginPage() {
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const headerList = headers();
-  const errorMessage = headerList.get('X-Error-Message');
-    
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const result = await login(formData);
+    if (result?.error) {
+      setError(result.error);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
       <Card className="mx-auto max-w-sm">
@@ -30,15 +35,11 @@ export default async function LoginPage() {
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
             Enter your email below to login to your account.
-            <br />
-            <span className="text-xs text-muted-foreground">
-                For admin access, use an account with an `admin` role custom claim.
-            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form
-            action={login}
+            onSubmit={handleSubmit}
             className="grid gap-4"
           >
             <div className="grid gap-2">
@@ -52,12 +53,31 @@ export default async function LoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </button>
               </div>
-              <Input id="password" name="password" type="password" required />
             </div>
-            {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+            {error && <p className="text-sm text-red-500">{error}</p>}
             <Button type="submit" className="w-full">
               Login
             </Button>

@@ -43,45 +43,35 @@ export async function getUser(): Promise<(User & { role?: string }) | null> {
 
 export async function logout() {
   cookies().delete("session");
+  revalidatePath("/", "layout");
   redirect("/auth/login");
 }
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData): Promise<{ error: string } | void> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  let userCredential;
-  let errorMessage = null;
-
+  
   try {
-    userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
+    const userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+    await createSession(idToken);
+    
+    const role = await getUserRole(userCredential.user.uid);
+    const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+    redirect(redirectTo);
+
   } catch (error: any) {
-    errorMessage = "Invalid email or password.";
+    console.error("Login failed:", error.code, error.message);
+    return { error: "Invalid email or password." };
   }
-
-  if (errorMessage) {
-    const headers = new Headers();
-    headers.set('X-Error-Message', errorMessage);
-    redirect("/auth/login", headers as any);
-  }
-
-  const idToken = await userCredential!.user.getIdToken();
-  await createSession(idToken);
-
-  const role = await getUserRole(userCredential!.user.uid);
-  const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-
-  redirect(redirectTo);
 }
 
-export async function signup(formData: FormData) {
+export async function signup(formData: FormData): Promise<{ error: string } | void> {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
   
-    let userCredential;
-    let errorMessage = null;
-
     try {
-      userCredential = await createUserWithEmailAndPassword(clientAuth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(clientAuth, email, password);
       const { uid } = userCredential.user;
 
       // Create a user document in Firestore
@@ -93,18 +83,12 @@ export async function signup(formData: FormData) {
     } catch (error: any) {
       console.error("Signup failed:", error.code, error.message);
       if (error.code === 'auth/email-already-in-use') {
-          errorMessage = "This email is already in use.";
+          return { error: "This email is already in use." };
       } else if (error.code === 'auth/weak-password') {
-          errorMessage = "Password should be at least 6 characters.";
+          return { error: "Password should be at least 6 characters." };
       } else {
-        errorMessage = "An unexpected error occurred.";
+        return { error: "An unexpected error occurred." };
       }
-    }
-
-    if (errorMessage) {
-      const headers = new Headers();
-      headers.set('X-Error-Message', errorMessage);
-      return redirect("/auth/signup", headers as any);
     }
     
     redirect("/user/dashboard");
