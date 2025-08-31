@@ -5,13 +5,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { getUser, AppUser } from "@/app/auth/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ProfileForm } from "@/components/profile-form";
+import { BrandingForm } from "@/components/branding-form";
 
 
 export default async function AdminSettingsPage() {
@@ -64,13 +63,8 @@ export default async function AdminSettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <p className="text-sm text-muted-foreground">
-                Branding and whitelabel options will be configured here.
-            </p>
+             <BrandingForm />
           </CardContent>
-          <CardFooter>
-            <Button variant="outline">Configure Branding</Button>
-          </CardFooter>
         </Card>
       </div>
     </div>
