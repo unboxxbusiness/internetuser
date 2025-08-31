@@ -1,39 +1,33 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-  
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow read, list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
-    
+
     match /subscriptionPlans/{planId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /payments/{paymentId} {
-      // Admins can see all payments
-      allow read, list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      // Users can only see their own payments
-      allow read, list: if request.auth != null && resource.data.userId == request.auth.uid;
+        allow read, list: if request.auth != null && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || resource.data.userId == request.auth.uid);
     }
     
     match /supportTickets/{ticketId} {
-        allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        allow read, list: if request.auth != null && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || resource.data.userId == request.auth.uid);
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /branding/config {
-      allow read: if request.auth != null;
+      allow read: if true; // Publicly readable
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
-
+    
     match /notifications/{notificationId} {
-        // Users can only read their own notifications
-        allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-        // Only the system (or admins) can create notifications. No client writes.
-        allow write: if false; 
+      allow read, list: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

@@ -21,6 +21,7 @@ export interface Payment {
 
 export interface SupportTicket {
     id: string;
+    userId: string;
     subject: string;
     description?: string;
     user: {

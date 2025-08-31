@@ -164,12 +164,17 @@ export async function getUserPayments(userId: string): Promise<Payment[]> {
 
 
 // Support Ticket Functions
+export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
+    await db.collection(SUPPORT_TICKETS_COLLECTION).add(ticketData);
+}
+
 export async function getSupportTickets(): Promise<SupportTicket[]> {
   const snapshot = await db.collection(SUPPORT_TICKETS_COLLECTION).orderBy("lastUpdated", "desc").get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       id: doc.id,
+      userId: data.userId,
       subject: data.subject,
       description: data.description,
       user: data.user,
@@ -179,6 +184,32 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
       lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
     };
   });
+}
+
+export async function getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
+    const snapshot = await db.collection(SUPPORT_TICKETS_COLLECTION)
+        .where('userId', '==', userId)
+        .orderBy('lastUpdated', 'desc')
+        .get();
+
+    if (snapshot.empty) {
+        return [];
+    }
+
+    return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            userId: data.userId,
+            subject: data.subject,
+            description: data.description,
+            user: data.user,
+            status: data.status,
+            priority: data.priority,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+            lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+        };
+    });
 }
 
 export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
@@ -191,6 +222,7 @@ export async function getSupportTicket(id: string): Promise<SupportTicket | null
 
     return {
         id: doc.id,
+        userId: data.userId,
         subject: data.subject,
         description: data.description,
         user: data.user,

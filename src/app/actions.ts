@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings } from "@/lib/firebase/firestore";
+import { updateUser, updateBrandingSettings, createSupportTicket } from "@/lib/firebase/firestore";
 import { BrandingSettings } from "@/lib/types";
 
 export async function deleteUserAction(uid: string) {
@@ -141,6 +141,7 @@ export async function updateUserProfileAction(
   try {
     await updateUser(user.uid, updates);
     revalidatePath("/admin/settings");
+    revalidatePath("/user/profile");
     return { message: "Profile updated successfully." };
   } catch (error) {
     console.error("Error updating profile:", error);
@@ -167,4 +168,41 @@ export async function updateBrandingAction(prevState: any, formData: FormData): 
         console.error('Error updating branding settings:', error);
         return { error: 'Failed to update branding settings.' };
     }
+}
+
+export async function createSupportTicketAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user) {
+        return { error: 'You must be logged in to create a ticket.' };
+    }
+
+    const subject = formData.get('subject') as string;
+    const description = formData.get('description') as string;
+    const priority = formData.get('priority') as 'low' | 'medium' | 'high';
+
+    if (!subject || !description || !priority) {
+        return { error: 'Please fill out all fields.' };
+    }
+
+    try {
+        await createSupportTicket({
+            subject,
+            description,
+            priority,
+            userId: user.uid,
+            user: {
+                name: user.name || 'N/A',
+                email: user.email || 'N/A'
+            },
+            status: 'open',
+            lastUpdated: new Date(),
+            createdAt: new Date(),
+        });
+    } catch (error) {
+        console.error('Error creating support ticket:', error);
+        return { error: 'Failed to create support ticket.' };
+    }
+    
+    revalidatePath('/user/support');
+    redirect('/user/support');
 }

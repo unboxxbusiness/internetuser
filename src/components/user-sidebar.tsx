@@ -15,6 +15,7 @@ import {
   ChevronRight,
   LayoutGrid,
   Bell,
+  LifeBuoy,
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -39,6 +40,7 @@ const navigationItems: NavigationItem[] = [
   { id: "plans", name: "Plans", icon: LayoutGrid, href: "/user/plans" },
   { id: "billing", name: "Billing", icon: ShoppingCart, href: "/user/billing" },
   { id: "notifications", name: "Notifications", icon: Bell, href: "/user/notifications" },
+  { id: "support", name: "Support", icon: LifeBuoy, href: "/user/support" },
   { id: "profile", name: "Profile", icon: Users, href: "/user/profile" },
 ];
 
