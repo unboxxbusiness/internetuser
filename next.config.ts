@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'html.tailus.io',
       },
+      {
+        protocol: 'https',
+        hostname: 'tailark.com',
+      },
     ],
   },
 };
