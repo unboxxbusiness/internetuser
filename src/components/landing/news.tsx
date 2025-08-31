@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Testimonials } from "./testimonials";
 
 const newsItems = [
@@ -38,11 +37,10 @@ export function News() {
               {newsItems.map((item) => (
                 <div key={item.title} className="flex gap-6 items-start">
                   <div className="w-32 h-32 flex-shrink-0 relative">
-                    <Image
+                    <img
                       src={item.image.src}
                       alt={item.image.alt}
-                      fill
-                      className="rounded-lg shadow-md object-cover"
+                      className="w-full h-full rounded-lg shadow-md object-cover"
                       data-ai-hint={item.image.hint}
                     />
                   </div>
