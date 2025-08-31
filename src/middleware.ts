@@ -12,7 +12,10 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("session")?.value;
 
   if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    if (pathname.startsWith("/admin") || pathname.startsWith("/user")) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+    return NextResponse.next();
   }
 
   try {
@@ -34,9 +37,12 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     // Session cookie is invalid or expired.
-    // Clear the cookie and redirect to login.
-    const response = NextResponse.redirect(new URL("/auth/login", request.url));
-    response.cookies.delete("session");
-    return response;
+    // Clear the cookie and redirect to login for protected routes.
+    if (pathname.startsWith("/admin") || pathname.startsWith("/user")) {
+      const response = NextResponse.redirect(new URL("/auth/login", request.url));
+      response.cookies.delete("session");
+      return response;
+    }
+    return NextResponse.next();
   }
 }
