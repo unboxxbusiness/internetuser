@@ -1,9 +1,9 @@
 "use client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Sparkles as SparklesComp } from "@/components/ui/sparkles";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { TimelineContent } from "@/components/ui/timeline-animation";
-import {VerticalCutReveal} from "@/components/ui/vertical-cut-reveal";
+import { VerticalCutReveal } from "@/components/ui/vertical-cut-reveal";
 import { cn } from "@/lib/utils";
+import { Briefcase, CheckCheck, Database, Server } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 
@@ -16,11 +16,12 @@ const plans = [
     yearlyPrice: 99,
     buttonText: "Get started",
     buttonVariant: "outline" as const,
+    features: [
+      { text: "Up to 10 boards per workspace", icon: <Briefcase size={20} /> },
+      { text: "Up to 10GB storage", icon: <Database size={20} /> },
+      { text: "Limited analytics", icon: <Server size={20} /> },
+    ],
     includes: [
-      "Free includes:",
-      "Unlimted Cards",
-      "Custom background & stickers",
-      "2-factor authentication",
       "Free includes:",
       "Unlimted Cards",
       "Custom background & stickers",
@@ -34,13 +35,13 @@ const plans = [
     price: 48,
     yearlyPrice: 399,
     buttonText: "Get started",
-    buttonVariant: "default" as const,
-    popular: true,
+    buttonVariant: "outline" as const,
+    features: [
+      { text: "Unlimted boards", icon: <Briefcase size={20} /> },
+      { text: "Storage (250MB/file)", icon: <Database size={20} /> },
+      { text: "100 workspace command runs", icon: <Server size={20} /> },
+    ],
     includes: [
-      "Everything in Starter, plus:",
-      "Advanced checklists",
-      "Custom fields",
-      "Servedless functions",
       "Everything in Starter, plus:",
       "Advanced checklists",
       "Custom fields",
@@ -53,13 +54,15 @@ const plans = [
       "Advanced plan with enhanced security and unlimited access for large teams",
     price: 96,
     yearlyPrice: 899,
+    popular: true,
     buttonText: "Get started",
-    buttonVariant: "outline" as const,
+    buttonVariant: "default" as const,
+    features: [
+      { text: "Unlimited board", icon: <Briefcase size={20} /> },
+      { text: "Unlimited storage ", icon: <Database size={20} /> },
+      { text: "Unlimited workspaces", icon: <Server size={20} /> },
+    ],
     includes: [
-      "Everything in Business, plus:",
-      "Multi-board management",
-      "Multi-board guest",
-      "Attachment permissions",
       "Everything in Business, plus:",
       "Multi-board management",
       "Multi-board guest",
@@ -68,7 +71,13 @@ const plans = [
   },
 ];
 
-const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
+const PricingSwitch = ({
+  onSwitch,
+  className,
+}: {
+  onSwitch: (value: string) => void;
+  className?: string;
+}) => {
   const [selected, setSelected] = useState("0");
 
   const handleSwitch = (value: string) => {
@@ -77,19 +86,21 @@ const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
   };
 
   return (
-    <div className="flex justify-center">
-      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-neutral-900 border border-gray-700 p-1">
+    <div className={cn("flex justify-center", className)}>
+      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-neutral-50 border border-gray-200 p-1">
         <button
           onClick={() => handleSwitch("0")}
           className={cn(
-            "relative z-10 w-fit h-10  rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
-            selected === "0" ? "text-white" : "text-gray-200",
+            "relative z-10 w-fit sm:h-12 cursor-pointer h-10  rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
+            selected === "0"
+              ? "text-black"
+              : "text-muted-foreground hover:text-black",
           )}
         >
           {selected === "0" && (
             <motion.span
               layoutId={"switch"}
-              className="absolute top-0 left-0 h-10 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-500 to-blue-600"
+              className="absolute top-0 left-0 sm:h-12 h-10 w-full rounded-full border-4 shadow-sm shadow-neutral-300 border-neutral-300 bg-gradient-to-t from-neutral-100 via-neutral-200 to-neutral-300"
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           )}
@@ -99,18 +110,25 @@ const PricingSwitch = ({ onSwitch }: { onSwitch: (value: string) => void }) => {
         <button
           onClick={() => handleSwitch("1")}
           className={cn(
-            "relative z-10 w-fit h-10 flex-shrink-0 rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
-            selected === "1" ? "text-white" : "text-gray-200",
+            "relative z-10 w-fit cursor-pointer sm:h-12 h-10 flex-shrink-0 rounded-full sm:px-6 px-3 sm:py-2 py-1 font-medium transition-colors",
+            selected === "1"
+              ? "text-black"
+              : "text-muted-foreground hover:text-black",
           )}
         >
           {selected === "1" && (
             <motion.span
               layoutId={"switch"}
-              className="absolute top-0 left-0 h-10 w-full  rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-500 to-blue-600"
+              className="absolute top-0 left-0 sm:h-12 h-10  w-full  rounded-full border-4 shadow-sm shadow-neutral-300 border-neutral-300 bg-gradient-to-t from-neutral-100 via-neutral-200 to-neutral-300"
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           )}
-          <span className="relative flex items-center gap-2">Yearly</span>
+          <span className="relative flex items-center gap-2">
+            Yearly
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-black">
+              Save 20%
+            </span>
+          </span>
         </button>
       </div>
     </div>
@@ -143,83 +161,40 @@ export function Offers() {
 
   return (
     <div
-      className=" min-h-screen  mx-auto relative bg-black overflow-x-hidden"
+      className="px-4 pt-20 min-h-screen  max-w-7xl  mx-auto relative"
       ref={pricingRef}
     >
-      <TimelineContent
-        animationNum={4}
-        timelineRef={pricingRef}
-        customVariants={revealVariants}
-        className="absolute top-0  h-96 w-screen overflow-hidden [mask-image:radial-gradient(50%_50%,white,transparent)] "
-      >
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#ffffff2c_1px,transparent_1px),linear-gradient(to_bottom,#3a3a3a01_1px,transparent_1px)] bg-[size:70px_80px] "></div>
-        <SparklesComp
-          density={1800}
-          direction="bottom"
-          speed={1}
-          color="#FFFFFF"
-          className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
-        />
-      </TimelineContent>
-      <TimelineContent
-        animationNum={5}
-        timelineRef={pricingRef}
-        customVariants={revealVariants}
-        className="absolute left-0 top-[-114px] w-full h-[113.625vh] flex flex-col items-start justify-start content-start flex-none flex-nowrap gap-2.5 overflow-hidden p-0 z-0"
-      >
-        <div className="framer-1i5axl2">
-          <div
-            className="absolute left-[-568px] right-[-568px] top-0 h-[2053px] flex-none rounded-full"
-            style={{
-              border: "200px solid #3131f5",
-              filter: "blur(92px)",
-              WebkitFilter: "blur(92px)",
-            }}
-            data-border="true"
-            data-framer-name="Ellipse 1"
-          ></div>
-          <div
-            className="absolute left-[-568px] right-[-568px] top-0 h-[2053px] flex-none rounded-full"
-            style={{
-              border: "200px solid #3131f5",
-              filter: "blur(92px)",
-              WebkitFilter: "blur(92px)",
-            }}
-            data-border="true"
-            data-framer-name="Ellipse 2"
-          ></div>
-        </div>
-      </TimelineContent>
+      <article className="flex sm:flex-row flex-col sm:pb-0 pb-4 sm:items-center items-start justify-between">
+        <div className="text-left mb-6">
+          <h2 className="text-4xl font-medium leading-[130%] text-gray-900 mb-4">
+            <VerticalCutReveal
+              splitBy="words"
+              staggerDuration={0.15}
+              staggerFrom="first"
+              reverse={true}
+              containerClassName="justify-start"
+              transition={{
+                type: "spring",
+                stiffness: 250,
+                damping: 40,
+                delay: 0, // First element
+              }}
+            >
+              Plans & Pricing
+            </VerticalCutReveal>
+          </h2>
 
-      <article className="text-center mb-6 pt-32 max-w-3xl mx-auto space-y-2 relative z-50">
-        <h2 className="text-4xl font-medium text-white">
-          <VerticalCutReveal
-            splitBy="words"
-            staggerDuration={0.15}
-            staggerFrom="first"
-            reverse={true}
-            containerClassName="justify-center "
-            transition={{
-              type: "spring",
-              stiffness: 250,
-              damping: 40,
-              delay: 0, // First element
-            }}
+          <TimelineContent
+            as="p"
+            animationNum={0}
+            timelineRef={pricingRef}
+            customVariants={revealVariants}
+            className="text-gray-600 w-[80%]"
           >
-            Plans that works best for your
-          </VerticalCutReveal>
-        </h2>
-
-        <TimelineContent
-          as="p"
-          animationNum={0}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
-          className="text-gray-300"
-        >
-          Trusted by millions, We help teams all around the world, Explore which
-          option is right for you.
-        </TimelineContent>
+            Trusted by millions, We help teams all around the world, Explore
+            which option is right for you.
+          </TimelineContent>
+        </div>
 
         <TimelineContent
           as="div"
@@ -227,89 +202,121 @@ export function Offers() {
           timelineRef={pricingRef}
           customVariants={revealVariants}
         >
-          <PricingSwitch onSwitch={togglePricingPeriod} />
+          <PricingSwitch onSwitch={togglePricingPeriod} className="shrink-0" />
         </TimelineContent>
       </article>
 
-      <div
-        className="absolute top-0 left-[10%] right-[10%] w-[80%] h-full z-0"
-        style={{
-          backgroundImage: `
-        radial-gradient(circle at center, #206ce8 0%, transparent 70%)
-      `,
-          opacity: 0.6,
-          mixBlendMode: "multiply",
-        }}
-      />
-
-      <div className="grid md:grid-cols-3 max-w-5xl gap-4 py-6 mx-auto ">
+      <TimelineContent
+        as="div"
+        animationNum={2}
+        timelineRef={pricingRef}
+        customVariants={revealVariants}
+        className="grid md:grid-cols-3 gap-4 mx-auto  bg-gradient-to-b from-neutral-100 to-neutral-200 sm:p-3 rounded-lg"
+      >
         {plans.map((plan, index) => (
           <TimelineContent
-            key={plan.name}
             as="div"
-            animationNum={2 + index}
+            key={plan.name}
+            animationNum={index + 3}
             timelineRef={pricingRef}
             customVariants={revealVariants}
           >
             <Card
-              className={`relative text-white border-neutral-800 ${
+              className={`relative flex-col flex justify-between  ${
                 plan.popular
-                  ? "bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 shadow-[0px_-13px_300px_0px_#0900ff] z-20"
-                  : "bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 z-10"
+                  ? "scale-110 ring-2 ring-neutral-900 bg-gradient-to-t from-black to-neutral-900 text-white"
+                  : "border-none shadow-none bg-transparent pt-4 text-gray-900"
               }`}
             >
-              <CardHeader className="text-left ">
-                <div className="flex justify-between">
-                  <h3 className="text-3xl mb-2">{plan.name}</h3>
-                </div>
-                <div className="flex items-baseline">
-                  <span className="text-4xl font-semibold ">
-                    $
-                    <span className="text-4xl font-semibold">
-                      {isYearly ? plan.yearlyPrice : plan.price}
-                    </span>
-                  </span>
-                  <span className="text-gray-300 ml-1">
-                    /{isYearly ? "year" : "month"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-300 mb-4">{plan.description}</p>
-              </CardHeader>
-
               <CardContent className="pt-0">
-                <button
-                  className={`w-full mb-6 p-4 text-xl rounded-xl ${
-                    plan.popular
-                      ? "bg-gradient-to-t from-blue-500 to-blue-600  shadow-lg shadow-blue-800 border border-blue-500 text-white"
-                      : plan.buttonVariant === "outline"
-                        ? "bg-gradient-to-t from-neutral-950 to-neutral-600  shadow-lg shadow-neutral-900 border border-neutral-800 text-white"
-                        : ""
-                  }`}
-                >
-                  {plan.buttonText}
-                </button>
+                <div className="space-y-2 pb-3">
+                  {plan.popular && (
+                    <div className="pt-4">
+                      <span className="bg-neutral-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Popular
+                      </span>
+                    </div>
+                  )}
 
-                 <div className="space-y-3 pt-4 border-t border-neutral-700">
-                  <h4 className="font-medium text-base mb-3">
+                  <div className="flex items-baseline">
+                    <span className="text-4xl font-semibold ">
+                      $
+                      <span className="text-4xl font-semibold">
+                        {isYearly ? plan.yearlyPrice : plan.price}
+                      </span>
+                    </span>
+                    <span
+                      className={
+                        plan.popular
+                          ? "text-neutral-200 ml-1"
+                          : "text-gray-600 ml-1"
+                      }
+                    >
+                      /{isYearly ? "year" : "month"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between">
+                  <h3 className="text-3xl font-semibold mb-2">{plan.name}</h3>
+                </div>
+                <p
+                  className={
+                    plan.popular
+                      ? "text-sm text-neutral-200 mb-4"
+                      : "text-sm text-gray-600 mb-4"
+                  }
+                >
+                  {plan.description}
+                </p>
+
+                <div className="space-y-3 pt-4 border-t border-neutral-200">
+                  <h4 className="font-medium text-base  mb-3">
                     {plan.includes[0]}
                   </h4>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 font-semibold">
                     {plan.includes.slice(1).map((feature, featureIndex) => (
-                      <li
-                        key={featureIndex}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="h-2.5 w-2.5 bg-neutral-500 rounded-full grid place-content-center"></span>
-                        <span className="text-sm text-gray-300">{feature}</span>
+                      <li key={featureIndex} className="flex items-center">
+                        <span
+                          className={
+                            plan.popular
+                              ? "text-white h-6 w-6 bg-neutral-600 border border-neutral-500 rounded-full grid place-content-center mt-0.5 mr-3"
+                              : "text-black h-6 w-6 bg-white border border-black rounded-full grid place-content-center mt-0.5 mr-3"
+                          }
+                        >
+                          <CheckCheck className="h-4 w-4  " />
+                        </span>
+                        <span
+                          className={
+                            plan.popular
+                              ? "text-sm text-neutral-100"
+                              : "text-sm text-gray-600"
+                          }
+                        >
+                          {feature}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </div>
               </CardContent>
+              <CardFooter>
+                <button
+                  className={`w-full mb-6 p-4 text-xl rounded-xl ${
+                    plan.popular
+                      ? "bg-gradient-to-t from-neutral-100 to-neutral-300 font-semibold shadow-lg shadow-neutral-500 border border-neutral-400 text-black"
+                      : plan.buttonVariant === "outline"
+                        ? "bg-gradient-to-t from-neutral-900 to-neutral-600  shadow-lg shadow-neutral-900 border border-neutral-700 text-white"
+                        : ""
+                  }`}
+                >
+                  {plan.buttonText}
+                </button>
+              </CardFooter>
             </Card>
           </TimelineContent>
         ))}
-      </div>
+      </TimelineContent>
     </div>
   );
 }
