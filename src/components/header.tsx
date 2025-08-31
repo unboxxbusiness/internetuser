@@ -83,13 +83,6 @@ export function Header({ user, branding }: HeaderProps) {
             </div>
         ) : (
           <>
-            <nav className="hidden md:flex items-center gap-8">
-              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#">Home</a>
-              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#plans">Plans</a>
-              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#">Support</a>
-              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#news-offers">News</a>
-              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#news-offers">Offers</a>
-            </nav>
             <div className="flex items-center gap-2">
               <Button asChild className="font-bold tracking-wide" size="sm">
                 <Link href="/auth/signup">Sign Up</Link>
