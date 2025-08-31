@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Home, 
-  Users,
+  Settings,
   ShoppingCart,
   LogOut, 
   Menu, 
@@ -41,7 +41,7 @@ const navigationItems: NavigationItem[] = [
   { id: "billing", name: "Billing", icon: ShoppingCart, href: "/user/billing" },
   { id: "notifications", name: "Notifications", icon: Bell, href: "/user/notifications" },
   { id: "support", name: "Support", icon: LifeBuoy, href: "/user/support" },
-  { id: "profile", name: "Profile", icon: Users, href: "/user/profile" },
+  { id: "settings", name: "Settings", icon: Settings, href: "/user/profile" },
 ];
 
 export function UserSidebar({ className = "", user, branding }: SidebarProps) {
