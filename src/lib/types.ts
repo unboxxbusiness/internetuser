@@ -5,3 +5,13 @@ export interface SubscriptionPlan {
   speed: number;
   dataLimit: number;
 }
+
+export interface Payment {
+  id: string;
+  customer: string;
+  email: string;
+  plan: string;
+  status: "succeeded" | "failed" | "refunded";
+  amount: number;
+  date: Date;
+}

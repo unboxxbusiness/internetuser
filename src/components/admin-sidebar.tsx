@@ -11,7 +11,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Wifi,
-  Package
+  Package,
+  CreditCard
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -32,6 +33,7 @@ const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/admin/dashboard" },
   { id: "users", name: "Users", icon: Users2, href: "/admin/users" },
   { id: "plans", name: "Plans", icon: Package, href: "/admin/plans" },
+  { id: "payments", name: "Payments", icon: CreditCard, href: "/admin/payments" },
 ];
 
 export function AdminSidebar({ className = "", user }: SidebarProps) {
