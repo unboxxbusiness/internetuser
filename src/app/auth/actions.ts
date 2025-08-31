@@ -52,7 +52,7 @@ export async function getUser(): Promise<(User & { role?: string }) | null> {
 export async function logout() {
   cookies().delete("session");
   revalidatePath("/", "layout");
-  redirect("/auth/login");
+  redirect("/");
 }
 
 export async function login(
@@ -61,20 +61,28 @@ export async function login(
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   let userCredential;
+  let error = "";
 
   try {
-    userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
-  } catch (error: any) {
-    console.error("Login failed:", error.code, error.message);
-    return { error: "Invalid email or password." };
+    userCredential = await signInWithEmailAndPassword(
+      clientAuth,
+      email,
+      password
+    );
+    const idToken = await userCredential.user.getIdToken();
+    await createSession(idToken);
+  } catch (e: any) {
+    console.error("Login failed:", e.code, e.message);
+    error = "Invalid email or password.";
   }
 
-  const idToken = await userCredential.user.getIdToken();
-  await createSession(idToken);
-
-  const role = await getUserRole(userCredential.user.uid);
-  const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-  redirect(redirectTo);
+  if (error) {
+    return { error };
+  } else {
+    const role = await getUserRole((await clientAuth.currentUser!.getIdTokenResult()).claims.user_id!);
+    const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+    redirect(redirectTo);
+  }
 }
 
 export async function signup(
@@ -84,6 +92,7 @@ export async function signup(
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   let userCredential;
+  let error = "";
 
   try {
     userCredential = await createUserWithEmailAndPassword(
@@ -98,16 +107,20 @@ export async function signup(
 
     const idToken = await userCredential.user.getIdToken();
     await createSession(idToken);
-  } catch (error: any) {
-    console.error("Signup failed:", error.code, error.message);
-    if (error.code === "auth/email-already-in-use") {
-      return { error: "This email is already in use." };
-    } else if (error.code === "auth/weak-password") {
-      return { error: "Password should be at least 6 characters." };
+  } catch (e: any) {
+    console.error("Signup failed:", e.code, e.message);
+    if (e.code === "auth/email-already-in-use") {
+      error = "This email is already in use.";
+    } else if (e.code === "auth/weak-password") {
+      error = "Password should be at least 6 characters.";
     } else {
-      return { error: "An unexpected error occurred." };
+      error = "An unexpected error occurred.";
     }
   }
 
-  redirect("/user/dashboard");
+  if (error) {
+    return { error };
+  } else {
+    redirect("/user/dashboard");
+  }
 }
