@@ -28,7 +28,8 @@
     "server-only": "^0.0.1",
     "framer-motion": "^11.2.10",
     "@radix-ui/react-collapsible": "^1.1.0",
-    "next-themes": "^0.3.0"
+    "next-themes": "^0.3.0",
+    "@radix-ui/react-switch": "^1.0.3"
   },
   "devDependencies": {
     "typescript": "^5",
