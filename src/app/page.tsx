@@ -3,14 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { CustomerTable } from "@/components/customer-table";
-import { placeholderCustomers } from "@/lib/placeholder-data";
+import { getCustomers } from "@/lib/firebase/firestore";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const customers = await getCustomers();
+  
+  const totalCustomers = customers.length;
+  const activeSubscriptions = customers.filter(c => c.paymentStatus !== 'Canceled').length;
+  // These are just placeholders, you can implement more complex logic
+  const pendingPayments = customers.filter(c => c.paymentStatus === 'Pending' || c.paymentStatus === 'Overdue').length;
+  const monthlyRevenue = activeSubscriptions * 50; // Assuming an average of $50/customer
+
   const stats = [
-    { title: "Total Customers", value: "1,250" },
-    { title: "Active Subscriptions", value: "1,180" },
-    { title: "Pending Payments", value: "70" },
-    { title: "Monthly Revenue", value: "$59,000" },
+    { title: "Total Customers", value: totalCustomers.toLocaleString() },
+    { title: "Active Subscriptions", value: activeSubscriptions.toLocaleString() },
+    { title: "Pending Payments", value: pendingPayments.toLocaleString() },
+    { title: "Monthly Revenue", value: `$${monthlyRevenue.toLocaleString()}` },
   ];
 
   return (
@@ -41,7 +49,7 @@ export default function DashboardPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <CustomerTable customers={placeholderCustomers} />
+          <CustomerTable customers={customers} />
         </CardContent>
       </Card>
     </div>

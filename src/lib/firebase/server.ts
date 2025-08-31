@@ -2,6 +2,7 @@ import "server-only";
 
 import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
 const serviceAccount = {
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -16,5 +17,6 @@ const app = !getApps().length
   : getApp();
 
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-export { app, auth };
+export { app, auth, db };

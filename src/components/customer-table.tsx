@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import type { Customer } from "@/lib/placeholder-data";
+import type { Customer } from "@/lib/types";
 
 type StatusVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -17,9 +17,13 @@ const statusVariantMap: Record<Customer["paymentStatus"], StatusVariant> = {
   Paid: "default",
   Pending: "secondary",
   Overdue: "destructive",
+  Canceled: "outline",
 };
 
 export function CustomerTable({ customers }: { customers: Customer[] }) {
+  if (customers.length === 0) {
+    return <p className="text-center text-muted-foreground py-8">No customers found.</p>
+  }
   return (
     <Table>
       <TableHeader>
