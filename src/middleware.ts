@@ -4,50 +4,45 @@ import { auth } from '@/lib/firebaseAdmin';
 
 export const runtime = 'nodejs';
 
-export const config = {
-  matcher: ['/admin/:path*', '/user/:path*', '/((?!api|_next/static|_next/image|favicon.ico|auth/login).*)'],
-};
-
 export async function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get('session')?.value;
+  const session = request.cookies.get('session')?.value;
+  const { pathname } = request.nextUrl;
 
-  if (request.nextUrl.pathname.startsWith('/auth/login')) {
-    if (sessionCookie) {
-      try {
-        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-        const redirectPath = decodedClaims.admin ? '/admin' : '/user';
-        return NextResponse.redirect(new URL(redirectPath, request.url));
-      } catch (error) {
-        // Session cookie is invalid, let them proceed to login
-      }
+  const isAuthPage = pathname.startsWith('/auth');
+
+  if (!session) {
+    if (isAuthPage) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
-  }
-  
-  if (!sessionCookie) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 
   try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    const isAdmin = decodedClaims.admin === true;
-    const path = request.nextUrl.pathname;
+    const decodedToken = await auth.verifySessionCookie(session, true);
+    const isAdmin = decodedToken.admin === true;
 
-    if (path.startsWith('/admin') && !isAdmin) {
+    if (isAuthPage) {
+      return NextResponse.redirect(new URL(isAdmin ? '/admin' : '/user', request.url));
+    }
+
+    if (pathname.startsWith('/admin') && !isAdmin) {
       return NextResponse.redirect(new URL('/user', request.url));
     }
 
-    if (path.startsWith('/user') && isAdmin) {
+    if (pathname.startsWith('/user') && isAdmin) {
       return NextResponse.redirect(new URL('/admin', request.url));
-    }
-
-    if (path === '/') {
-        const redirectPath = isAdmin ? '/admin' : '/user';
-        return NextResponse.redirect(new URL(redirectPath, request.url));
     }
 
     return NextResponse.next();
   } catch (error) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+    console.error('Middleware error:', error);
+    // Clear the invalid cookie
+    const response = NextResponse.redirect(new URL('/auth/login', request.url));
+    response.cookies.set('session', '', { maxAge: -1 });
+    return response;
   }
 }
+
+export const config = {
+  matcher: ['/((?!api/auth/logout|_next/static|_next/image|favicon.ico).*)'],
+};
