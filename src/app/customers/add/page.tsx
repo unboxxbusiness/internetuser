@@ -55,7 +55,7 @@ export default function AddCustomerPage() {
             </div>
             <div className="flex justify-end space-x-2">
                <Button variant="outline" asChild>
-                <Link href="/admin/dashboard">Cancel</Link>
+                <Link href="/">Cancel</Link>
               </Button>
               <Button type="submit">Add Customer</Button>
             </div>
