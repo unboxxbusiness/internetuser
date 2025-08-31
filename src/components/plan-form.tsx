@@ -1,7 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
-import { useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,7 @@ function SubmitButton({ isEditing }: { isEditing: boolean }) {
 
 export function PlanForm({ plan }: { plan?: SubscriptionPlan }) {
   const action = plan ? updatePlanAction.bind(null, plan.id) : addPlanAction;
-  const [state, formAction] = useFormState(action, null);
+  const [state, formAction] = useActionState(action, null);
 
   return (
     <form action={formAction} className="space-y-4">
