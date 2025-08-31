@@ -1,15 +1,35 @@
 import Link from "next/link";
-import { Wifi, LogOut } from "lucide-react";
+import { Wifi, LogOut, Search } from "lucide-react";
 import type { User } from "firebase/auth";
 import { logout } from "@/app/auth/actions";
 import { Button } from "./ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "./ui/input";
 
 interface HeaderProps {
-  user: (User & { role?: string }) | null;
+  user: (User & { role?: string; name?: string }) | null;
 }
 
 export function Header({ user }: HeaderProps) {
-  const dashboardUrl = user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+  const dashboardUrl =
+    user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
 
   return (
     <header className="bg-card border-b">
@@ -20,24 +40,61 @@ export function Header({ user }: HeaderProps) {
             className="flex items-center gap-2 font-bold text-lg"
           >
             <Wifi className="h-6 w-6 text-primary" />
-            Gc Fiber Net
+            <span className="hidden sm:inline-block">Gc Fiber Net</span>
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" asChild>
-                <Link href={dashboardUrl}>Dashboard</Link>
-              </Button>
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">
-                {user.email}
-              </span>
-              <form action={logout}>
-                <Button variant="ghost" size="icon">
-                  <LogOut className="h-5 w-5" />
-                  <span className="sr-only">Logout</span>
-                </Button>
-              </form>
+             <div className="flex w-full max-w-sm items-center space-x-2 hidden md:flex">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search..." className="pl-9" />
+              </div>
             </div>
+          ) : null}
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.photoURL || undefined} alt={user.name || user.email || ''} />
+                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={dashboardUrl}>Dashboard</Link>
+                </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                  <Link href="#">Profile</Link>
+                </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                  <Link href="#">Billing</Link>
+                </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                  <Link href="#">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                   <form action={logout} className="w-full">
+                      <button type="submit" className="w-full text-left flex items-center">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log out
+                      </button>
+                    </form>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
