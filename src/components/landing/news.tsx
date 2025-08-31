@@ -1,4 +1,3 @@
-import { Testimonials } from "./testimonials";
 
 const newsItems = [
   {
@@ -27,9 +26,9 @@ export function News() {
   return (
     <section id="news-offers" className="py-16 sm:py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="max-w-2xl mx-auto">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white text-center">
               Latest News & Offers
             </h2>
 
@@ -54,7 +53,6 @@ export function News() {
               ))}
             </div>
           </div>
-          <Testimonials />
         </div>
       </div>
     </section>
