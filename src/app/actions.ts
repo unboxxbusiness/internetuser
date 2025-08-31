@@ -37,7 +37,7 @@ export async function resetPasswordAction(email: string): Promise<{ message?: st
     }
 }
 
-export async function addPlanAction(formData: FormData) {
+export async function addPlanAction(prevState: any, formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const price = Number(formData.get("price"));
@@ -58,7 +58,7 @@ export async function addPlanAction(formData: FormData) {
   redirect("/admin/plans");
 }
 
-export async function updatePlanAction(id: string, formData: FormData) {
+export async function updatePlanAction(id: string, prevState: any, formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const price = Number(formData.get("price"));
@@ -89,7 +89,7 @@ export async function deletePlanAction(id: string) {
   revalidatePath("/admin/plans");
 }
 
-export async function sendNotificationAction(formData: FormData): Promise<{ message?: string; error?: string }> {
+export async function sendNotificationAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const subject = formData.get('subject') as string;
     const message = formData.get('message') as string;
 
@@ -119,6 +119,7 @@ export async function sendNotificationAction(formData: FormData): Promise<{ mess
 }
 
 export async function updateUserProfileAction(
+  prevState: any,
   formData: FormData
 ): Promise<{ message?: string; error?: string }> {
   const user = await getUser();
@@ -147,7 +148,7 @@ export async function updateUserProfileAction(
   }
 }
 
-export async function updateBrandingAction(formData: FormData): Promise<{ message?: string; error?: string }> {
+export async function updateBrandingAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const brandName = formData.get('brandName') as string;
     const icon = formData.get('icon') as string;
     const footerText = formData.get('footerText') as string;
