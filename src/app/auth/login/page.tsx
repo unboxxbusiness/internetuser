@@ -10,9 +10,16 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { login } from "../actions";
+import { login, getUser } from "../actions";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const user = await getUser();
+  if (user) {
+    const redirectTo = user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
+    redirect(redirectTo);
+  }
+
   const headerList = headers();
   const errorMessage = headerList.get('X-Error-Message');
     

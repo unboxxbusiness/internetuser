@@ -10,9 +10,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { headers } from 'next/headers';
-import { signup } from "../actions";
+import { signup, getUser } from "../actions";
+import { redirect } from "next/navigation";
 
-export default function SignupPage() {
+export default async function SignupPage() {
+    const user = await getUser();
+    if (user) {
+      const redirectTo = user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
+      redirect(redirectTo);
+    }
+    
   const headerList = headers();
   const errorMessage = headerList.get('X-Error-Message');
 

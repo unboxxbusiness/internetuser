@@ -4,8 +4,15 @@ import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { CustomerTable } from "@/components/customer-table";
 import { getCustomers } from "@/lib/firebase/firestore";
+import { getUser } from "@/app/auth/actions";
+import { redirect } from "next/navigation";
 
 export default async function AdminDashboardPage() {
+  const user = await getUser();
+  if (!user || user.role !== 'admin') {
+    redirect('/auth/login');
+  }
+
   const customers = await getCustomers();
   
   const totalCustomers = customers.length;
