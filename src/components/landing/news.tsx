@@ -7,7 +7,7 @@ const newsItems = [
     description:
       "We're expanding our 5G network to bring faster speeds to more areas. Check our coverage map for updates.",
     image: {
-      src: "https://picsum.photos/300/300",
+      src: "https://picsum.photos/seed/news1/300/300",
       alt: "New 5G Network Expansion",
       hint: "network tower",
     },
@@ -17,7 +17,7 @@ const newsItems = [
     description:
       "Get free installation on all new plans for a limited time. Don't miss out on this great offer!",
     image: {
-      src: "https://picsum.photos/300",
+      src: "https://picsum.photos/seed/news2/300/300",
       alt: "Limited Time Offer: Free Installation",
       hint: "worker installing",
     },
@@ -26,11 +26,11 @@ const newsItems = [
 
 export function News() {
   return (
-    <section id="news-offers" className="py-16 sm:py-24 bg-slate-100">
+    <section id="news-offers" className="py-16 sm:py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Latest News & Offers
             </h2>
 
@@ -47,10 +47,10 @@ export function News() {
                     />
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-slate-900 leading-tight">
+                    <p className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
                       {item.title}
                     </p>
-                    <p className="mt-2 text-slate-600">{item.description}</p>
+                    <p className="mt-2 text-slate-600 dark:text-slate-400">{item.description}</p>
                   </div>
                 </div>
               ))}

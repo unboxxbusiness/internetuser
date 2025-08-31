@@ -1,6 +1,5 @@
-
 import Link from "next/link";
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { logout } from "@/app/auth/actions";
 import { Button } from "./ui/button";
 import {
@@ -16,18 +15,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "./ui/input";
 import type { AppUser } from "@/app/auth/actions";
 import { BrandingSettings } from "@/lib/types";
 import { DynamicIcon } from "./dynamic-icon";
 
 interface HeaderProps {
   user: AppUser | null;
-  children?: React.ReactNode;
   branding: BrandingSettings | null;
 }
 
-export function Header({ user, children, branding }: HeaderProps) {
+export function Header({ user, branding }: HeaderProps) {
   const dashboardUrl =
     user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
 
@@ -37,34 +34,23 @@ export function Header({ user, children, branding }: HeaderProps) {
   }
 
   return (
-    <header className="bg-card border-b sticky top-0 z-10">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-           {children}
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md">
+      <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
+            <DynamicIcon iconName={branding?.icon || "Wifi"} className="h-8 w-8 text-primary" />
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+              {branding?.brandName || "Gc Fiber Net"}
+            </h2>
+          </Link>
+        </div>
 
-          {user ? (
-             <div className="flex w-full max-w-sm items-center space-x-2 ml-auto">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." className="pl-9" />
-              </div>
-            </div>
-          ) : (
-            <Link
-              href="/"
-              className="flex items-center gap-2 font-bold text-lg"
-            >
-              <DynamicIcon iconName={branding?.icon || "Wifi"} className="h-6 w-6 text-primary" />
-              <span className="hidden sm:inline-block">{branding?.brandName || "Gc Fiber Net"}</span>
-            </Link>
-          )}
-
-          {user ? (
+        {user ? (
             <div className="flex items-center gap-4">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
                         <AvatarImage src={user.photoURL || undefined} alt={user.name || user.email || ''} />
                         <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                     </Avatar>
@@ -81,40 +67,42 @@ export function Header({ user, children, branding }: HeaderProps) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                    <Link href={dashboardUrl}>Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <Link href="#">Profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <Link href="#">Billing</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <Link href="#">Settings</Link>
+                      <Link href={dashboardUrl}>Dashboard</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                    <form action={logout} className="w-full">
-                        <button type="submit" className="w-full text-left flex items-center">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Log out
-                        </button>
+                      <form action={logout} className="w-full">
+                          <button type="submit" className="w-full text-left flex items-center">
+                              <LogOut className="mr-2 h-4 w-4" />
+                              Log out
+                          </button>
                         </form>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-          ) : (
+        ) : (
+          <>
+            <nav className="hidden md:flex items-center gap-8">
+              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#">Home</a>
+              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#plans">Plans</a>
+              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#">Support</a>
+              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#news-offers">News</a>
+              <a className="text-sm font-medium text-slate-700 hover:text-primary transition-colors" href="#news-offers">Offers</a>
+            </nav>
             <div className="flex items-center gap-2">
-              <Button variant="outline" asChild>
-                <Link href="/auth/login">Login</Link>
-              </Button>
-              <Button asChild>
+              <Button asChild className="font-bold tracking-wide" size="sm">
                 <Link href="/auth/signup">Sign Up</Link>
               </Button>
+              <Button asChild variant="secondary" className="hidden sm:flex font-bold tracking-wide bg-slate-200 text-slate-800 hover:bg-slate-300" size="sm">
+                <Link href="/auth/login">Log In</Link>
+              </Button>
+               <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </header>
   );
