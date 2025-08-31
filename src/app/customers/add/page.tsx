@@ -26,6 +26,7 @@ export default function AddCustomerPage() {
               <Input
                 id="name"
                 name="name"
+                placeholder="John Doe"
                 required
               />
             </div>
@@ -35,12 +36,13 @@ export default function AddCustomerPage() {
                 id="email"
                 name="email"
                 type="email"
+                placeholder="john.doe@example.com"
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="plan">Subscription Plan</Label>
-              <Select name="plan" required>
+              <Select name="plan" required defaultValue="Basic">
                 <SelectTrigger id="plan">
                   <SelectValue placeholder="Select a plan" />
                 </SelectTrigger>
@@ -53,7 +55,7 @@ export default function AddCustomerPage() {
             </div>
             <div className="flex justify-end space-x-2">
                <Button variant="outline" asChild>
-                <Link href="/">Cancel</Link>
+                <Link href="/admin/dashboard">Cancel</Link>
               </Button>
               <Button type="submit">Add Customer</Button>
             </div>

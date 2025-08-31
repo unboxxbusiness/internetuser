@@ -91,7 +91,7 @@ export default async function EditCustomerPage({
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" asChild>
-                <Link href="/">Cancel</Link>
+                <Link href="/admin/dashboard">Cancel</Link>
               </Button>
               <Button type="submit">Update Customer</Button>
             </div>

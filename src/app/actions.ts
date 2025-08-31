@@ -16,8 +16,8 @@ export async function addCustomerAction(formData: FormData) {
 
   await addCustomer(customerData);
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/admin/dashboard");
+  redirect("/admin/dashboard");
 }
 
 export async function updateCustomerAction(id: string, formData: FormData) {
@@ -30,12 +30,12 @@ export async function updateCustomerAction(id: string, formData: FormData) {
 
     await updateCustomer(id, customerData);
 
-    revalidatePath("/");
+    revalidatePath("/admin/dashboard");
     revalidatePath(`/customers/${id}/edit`);
-    redirect("/");
+    redirect("/admin/dashboard");
 }
 
 export async function deleteCustomerAction(id: string) {
     await deleteCustomer(id);
-    revalidatePath("/");
+    revalidatePath("/admin/dashboard");
 }

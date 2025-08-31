@@ -1,57 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle } from "lucide-react";
 import Link from "next/link";
-import { CustomerTable } from "@/components/customer-table";
-import { getCustomers } from "@/lib/firebase/firestore";
 
-export default async function DashboardPage() {
-  const customers = await getCustomers();
-  
-  const totalCustomers = customers.length;
-  const activeSubscriptions = customers.filter(c => c.paymentStatus !== 'Canceled').length;
-  // These are just placeholders, you can implement more complex logic
-  const pendingPayments = customers.filter(c => c.paymentStatus === 'Pending' || c.paymentStatus === 'Overdue').length;
-  const monthlyRevenue = activeSubscriptions * 50; // Assuming an average of $50/customer
-
-  const stats = [
-    { title: "Total Customers", value: totalCustomers.toLocaleString() },
-    { title: "Active Subscriptions", value: activeSubscriptions.toLocaleString() },
-    { title: "Pending Payments", value: pendingPayments.toLocaleString() },
-    { title: "Monthly Revenue", value: `$${monthlyRevenue.toLocaleString()}` },
-  ];
-
+export default function HomePage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{stat.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Customers</CardTitle>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="text-center p-8">
+        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-6xl">
+          Welcome to Broadband Manager
+        </h1>
+        <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          The all-in-one solution for managing your broadband customers, plans, and payments.
+        </p>
+        <div className="mt-10 flex items-center justify-center gap-x-6">
           <Button asChild>
-            <Link href="/customers/add">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Customer
+            <Link href="/auth/login">
+              Get Started
             </Link>
           </Button>
-        </CardHeader>
-        <CardContent>
-          <CustomerTable customers={customers} />
-        </CardContent>
-      </Card>
+          <Button variant="ghost" asChild>
+             <a href="#">Learn more &rarr;</a>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

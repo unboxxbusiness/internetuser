@@ -44,9 +44,12 @@ export function CustomerTable({ customers }: { customers: Customer[] }) {
 
   if (customers.length === 0) {
     return (
-      <p className="text-center text-muted-foreground py-8">
-        No customers found.
-      </p>
+      <div className="text-center text-muted-foreground py-16">
+        <p className="text-lg">No customers found.</p>
+        <p className="mt-2">
+          Click the "Add Customer" button to get started.
+        </p>
+      </div>
     );
   }
   return (
@@ -81,6 +84,7 @@ export function CustomerTable({ customers }: { customers: Customer[] }) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" disabled={isPending}>
                     <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Customer Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -93,6 +97,7 @@ export function CustomerTable({ customers }: { customers: Customer[] }) {
                   <DropdownMenuItem
                     onClick={() => handleDelete(customer.id)}
                     className="text-red-500 focus:text-red-500"
+                    disabled={isPending}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
