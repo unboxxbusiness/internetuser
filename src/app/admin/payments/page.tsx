@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
+import { getPayments } from "@/lib/firebase/firestore";
 import { PaymentTable } from "@/components/payment-table";
 
 export default async function AdminPaymentsPage() {
@@ -15,14 +16,7 @@ export default async function AdminPaymentsPage() {
     redirect("/auth/login");
   }
 
-  // In a real application, you would fetch these from your database
-  const payments = [
-      { id: "1", customer: "John Doe", email: "john.doe@example.com", plan: "Premium", status: "succeeded", amount: 99.99, date: new Date() },
-      { id: "2", customer: "Jane Smith", email: "jane.smith@example.com", plan: "Basic", status: "succeeded", amount: 29.99, date: new Date(new Date().setDate(new Date().getDate() - 1)) },
-      { id: "3", customer: "Michael Johnson", email: "michael.j@example.com", plan: "Premium", status: "failed", amount: 99.99, date: new Date(new Date().setDate(new Date().getDate() - 1)) },
-      { id: "4", customer: "Emily Davis", email: "emily.d@example.com", plan: "Standard", status: "refunded", amount: 59.99, date: new Date(new Date().setDate(new Date().getDate() - 2)) },
-      { id: "5", customer: "Chris Lee", email: "chris.l@example.com", plan: "Basic", status: "succeeded", amount: 29.99, date: new Date(new Date().setDate(new Date().getDate() - 3)) },
-  ];
+  const payments = await getPayments();
 
   return (
     <div className="flex-1 space-y-4">
@@ -33,7 +27,7 @@ export default async function AdminPaymentsPage() {
         <CardHeader>
           <CardTitle>All Payments</CardTitle>
           <CardDescription>
-            View and manage all payment records.
+            View and manage all payment records from your Firestore database.
           </CardDescription>
         </CardHeader>
         <CardContent>

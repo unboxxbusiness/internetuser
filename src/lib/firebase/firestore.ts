@@ -1,9 +1,11 @@
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan } from "@/lib/types";
+import { SubscriptionPlan, Payment } from "@/lib/types";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
+const PAYMENTS_COLLECTION = "payments";
+
 
 // User & Role Functions
 export async function createUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
@@ -78,4 +80,22 @@ export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
     speed: data.speed,
     dataLimit: data.dataLimit,
   };
+}
+
+// Payment Functions
+export async function getPayments(): Promise<Payment[]> {
+  const snapshot = await db.collection(PAYMENTS_COLLECTION).orderBy("date", "desc").get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      customer: data.customer,
+      email: data.email,
+      plan: data.plan,
+      status: data.status,
+      amount: data.amount,
+      // Convert Firestore Timestamp to JavaScript Date
+      date: (data.date.toDate ? data.date.toDate() : new Date(data.date)),
+    };
+  });
 }
