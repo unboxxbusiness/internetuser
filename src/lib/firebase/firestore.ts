@@ -36,9 +36,10 @@ export async function deleteCustomer(id: string): Promise<void> {
 }
 
 // User & Role Functions
-export async function createUser(uid: string, email: string, role: string): Promise<void> {
+export async function createUser(uid: string, name:string, email: string, role: string): Promise<void> {
   await db.collection(USERS_COLLECTION).doc(uid).set({
     uid,
+    name,
     email,
     role,
   });
