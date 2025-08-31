@@ -20,7 +20,7 @@ export const HeroSection = () => {
         <div>
             <header>
                 <nav
-                    data-state={menuState && 'active'}
+                    data-state={menuState ? 'active' : 'inactive'}
                     className="group fixed z-20 w-full border-b border-dashed bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent">
                     <div className="m-auto max-w-5xl px-6">
                         <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
@@ -36,8 +36,8 @@ export const HeroSection = () => {
                                     onClick={() => setMenuState(!menuState)}
                                     aria-label={menuState == true ? 'Close Menu' : 'Open Menu'}
                                     className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
-                                    <Menu className="group-data-[state=active]:rotate-180 group-data-[state=active]:scale-0 group-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
-                                    <X className="group-data-[state=active]:rotate-0 group-data-[state=active]:scale-100 group-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" />
+                                    <Menu className="group-data-[state=inactive]:rotate-0 group-data-[state=inactive]:scale-100 group-data-[state=inactive]:opacity-100 group-data-[state=active]:-rotate-180 group-data-[state=active]:scale-0 group-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
+                                    <X className="group-data-[state=active]:rotate-0 group-data-[state=active]:scale-100 group-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 group-data-[state=inactive]:-rotate-180 group-data-[state=inactive]:scale-0 group-data-[state=inactive]:opacity-0 duration-200" />
                                 </button>
                             </div>
 

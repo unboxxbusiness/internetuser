@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from "react";
@@ -144,24 +145,24 @@ export function Header({ user, branding }: HeaderProps) {
                     </Button>
                 </div>
                 <Collapsible asChild open={isOpen} onOpenChange={setIsOpen} className="md:hidden">
-                    <>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="icon" >
-                            {isOpen ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-                            <span className="sr-only">Toggle navigation</span>
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent asChild>
-                        <div className="absolute top-full right-4 mt-2 w-48 bg-background border rounded-md shadow-lg p-2 flex flex-col gap-2">
-                            <Button asChild className="font-bold tracking-wide w-full" size="sm">
-                                <Link href="/auth/signup">Sign Up</Link>
+                    <div>
+                        <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="icon" >
+                                {isOpen ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+                                <span className="sr-only">Toggle navigation</span>
                             </Button>
-                            <Button asChild variant="secondary" className="font-bold tracking-wide w-full bg-slate-200 text-slate-800 hover:bg-slate-300" size="sm">
-                                <Link href="/auth/login">Log In</Link>
-                            </Button>
-                        </div>
-                    </CollapsibleContent>
-                    </>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent asChild>
+                            <div className="absolute top-full right-4 mt-2 w-48 bg-background border rounded-md shadow-lg p-2 flex flex-col gap-2">
+                                <Button asChild className="font-bold tracking-wide w-full" size="sm">
+                                    <Link href="/auth/signup">Sign Up</Link>
+                                </Button>
+                                <Button asChild variant="secondary" className="font-bold tracking-wide w-full bg-slate-200 text-slate-800 hover:bg-slate-300" size="sm">
+                                    <Link href="/auth/login">Log In</Link>
+                                </Button>
+                            </div>
+                        </CollapsibleContent>
+                    </div>
                 </Collapsible>
             </div>
           )}
