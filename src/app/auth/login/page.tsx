@@ -75,7 +75,7 @@ export default function LoginPage() {
           </Button>
         </form>
          <div className="mt-4 text-center text-sm">
-          <p>Admin: anujkumar7676@gmail.com / password</p>
+          <p>Admin: {process.env.NEXT_PUBLIC_ADMIN_EMAIL} / password</p>
           <p>User: user@example.com / password</p>
            <p className="font-bold mt-2">Note: You need to create these users in Firebase Auth and set a custom claim `role: 'admin'` for the admin user.</p>
         </div>
