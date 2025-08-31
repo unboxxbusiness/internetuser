@@ -6,17 +6,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { getUser } from "@/app/auth/actions";
 import { getSupportTicket } from "@/lib/firebase/firestore";
-import { SupportTicket } from "@/lib/types";
-import { ArrowLeft, Send, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TicketReplyForm } from "@/components/ticket-reply-form";
 
 
 export default async function TicketDetailPage({ params }: { params: { id: string } }) {
@@ -70,22 +67,8 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Respond to Ticket</CardTitle>
-                </CardHeader>
-                <CardContent>
-                     <div className="grid gap-2">
-                        <Label htmlFor="reply" className="sr-only">Reply</Label>
-                        <Textarea id="reply" placeholder="Type your response here..." className="min-h-[120px]" />
-                     </div>
-                </CardContent>
-                <CardFooter>
-                     <Button>
-                        <Send className="mr-2 h-4 w-4" /> Send Reply
-                    </Button>
-                </CardFooter>
-            </Card>
+            <TicketReplyForm ticketId={ticket.id} />
+
         </div>
 
         <div className="space-y-6">

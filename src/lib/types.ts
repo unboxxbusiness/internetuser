@@ -59,3 +59,8 @@ export interface Notification {
   isRead: boolean;
   createdAt: Date;
 }
+
+export interface UserSettings {
+    paperlessBilling: boolean;
+    paymentReminders: boolean;
+}

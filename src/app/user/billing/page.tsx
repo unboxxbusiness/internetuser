@@ -16,10 +16,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
 import { getUserPayments } from "@/lib/firebase/firestore";
-import { Download } from "lucide-react";
+import { DownloadInvoiceButton } from "@/components/download-invoice-button";
 
 export default async function UserBillingPage() {
   const user = await getUser();
@@ -68,10 +67,7 @@ export default async function UserBillingPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Invoice
-                      </Button>
+                       <DownloadInvoiceButton payment={payment} user={user} />
                     </TableCell>
                   </TableRow>
                 ))}

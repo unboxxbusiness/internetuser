@@ -8,10 +8,10 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
 import { getPlans, getUserSubscription } from "@/lib/firebase/firestore";
 import { CheckCircle } from "lucide-react";
+import { SwitchPlanButton } from "@/components/switch-plan-button";
 
 export default async function UserPlansPage() {
   const user = await getUser();
@@ -70,13 +70,10 @@ export default async function UserPlansPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                {currentSubscription?.planId === plan.id ? (
-                  <Button disabled className="w-full">
-                    Current Plan
-                  </Button>
-                ) : (
-                  <Button className="w-full">Switch to Plan</Button>
-                )}
+                 <SwitchPlanButton 
+                    planId={plan.id} 
+                    currentPlanId={currentSubscription?.planId}
+                 />
               </CardFooter>
             </Card>
           ))}

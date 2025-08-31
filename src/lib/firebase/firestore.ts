@@ -1,9 +1,6 @@
-
-
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification } from "@/lib/types";
-import { firestore } from "firebase-admin";
+import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings } from "@/lib/types";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
@@ -21,6 +18,11 @@ export async function createUser(uid: string, name:string, email: string, role: 
     email,
     role,
     photoURL,
+    // Default settings for new users
+    settings: {
+        paperlessBilling: true,
+        paymentReminders: true,
+    }
   });
 }
 
@@ -92,29 +94,36 @@ export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
   };
 }
 
-// This is a placeholder until full subscription logic is implemented.
-// It fetches the first available plan and treats it as the user's subscription.
+
 export async function getUserSubscription(userId: string): Promise<Subscription | null> {
-    const plans = await getPlans();
-    if (plans.length === 0) {
+    const userDoc = await db.collection(USERS_COLLECTION).doc(userId).get();
+    if (!userDoc.exists || !userDoc.data()?.subscriptionPlanId) {
         return null;
     }
-    const firstPlan = plans[0];
+    const user = userDoc.data();
+    const planId = user?.subscriptionPlanId;
 
-    // In a real app, you'd fetch the user's specific subscription record.
-    // For now, we'll create a mock subscription object.
+    const plan = await getPlan(planId);
+    if (!plan) return null;
+
     const nextBillingDate = new Date();
     nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
     return {
-        planId: firstPlan.id,
-        planName: firstPlan.name,
+        planId: plan.id,
+        planName: plan.name,
         status: 'active',
-        price: firstPlan.price,
-        speed: firstPlan.speed,
-        dataLimit: firstPlan.dataLimit === 0 ? 'Unlimited' : firstPlan.dataLimit,
+        price: plan.price,
+        speed: plan.speed,
+        dataLimit: plan.dataLimit === 0 ? 'Unlimited' : plan.dataLimit,
         nextBillingDate: nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     };
+}
+
+export async function updateUserSubscription(userId: string, planId: string): Promise<void> {
+    await db.collection(USERS_COLLECTION).doc(userId).update({
+        subscriptionPlanId: planId
+    });
 }
 
 
@@ -166,6 +175,10 @@ export async function getUserPayments(userId: string): Promise<Payment[]> {
 // Support Ticket Functions
 export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
     await db.collection(SUPPORT_TICKETS_COLLECTION).add(ticketData);
+}
+
+export async function updateSupportTicket(ticketId: string, data: Partial<SupportTicket>): Promise<void> {
+    await db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId).update(data);
 }
 
 export async function getSupportTickets(): Promise<SupportTicket[]> {
@@ -243,14 +256,9 @@ export async function getBrandingSettings(): Promise<BrandingSettings | null> {
         return doc.data() as BrandingSettings;
     } catch (error) {
         console.error("Error getting branding settings:", error);
-        if ((error as any).code === 'permission-denied' && process.env.NODE_ENV === 'development') {
-            console.warn("Firestore permission denied. This might be because you're running in the emulator without auth. Returning default branding.");
-            return null;
-        }
         return null;
     }
 }
-
 
 export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
     await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').set(settings, { merge: true });
@@ -258,7 +266,7 @@ export async function updateBrandingSettings(settings: BrandingSettings): Promis
 
 // Notification Functions
 export async function getUserNotifications(userId: string): Promise<Notification[]> {
-    const snapshot = await db.collection(NOTIFICATIONS_COLLECTION)
+    const snapshot = await db.collection(NOTIFICATIONS_COLlection)
         .where('userId', '==', userId)
         .orderBy('createdAt', 'desc')
         .get();
@@ -278,5 +286,20 @@ export async function getUserNotifications(userId: string): Promise<Notification
             isRead: data.isRead,
             createdAt: data.createdAt.toDate(),
         };
+    });
+}
+
+
+// User Settings
+export async function getUserSettings(userId: string): Promise<UserSettings | null> {
+    const doc = await db.collection(USERS_COLLECTION).doc(userId).get();
+    if (!doc.exists) return null;
+    const data = doc.data();
+    return data?.settings || null;
+}
+
+export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
+    await db.collection(USERS_COLLECTION).doc(userId).update({
+        settings: settings
     });
 }

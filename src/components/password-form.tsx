@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { changeUserPasswordAction } from "@/app/actions";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -20,26 +21,35 @@ function SubmitButton() {
 
 export function PasswordForm() {
     const [showPassword, setShowPassword] = useState(false);
-    // Placeholder state
-    const [state, setState] = useState<{ message?: string; error?: string } | undefined>(undefined);
+    const [state, formAction] = useActionState(changeUserPasswordAction, undefined);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Placeholder logic
-        setState({ message: "Password updated successfully! (This is a demo)"});
-    }
+
+    useEffect(() => {
+        if (state?.message) {
+            setShowSuccess(true);
+            formRef.current?.reset();
+            const timer = setTimeout(() => {
+                setShowSuccess(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [state]);
+
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6">
       <div className="space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="currentPassword">Current Password</Label>
+          <Label htmlFor="newPassword">New Password</Label>
            <div className="relative">
                 <Input
-                  id="currentPassword"
-                  name="currentPassword"
+                  id="newPassword"
+                  name="newPassword"
                   type={showPassword ? "text" : "password"}
                   required
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -54,17 +64,13 @@ export function PasswordForm() {
                 </button>
               </div>
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="newPassword">New Password</Label>
-          <Input id="newPassword" name="newPassword" type="password" required />
-        </div>
          <div className="grid gap-2">
           <Label htmlFor="confirmPassword">Confirm New Password</Label>
           <Input id="confirmPassword" name="confirmPassword" type="password" required />
         </div>
       </div>
       
-      {state?.message && (
+      {showSuccess && state?.message && (
          <Alert variant="default" className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
             <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
             <AlertTitle className="text-green-800 dark:text-green-300">Success</AlertTitle>
@@ -88,4 +94,3 @@ export function PasswordForm() {
     </form>
   );
 }
-

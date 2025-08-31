@@ -8,18 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { getUser } from "@/app/auth/actions";
 import { ProfileForm } from "@/components/profile-form";
 import { PasswordForm } from "@/components/password-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Label } from "@/components/ui/label";
+import { BillingPreferencesForm } from "@/components/billing-preferences-form";
+import { getUserSettings } from "@/lib/firebase/firestore";
 
 export default async function UserProfilePage() {
   const user = await getUser();
   if (!user || user.role !== "user") {
     redirect("/auth/login");
   }
+
+  const userSettings = await getUserSettings(user.uid);
 
   return (
     <div className="space-y-6">
@@ -91,31 +94,7 @@ export default async function UserProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="paperless-billing" className="text-base">Paperless Billing</Label>
-                        <p className="text-sm text-muted-foreground">
-                            Receive your bills electronically instead of by mail.
-                        </p>
-                    </div>
-                     <Switch
-                        id="paperless-billing"
-                        aria-label="Toggle paperless billing"
-                      />
-                </div>
-                 <div className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="payment-reminders" className="text-base">Payment Reminders</Label>
-                        <p className="text-sm text-muted-foreground">
-                            Get notified a few days before your payment is due.
-                        </p>
-                    </div>
-                     <Switch
-                        id="payment-reminders"
-                        defaultChecked
-                        aria-label="Toggle payment reminders"
-                      />
-                </div>
+                <BillingPreferencesForm settings={userSettings} />
             </CardContent>
           </Card>
         </TabsContent>

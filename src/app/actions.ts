@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings, createSupportTicket } from "@/lib/firebase/firestore";
+import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket } from "@/lib/firebase/firestore";
 import { BrandingSettings } from "@/lib/types";
 
 export async function deleteUserAction(uid: string) {
@@ -205,4 +205,94 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
     
     revalidatePath('/user/support');
     redirect('/user/support');
+}
+
+export async function changeUserPasswordAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user) {
+        return { error: "You must be logged in." };
+    }
+    
+    const newPassword = formData.get('newPassword') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (!newPassword || newPassword.length < 6) {
+        return { error: "Password must be at least 6 characters long." };
+    }
+
+    if (newPassword !== confirmPassword) {
+        return { error: "Passwords do not match." };
+    }
+
+    try {
+        await adminAuth.updateUser(user.uid, { password: newPassword });
+        return { message: "Password updated successfully." };
+    } catch (error) {
+        console.error("Error updating password:", error);
+        return { error: "Failed to update password. Please try again." };
+    }
+}
+
+export async function switchUserPlanAction(planId: string): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user) {
+        return { error: "You must be logged in to change your plan." };
+    }
+
+    try {
+        await updateUserSubscription(user.uid, planId);
+        revalidatePath('/user/dashboard');
+        revalidatePath('/user/plans');
+        return { message: "Plan changed successfully!" };
+    } catch (error) {
+        console.error("Error switching plan:", error);
+        return { error: "Failed to switch plan." };
+    }
+}
+
+export async function updateUserPreferencesAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user) {
+        return { error: "You must be logged in." };
+    }
+
+    const paperlessBilling = formData.get('paperless-billing') === 'on';
+    const paymentReminders = formData.get('payment-reminders') === 'on';
+
+    try {
+        await updateUserSettings(user.uid, { paperlessBilling, paymentReminders });
+        revalidatePath('/user/profile');
+        return { message: 'Preferences updated successfully.' };
+    } catch (error) {
+        console.error("Error updating preferences:", error);
+        return { error: "Failed to update preferences." };
+    }
+}
+
+export async function replyToSupportTicketAction(ticketId: string, prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') {
+        return { error: "You do not have permission to perform this action." };
+    }
+
+    const reply = formData.get('reply') as string;
+    if (!reply) {
+        return { error: "Reply message cannot be empty." };
+    }
+    
+    try {
+        // In a real app, this would send an email to the user.
+        // For now, we log it and update the ticket status.
+        console.log(`--- Replying to ticket ${ticketId} ---`);
+        console.log(reply);
+        console.log('------------------------------------');
+
+        await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
+        revalidatePath(`/admin/support/${ticketId}`);
+        return { message: "Your reply has been sent (logged) and the ticket status is now 'in-progress'." };
+
+    } catch (error) {
+        console.error("Error replying to ticket:", error);
+        return { error: "Failed to send reply." };
+    }
 }
