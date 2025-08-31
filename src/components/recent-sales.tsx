@@ -3,35 +3,28 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import type { Customer } from "@/lib/types";
+import type { AppUser } from "@/app/auth/actions";
 
-function getInitials(name: string) {
+function getInitials(name?: string) {
+  if (!name) return 'U';
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
 
-const planPrices: Record<string, number> = {
-  Basic: 29.99,
-  Premium: 59.99,
-  Pro: 99.99,
-};
-
-
-export function RecentSales({ customers }: { customers: Customer[] }) {
+export function RecentSales({ users }: { users: AppUser[] }) {
   return (
     <div className="space-y-8">
-      {customers.map(customer => (
-        <div className="flex items-center" key={customer.id}>
+      {users.map(user => (
+        <div className="flex items-center" key={user.uid}>
           <Avatar className="h-9 w-9">
-            <AvatarImage src="/avatars/01.png" alt="Avatar" />
-            <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+            <AvatarImage src={user.photoURL || undefined} alt="Avatar" />
+            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
           </Avatar>
           <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{customer.name}</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-sm text-muted-foreground">
-              {customer.email}
+              {user.email}
             </p>
           </div>
-          <div className="ml-auto font-medium">+${planPrices[customer.plan].toFixed(2)}</div>
         </div>
       ))}
     </div>

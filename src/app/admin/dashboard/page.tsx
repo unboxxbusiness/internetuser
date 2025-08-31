@@ -7,9 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getCustomers } from "@/lib/firebase/firestore";
+import { getUsers } from "@/lib/firebase/firestore";
 import { RecentSales } from "@/components/recent-sales";
 import { OverviewChart } from "@/components/overview-chart";
+import { AppUser } from "@/app/auth/actions";
 
 export default async function AdminDashboardPage() {
   const user = await getUser();
@@ -17,24 +18,12 @@ export default async function AdminDashboardPage() {
     redirect("/auth/login");
   }
 
-  const customers = await getCustomers();
-  const totalCustomers = customers.length;
-  const activeSubscriptions = customers.filter(
-    (c) => c.paymentStatus !== "Canceled"
-  ).length;
-  const pendingPayments = customers.filter(
-    (c) => c.paymentStatus === "Pending" || c.paymentStatus === "Overdue"
-  ).length;
-
-  const planPrices: Record<string, number> = {
-    Basic: 29.99,
-    Premium: 59.99,
-    Pro: 99.99,
-  };
-
-  const monthlyRevenue = customers
-    .filter((c) => c.paymentStatus !== "Canceled")
-    .reduce((total, c) => total + (planPrices[c.plan] || 0), 0);
+  const users: AppUser[] = await getUsers();
+  const totalCustomers = users.length;
+  // Dummy data for now - these would be derived from user properties
+  const activeSubscriptions = users.length; 
+  const pendingPayments = 0;
+  const monthlyRevenue = 0;
 
   return (
     <div className="flex-1 space-y-4">
@@ -77,7 +66,7 @@ export default async function AdminDashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Customers
+                  Total Users
                 </CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +88,7 @@ export default async function AdminDashboardPage() {
                   +{totalCustomers.toLocaleString()}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  all-time customer count
+                  all-time user count
                 </p>
               </CardContent>
             </Card>
@@ -170,13 +159,13 @@ export default async function AdminDashboardPage() {
             </Card>
             <Card className="col-span-4 md:col-span-3">
               <CardHeader>
-                <CardTitle>Recent Customers</CardTitle>
+                <CardTitle>Recent Signups</CardTitle>
                 <CardDescription>
-                  {customers.length} customers joined this month.
+                  {users.length} users joined this month.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentSales customers={customers.slice(0, 5)} />
+                <RecentSales users={users.slice(0, 5)} />
               </CardContent>
             </Card>
           </div>

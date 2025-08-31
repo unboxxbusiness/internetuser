@@ -30,7 +30,6 @@ interface SidebarProps {
 
 const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/admin/dashboard" },
-  { id: "customers", name: "Customers", icon: Users, href: "/admin/customers" },
   { id: "users", name: "Users", icon: Users2, href: "/admin/users" },
 ];
 
