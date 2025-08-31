@@ -1,7 +1,9 @@
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
+import { SubscriptionPlan } from "@/lib/types";
 
 const USERS_COLLECTION = "users";
+const PLANS_COLLECTION = "subscriptionPlans";
 
 // User & Role Functions
 export async function createUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
@@ -44,4 +46,36 @@ export async function getUsers(): Promise<AppUser[]> {
       photoURL: data.photoURL,
     };
   });
+}
+
+// Subscription Plan Functions
+export async function getPlans(): Promise<SubscriptionPlan[]> {
+  const snapshot = await db.collection(PLANS_COLLECTION).get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      price: data.price,
+      speed: data.speed,
+      dataLimit: data.dataLimit,
+    };
+  });
+}
+
+export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
+  const doc = await db.collection(PLANS_COLLECTION).doc(id).get();
+  if (!doc.exists) {
+    return null;
+  }
+  const data = doc.data();
+  if (!data) return null;
+  
+  return {
+    id: doc.id,
+    name: data.name,
+    price: data.price,
+    speed: data.speed,
+    dataLimit: data.dataLimit,
+  };
 }

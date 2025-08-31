@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Home, 
-  Users,
+  Users2,
   LogOut, 
   Menu, 
   X, 
   ChevronLeft, 
   ChevronRight,
   Wifi,
-  Users2
+  Package
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -31,6 +31,7 @@ interface SidebarProps {
 const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/admin/dashboard" },
   { id: "users", name: "Users", icon: Users2, href: "/admin/users" },
+  { id: "plans", name: "Plans", icon: Package, href: "/admin/plans" },
 ];
 
 export function AdminSidebar({ className = "", user }: SidebarProps) {

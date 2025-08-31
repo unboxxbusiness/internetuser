@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth as adminAuth } from "@/lib/firebase/server";
-import { db } from "@/lib/firebase/server";
+import { auth as adminAuth, db } from "@/lib/firebase/server";
+import { redirect } from "next/navigation";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -32,4 +32,56 @@ export async function resetPasswordAction(email: string): Promise<{ message?: st
         }
         return { error: "Failed to send password reset email." };
     }
+}
+
+export async function addPlanAction(formData: FormData) {
+  try {
+    const name = formData.get("name") as string;
+    const price = Number(formData.get("price"));
+    const speed = Number(formData.get("speed"));
+    const dataLimit = Number(formData.get("dataLimit"));
+
+    await db.collection("subscriptionPlans").add({
+      name,
+      price,
+      speed,
+      dataLimit,
+    });
+  } catch (error) {
+    console.error("Error adding plan:", error);
+    return { error: "Failed to add plan." };
+  }
+  revalidatePath("/admin/plans");
+  redirect("/admin/plans");
+}
+
+export async function updatePlanAction(id: string, formData: FormData) {
+  try {
+    const name = formData.get("name") as string;
+    const price = Number(formData.get("price"));
+    const speed = Number(formData.get("speed"));
+    const dataLimit = Number(formData.get("dataLimit"));
+
+    await db.collection("subscriptionPlans").doc(id).update({
+      name,
+      price,
+      speed,
+      dataLimit,
+    });
+  } catch (error) {
+    console.error("Error updating plan:", error);
+    return { error: "Failed to update plan." };
+  }
+  revalidatePath("/admin/plans");
+  redirect("/admin/plans");
+}
+
+export async function deletePlanAction(id: string) {
+  try {
+    await db.collection("subscriptionPlans").doc(id).delete();
+  } catch (error) {
+    console.error("Error deleting plan:", error);
+    return { error: "Failed to delete plan." };
+  }
+  revalidatePath("/admin/plans");
 }
