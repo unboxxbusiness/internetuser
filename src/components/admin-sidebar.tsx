@@ -14,7 +14,8 @@ import {
   Package,
   CreditCard,
   Bell,
-  LifeBuoy
+  LifeBuoy,
+  SlidersHorizontal
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -38,6 +39,7 @@ const navigationItems: NavigationItem[] = [
   { id: "payments", name: "Payments", icon: CreditCard, href: "/admin/payments" },
   { id: "notifications", name: "Notifications", icon: Bell, href: "/admin/notifications" },
   { id: "support", name: "Support", icon: LifeBuoy, href: "/admin/support" },
+  { id: "settings", name: "Settings", icon: SlidersHorizontal, href: "/admin/settings" },
 ];
 
 export function AdminSidebar({ className = "", user }: SidebarProps) {
