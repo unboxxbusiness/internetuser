@@ -85,3 +85,32 @@ export async function deletePlanAction(id: string) {
   }
   revalidatePath("/admin/plans");
 }
+
+export async function sendNotificationAction(formData: FormData): Promise<{ message?: string; error?: string }> {
+    const subject = formData.get('subject') as string;
+    const message = formData.get('message') as string;
+
+    if (!subject || !message) {
+        return { error: 'Subject and message are required.' };
+    }
+
+    try {
+        // In a real application, you would integrate an email/notification service here.
+        // For this example, we'll just log the notification to the console.
+        console.log('--- Sending Notification ---');
+        console.log('Subject:', subject);
+        console.log('Message:', message);
+        console.log('--------------------------');
+        
+        // You could fetch all user emails from Firestore here to send a bulk email.
+        // const usersSnapshot = await db.collection('users').get();
+        // const emails = usersSnapshot.docs.map(doc => doc.data().email);
+        // console.log('Target emails:', emails);
+        
+        return { message: 'Notification has been successfully sent (logged to console).' };
+
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        return { error: 'Failed to send notification.' };
+    }
+}
