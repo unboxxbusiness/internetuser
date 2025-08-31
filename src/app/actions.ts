@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket } from "@/lib/firebase/firestore";
+import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan } from "@/lib/firebase/firestore";
 import { BrandingSettings } from "@/lib/types";
+import { randomBytes } from "crypto";
+import { sha512 } from "js-sha512";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -233,23 +235,6 @@ export async function changeUserPasswordAction(prevState: any, formData: FormDat
     }
 }
 
-export async function switchUserPlanAction(planId: string): Promise<{ message?: string; error?: string }> {
-    const user = await getUser();
-    if (!user) {
-        return { error: "You must be logged in to change your plan." };
-    }
-
-    try {
-        await updateUserSubscription(user.uid, planId);
-        revalidatePath('/user/dashboard');
-        revalidatePath('/user/plans');
-        return { message: "Plan changed successfully!" };
-    } catch (error) {
-        console.error("Error switching plan:", error);
-        return { error: "Failed to switch plan." };
-    }
-}
-
 export async function updateUserPreferencesAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const user = await getUser();
     if (!user) {
@@ -295,4 +280,47 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
         console.error("Error replying to ticket:", error);
         return { error: "Failed to send reply." };
     }
+}
+
+export async function createPayUTransactionAction(planId: string) {
+  const user = await getUser();
+  if (!user) {
+    return { error: "You must be logged in to create a transaction." };
+  }
+
+  const plan = await getPlan(planId);
+  if (!plan) {
+    return { error: "The selected plan does not exist." };
+  }
+  
+  const key = process.env.NEXT_PUBLIC_PAYU_KEY;
+  const salt = process.env.NEXT_PUBLIC_PAYU_SALT;
+
+  if (!key || !salt) {
+    return { error: "PayU credentials are not configured in the environment." };
+  }
+
+  const txnid = `tx-${randomBytes(16).toString("hex")}`;
+  const payUData = {
+    key: key,
+    txnid: txnid,
+    amount: plan.price.toString(),
+    productinfo: `Subscription to ${plan.name}`,
+    firstname: user.name || "Customer",
+    email: user.email || "",
+    phone: "9999999999", // Placeholder phone number
+    surl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/callback`,
+    furl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/callback`,
+    udf1: user.uid,
+    udf2: plan.id,
+  };
+
+  const hashString = `${key}|${payUData.txnid}|${payUData.amount}|${payUData.productinfo}|${payUData.firstname}|${payUData.email}|${payUData.udf1}|${payUData.udf2}|||||||||${salt}`;
+  const hash = sha512(hashString);
+
+  return {
+    ...payUData,
+    hash: hash,
+    payu_url: "https://sandboxsecure.payu.in/_payment", // Sandbox URL, change for production
+  };
 }
