@@ -1,6 +1,5 @@
 import { Hero } from "@/components/landing/hero";
 import { Offers } from "@/components/landing/offers";
-import { CTA } from "@/components/landing/cta";
 
 export default function LandingPage() {
   return (
@@ -8,7 +7,6 @@ export default function LandingPage() {
       <main className="flex-1">
         <Hero />
         <Offers />
-        <CTA />
       </main>
     </div>
   );
