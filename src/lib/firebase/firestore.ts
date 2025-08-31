@@ -1,10 +1,11 @@
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan, Payment } from "@/lib/types";
+import { SubscriptionPlan, Payment, SupportTicket } from "@/lib/types";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
+const SUPPORT_TICKETS_COLLECTION = "supportTickets";
 
 
 // User & Role Functions
@@ -98,4 +99,42 @@ export async function getPayments(): Promise<Payment[]> {
       date: (data.date.toDate ? data.date.toDate() : new Date(data.date)),
     };
   });
+}
+
+// Support Ticket Functions
+export async function getSupportTickets(): Promise<SupportTicket[]> {
+  const snapshot = await db.collection(SUPPORT_TICKETS_COLLECTION).orderBy("lastUpdated", "desc").get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      subject: data.subject,
+      description: data.description,
+      user: data.user,
+      status: data.status,
+      priority: data.priority,
+      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+    };
+  });
+}
+
+export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
+    const doc = await db.collection(SUPPORT_TICKETS_COLLECTION).doc(id).get();
+    if (!doc.exists) {
+        return null;
+    }
+    const data = doc.data();
+    if (!data) return null;
+
+    return {
+        id: doc.id,
+        subject: data.subject,
+        description: data.description,
+        user: data.user,
+        status: data.status,
+        priority: data.priority,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+    };
 }

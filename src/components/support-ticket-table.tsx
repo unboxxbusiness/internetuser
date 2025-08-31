@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SupportTicket } from "@/lib/types";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, LifeBuoy } from "lucide-react";
 
 export function SupportTicketTable({ tickets }: { tickets: SupportTicket[] }) {
 
@@ -42,7 +42,8 @@ export function SupportTicketTable({ tickets }: { tickets: SupportTicket[] }) {
     }
   };
 
-  const timeSince = (date: Date) => {
+  const timeSince = (date?: Date) => {
+    if (!date) return 'N/A';
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     let interval = seconds / 31536000;
     if (interval > 1) {
@@ -71,8 +72,10 @@ export function SupportTicketTable({ tickets }: { tickets: SupportTicket[] }) {
   return (
     <div className="space-y-4">
       {tickets.length === 0 ? (
-        <div className="text-center text-muted-foreground py-16">
-          <p className="text-lg">No support tickets found.</p>
+        <div className="text-center text-muted-foreground py-16 flex flex-col items-center">
+          <LifeBuoy className="w-16 h-16 mb-4 text-primary" />
+          <p className="text-lg font-medium">No support tickets found.</p>
+          <p className="text-sm">When users submit tickets, they will appear here.</p>
         </div>
       ) : (
         <div className="rounded-md border">

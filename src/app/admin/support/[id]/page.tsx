@@ -13,23 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { getUser } from "@/app/auth/actions";
+import { getSupportTicket } from "@/lib/firebase/firestore";
 import { SupportTicket } from "@/lib/types";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Mock data for a single ticket - in a real app, you'd fetch this by ID
-const mockTicket: SupportTicket = {
-  id: "TICKET-001",
-  subject: "Cannot connect to the internet",
-  description: "My router seems to be online and the lights are green, but none of my devices can access the internet. I've tried restarting the router and my computer multiple times. This started happening about an hour ago. Can you please help?",
-  user: {
-    name: "Alice Johnson",
-    email: "alice@example.com",
-  },
-  status: "open",
-  priority: "high",
-  createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-  lastUpdated: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-};
 
 export default async function TicketDetailPage({ params }: { params: { id: string } }) {
   const user = await getUser();
@@ -37,8 +25,26 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
     redirect("/auth/login");
   }
 
-  // In the future, you would fetch the real ticket by `params.id` from Firestore
-  const ticket = mockTicket;
+  const ticket = await getSupportTicket(params.id);
+
+  if (!ticket) {
+      return (
+         <div className="flex-1 space-y-4">
+            <Button variant="outline" asChild>
+                <Link href="/admin/support">
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets
+                </Link>
+            </Button>
+            <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Not Found</AlertTitle>
+                <AlertDescription>
+                    The ticket you are looking for does not exist.
+                </AlertDescription>
+            </Alert>
+        </div>
+      )
+  }
 
   return (
     <div className="flex-1 space-y-4">
