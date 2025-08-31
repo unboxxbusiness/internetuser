@@ -5,11 +5,9 @@ import {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
-import { useMouse } from "@uidotdev/usehooks";
 
 interface MousePosition {
   x: number | null;
@@ -60,8 +58,8 @@ function Sparkle() {
     if (ref.current) {
       const { left, top, width, height } = ref.current.parentElement!.getBoundingClientRect();
       setPosition([
-        x ? x - left - width / 2 : 0,
-        y ? y - top - height / 2 : 0,
+        Math.random() * width,
+        Math.random() * height,
       ]);
     }
   }, [x, y]);
@@ -95,7 +93,6 @@ function Sparkles({
   className?: string;
 }) {
   const [sparkles, setSparkles] = useState<React.ReactNode[]>([]);
-  const [mouse] = useMouse();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -109,7 +106,7 @@ function Sparkles({
   }, []);
 
   return (
-    <MouseContext.Provider value={{ x: mouse.x, y: mouse.y }}>
+    <MouseContext.Provider value={{ x: 0, y: 0 }}>
       <div className={className}>
         {sparkles}
         {children}
