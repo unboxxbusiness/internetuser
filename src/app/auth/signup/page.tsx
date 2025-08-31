@@ -2,24 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
       const res = await fetch("/api/auth/session", {
@@ -31,12 +31,8 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        const { role } = await res.json();
-        if (role === 'admin') {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/user/dashboard");
-        }
+        // New users are always 'user' role by default
+        router.push("/user/dashboard");
       } else {
         throw new Error("Failed to create session");
       }
@@ -48,8 +44,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-6 text-center text-2xl font-bold">Login</h1>
-        <form onSubmit={handleLogin}>
+        <h1 className="mb-6 text-center text-2xl font-bold">Create an Account</h1>
+        <form onSubmit={handleSignup}>
           <div className="mb-4">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -72,16 +68,11 @@ export default function LoginPage() {
           </div>
           {error && <p className="mb-4 text-center text-red-500">{error}</p>}
           <Button type="submit" className="w-full">
-            Login
+            Sign Up
           </Button>
         </form>
-         <div className="mt-4 text-center text-sm">
-          <p>Admin: admin@example.com / password</p>
-          <p>User: user@example.com / password</p>
-           <p className="font-bold mt-2">Note: You need to create these users in Firebase Auth and set a custom claim `role: 'admin'` for the admin user.</p>
-        </div>
         <div className="mt-4 text-center text-sm">
-            <p>Don&apos;t have an account? <Link href="/auth/signup" className="font-medium text-primary hover:underline">Sign up</Link></p>
+            <p>Already have an account? <Link href="/auth/login" className="font-medium text-primary hover:underline">Log in</Link></p>
         </div>
       </div>
     </div>
