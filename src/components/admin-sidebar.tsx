@@ -13,7 +13,8 @@ import {
   Wifi,
   Package,
   CreditCard,
-  Bell
+  Bell,
+  LifeBuoy
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -36,6 +37,7 @@ const navigationItems: NavigationItem[] = [
   { id: "plans", name: "Plans", icon: Package, href: "/admin/plans" },
   { id: "payments", name: "Payments", icon: CreditCard, href: "/admin/payments" },
   { id: "notifications", name: "Notifications", icon: Bell, href: "/admin/notifications" },
+  { id: "support", name: "Support", icon: LifeBuoy, href: "/admin/support" },
 ];
 
 export function AdminSidebar({ className = "", user }: SidebarProps) {
