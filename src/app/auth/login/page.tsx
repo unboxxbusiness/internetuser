@@ -38,7 +38,8 @@ export default function LoginPage() {
           router.push("/user/dashboard");
         }
       } else {
-        throw new Error("Failed to create session");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to create session");
       }
     } catch (err: any) {
       setError(err.message);

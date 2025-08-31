@@ -34,7 +34,8 @@ export default function SignupPage() {
         // New users are always 'user' role by default
         router.push("/user/dashboard");
       } else {
-        throw new Error("Failed to create session");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to create session");
       }
     } catch (err: any) {
       setError(err.message);
