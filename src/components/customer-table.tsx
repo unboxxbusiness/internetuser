@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { Customer } from "@/lib/types";
 import Link from "next/link";
 import { deleteCustomerAction } from "@/app/actions";
@@ -44,18 +44,14 @@ export function CustomerTable({ customers }: { customers: Customer[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button asChild>
-          <Link href="/customers/add">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Customer
-          </Link>
-        </Button>
-      </div>
       {customers.length === 0 ? (
         <div className="text-center text-muted-foreground py-16">
           <p className="text-lg">No customers found.</p>
-          <p className="mt-2">Click the "Add Customer" button to get started.</p>
+           <Button asChild className="mt-4">
+              <Link href="/customers/add">
+                Add Customer
+              </Link>
+            </Button>
         </div>
       ) : (
         <div className="rounded-md border">

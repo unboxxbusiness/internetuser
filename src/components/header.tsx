@@ -20,9 +20,10 @@ import { Input } from "./ui/input";
 
 interface HeaderProps {
   user: (User & { role?: string; name?: string }) | null;
+  children?: React.ReactNode;
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, children }: HeaderProps) {
   const dashboardUrl =
     user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
 
@@ -32,25 +33,27 @@ export function Header({ user }: HeaderProps) {
   }
 
   return (
-    <header className="bg-card border-b">
+    <header className="bg-card border-b sticky top-0 z-10">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link
-            href={user ? dashboardUrl : "/"}
-            className="flex items-center gap-2 font-bold text-lg"
-          >
-            <Wifi className="h-6 w-6 text-primary" />
-            <span className="hidden sm:inline-block">Gc Fiber Net</span>
-          </Link>
+           {children || <div />}
 
           {user ? (
-             <div className="flex w-full max-w-sm items-center space-x-2 hidden md:flex">
+             <div className="flex w-full max-w-sm items-center space-x-2">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search..." className="pl-9" />
               </div>
             </div>
-          ) : null}
+          ) : (
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-bold text-lg"
+            >
+              <Wifi className="h-6 w-6 text-primary" />
+              <span className="hidden sm:inline-block">Gc Fiber Net</span>
+            </Link>
+          )}
 
           {user ? (
             <DropdownMenu>
