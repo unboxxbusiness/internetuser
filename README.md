@@ -1,5 +1,3 @@
-# Firebase Studio
+# Fresh Next.js Project
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+This is a new Next.js project created in Firebase Studio.
