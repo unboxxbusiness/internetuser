@@ -1,6 +1,6 @@
+
 import Link from "next/link";
 import { Wifi, LogOut, Search } from "lucide-react";
-import type { User } from "firebase/auth";
 import { logout } from "@/app/auth/actions";
 import { Button } from "./ui/button";
 import {
@@ -17,9 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "./ui/input";
+import type { AppUser } from "@/app/auth/actions";
 
 interface HeaderProps {
-  user: (User & { role?: string; name?: string }) | null;
+  user: AppUser | null;
   children?: React.ReactNode;
 }
 

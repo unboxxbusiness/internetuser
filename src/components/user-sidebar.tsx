@@ -1,11 +1,8 @@
+
 "use client"
 
 import {
-  Bell,
   Home,
-  LineChart,
-  Package,
-  Package2,
   ShoppingCart,
   Users,
   Wifi,
@@ -20,12 +17,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
-import type { User } from "firebase/auth"
+import type { AppUser } from "@/app/auth/actions"
 
-export function UserSidebar({ user }: { user: User & { role?: string; name?: string } }) {
+export function UserSidebar({ user }: { user: AppUser }) {
   const pathname = usePathname()
 
   const isActive = (path: string) => {

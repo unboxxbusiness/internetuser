@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -9,8 +10,15 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import type { User } from "firebase/auth";
-import { createUser, getUserRole } from "@/lib/firebase/firestore";
+import { createUser, getUser as getFirestoreUser } from "@/lib/firebase/firestore";
+
+export interface AppUser {
+  uid: string;
+  email: string | undefined;
+  name: string | undefined;
+  photoURL: string | undefined;
+  role: string;
+}
 
 async function createSession(idToken: string) {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
@@ -24,7 +32,7 @@ async function createSession(idToken: string) {
   });
 }
 
-export async function getUser(): Promise<(User & { role?: string }) | null> {
+export async function getUser(): Promise<AppUser | null> {
   const sessionCookie = cookies().get("session")?.value;
   if (!sessionCookie) {
     return null;
@@ -34,12 +42,18 @@ export async function getUser(): Promise<(User & { role?: string }) | null> {
       sessionCookie,
       true
     );
-    const user = await adminAuth.getUser(decodedClaims.uid);
-    const role = await getUserRole(decodedClaims.uid);
+    const firestoreUser = await getFirestoreUser(decodedClaims.uid);
+
+    if (!firestoreUser) {
+        return null;
+    }
 
     return {
-      ...user,
-      role: role || "user",
+      uid: firestoreUser.uid,
+      email: firestoreUser.email,
+      name: firestoreUser.name,
+      photoURL: firestoreUser.photoURL,
+      role: firestoreUser.role,
     };
   } catch (error) {
     console.error("Error verifying session cookie:", error);
@@ -79,9 +93,14 @@ export async function login(
   if (error) {
     return { error };
   } else {
-    const role = await getUserRole((await clientAuth.currentUser!.getIdTokenResult()).claims.user_id!);
-    const redirectTo = role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-    redirect(redirectTo);
+    const user = await clientAuth.currentUser;
+    if (user) {
+        const firestoreUser = await getFirestoreUser(user.uid);
+        const redirectTo = firestoreUser?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        redirect(redirectTo);
+    } else {
+        redirect("/auth/login");
+    }
   }
 }
 
@@ -100,12 +119,12 @@ export async function signup(
       email,
       password
     );
-    const { uid } = userCredential.user;
+    const { user } = userCredential;
 
     // Create a user document in Firestore
-    await createUser(uid, name, email, "user");
+    await createUser(user.uid, name, user.email || '', "user", user.photoURL || '');
 
-    const idToken = await userCredential.user.getIdToken();
+    const idToken = await user.getIdToken();
     await createSession(idToken);
   } catch (e: any) {
     console.error("Signup failed:", e.code, e.message);

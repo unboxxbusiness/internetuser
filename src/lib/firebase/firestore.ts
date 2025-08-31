@@ -1,3 +1,4 @@
+
 import { db } from "./server";
 import type { Customer, CustomerData } from "@/lib/types";
 
@@ -36,19 +37,27 @@ export async function deleteCustomer(id: string): Promise<void> {
 }
 
 // User & Role Functions
-export async function createUser(uid: string, name:string, email: string, role: string): Promise<void> {
+export async function createUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
   await db.collection(USERS_COLLECTION).doc(uid).set({
     uid,
     name,
     email,
     role,
+    photoURL,
   });
 }
 
-export async function getUserRole(uid: string): Promise<string | null> {
+export async function getUser(uid: string): Promise<{uid:string; name:string; email:string; role:string; photoURL?:string} | null> {
   const doc = await db.collection(USERS_COLLECTION).doc(uid).get();
   if (!doc.exists) {
     return null;
   }
-  return (doc.data()?.role as string) || null;
+  const data = doc.data()
+  return {
+    uid: data?.uid,
+    name: data?.name,
+    email: data?.email,
+    role: data?.role,
+    photoURL: data?.photoURL,
+  }
 }
