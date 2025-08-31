@@ -6,10 +6,8 @@ import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { getUser } from "./auth/actions";
 import { Footer } from "@/components/footer";
-import { SidebarProvider, Sidebar, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { UserSidebar } from "@/components/user-sidebar";
-import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,30 +22,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getUser();
-  const cookieStore = cookies()
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.className, "bg-background text-foreground")}>
-        {user ? (
-           <SidebarProvider defaultOpen={defaultOpen}>
-            {user.role === 'admin' ? <AdminSidebar user={user} /> : <UserSidebar user={user} />}
-            <div className="sm:ml-64">
-              <Header user={user}>
-                 <SidebarTrigger className="sm:hidden" />
-              </Header>
-              <main className="p-4 sm:p-8 pt-6">{children}</main>
-              <Footer />
-            </div>
-          </SidebarProvider>
-        ) : (
-          <>
-            <Header user={null} />
-            <main>{children}</main>
-            <Footer />
-          </>
-        )}
+        <div className="flex min-h-screen">
+          {user && (
+             <>
+              {user.role === 'admin' ? <AdminSidebar user={user} /> : <UserSidebar user={user} />}
+             </>
+          )}
+          <div className="flex-1 flex flex-col">
+             <Header user={user} />
+             <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
+             <Footer />
+          </div>
+        </div>
       </body>
     </html>
   );
