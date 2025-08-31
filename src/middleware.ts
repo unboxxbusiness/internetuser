@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/lib/firebaseAdmin';
 
+export const runtime = 'nodejs';
+
 export const config = {
   matcher: ['/admin/:path*', '/user/:path*', '/((?!api|_next/static|_next/image|favicon.ico|auth/login).*)'],
 };
