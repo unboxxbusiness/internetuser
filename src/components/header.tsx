@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import { Wifi, LogOut, Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { logout } from "@/app/auth/actions";
 import { Button } from "./ui/button";
 import {
@@ -18,13 +18,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "./ui/input";
 import type { AppUser } from "@/app/auth/actions";
+import { BrandingSettings } from "@/lib/types";
+import { DynamicIcon } from "./dynamic-icon";
 
 interface HeaderProps {
   user: AppUser | null;
   children?: React.ReactNode;
+  branding: BrandingSettings | null;
 }
 
-export function Header({ user, children }: HeaderProps) {
+export function Header({ user, children, branding }: HeaderProps) {
   const dashboardUrl =
     user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
 
@@ -51,8 +54,8 @@ export function Header({ user, children }: HeaderProps) {
               href="/"
               className="flex items-center gap-2 font-bold text-lg"
             >
-              <Wifi className="h-6 w-6 text-primary" />
-              <span className="hidden sm:inline-block">Gc Fiber Net</span>
+              <DynamicIcon iconName={branding?.icon || "Wifi"} className="h-6 w-6 text-primary" />
+              <span className="hidden sm:inline-block">{branding?.brandName || "Gc Fiber Net"}</span>
             </Link>
           )}
 

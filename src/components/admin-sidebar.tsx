@@ -10,7 +10,6 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight,
-  Wifi,
   Package,
   CreditCard,
   Bell,
@@ -19,6 +18,9 @@ import {
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
+import { BrandingSettings } from '@/lib/types';
+import { DynamicIcon } from './dynamic-icon';
+
 
 interface NavigationItem {
   id: string;
@@ -30,6 +32,7 @@ interface NavigationItem {
 interface SidebarProps {
   className?: string;
   user: AppUser;
+  branding: BrandingSettings | null;
 }
 
 const navigationItems: NavigationItem[] = [
@@ -42,7 +45,7 @@ const navigationItems: NavigationItem[] = [
   { id: "settings", name: "Settings", icon: SlidersHorizontal, href: "/admin/settings" },
 ];
 
-export function AdminSidebar({ className = "", user }: SidebarProps) {
+export function AdminSidebar({ className = "", user, branding }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
@@ -106,8 +109,8 @@ export function AdminSidebar({ className = "", user }: SidebarProps) {
       >
         <div className={`flex items-center border-b h-16 ${isCollapsed ? 'justify-center' : 'justify-between px-4'}`}>
            <Link href="/" className={`flex items-center gap-2 font-bold text-lg ${isCollapsed ? 'hidden' : ''}`}>
-              <Wifi className="h-6 w-6 text-primary" />
-              <span className="font-semibold">Gc Fiber Net</span>
+              <DynamicIcon iconName={branding?.icon || "Wifi"} className="h-6 w-6 text-primary" />
+              <span className="font-semibold">{branding?.brandName || "Gc Fiber Net"}</span>
            </Link>
             <button
                 onClick={toggleCollapse}

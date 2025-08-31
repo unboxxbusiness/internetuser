@@ -11,6 +11,7 @@ import { getUser, AppUser } from "@/app/auth/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ProfileForm } from "@/components/profile-form";
 import { BrandingForm } from "@/components/branding-form";
+import { getBrandingSettings } from "@/lib/firebase/firestore";
 
 
 export default async function AdminSettingsPage() {
@@ -18,6 +19,8 @@ export default async function AdminSettingsPage() {
   if (!user || user.role !== "admin") {
     redirect("/auth/login");
   }
+
+  const brandingSettings = await getBrandingSettings();
 
   return (
     <div className="flex-1 space-y-4">
@@ -63,7 +66,7 @@ export default async function AdminSettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <BrandingForm />
+             <BrandingForm brandingSettings={brandingSettings} />
           </CardContent>
         </Card>
       </div>

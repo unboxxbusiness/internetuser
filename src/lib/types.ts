@@ -29,3 +29,9 @@ export interface SupportTicket {
     createdAt?: Date;
     lastUpdated: Date;
 }
+
+export interface BrandingSettings {
+    brandName: string;
+    icon: string;
+    footerText: string;
+}

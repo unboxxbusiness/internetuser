@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser } from "@/lib/firebase/firestore";
+import { updateUser, updateBrandingSettings } from "@/lib/firebase/firestore";
+import { BrandingSettings } from "@/lib/types";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -144,4 +145,25 @@ export async function updateUserProfileAction(
     console.error("Error updating profile:", error);
     return { error: "Failed to update profile." };
   }
+}
+
+export async function updateBrandingAction(formData: FormData): Promise<{ message?: string; error?: string }> {
+    const brandName = formData.get('brandName') as string;
+    const icon = formData.get('icon') as string;
+    const footerText = formData.get('footerText') as string;
+
+    const settings: BrandingSettings = {
+        brandName,
+        icon,
+        footerText
+    };
+
+    try {
+        await updateBrandingSettings(settings);
+        revalidatePath('/', 'layout'); // Revalidate the whole site
+        return { message: 'Branding settings updated successfully.' };
+    } catch (error) {
+        console.error('Error updating branding settings:', error);
+        return { error: 'Failed to update branding settings.' };
+    }
 }

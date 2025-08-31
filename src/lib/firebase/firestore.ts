@@ -1,11 +1,12 @@
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
-import { SubscriptionPlan, Payment, SupportTicket } from "@/lib/types";
+import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings } from "@/lib/types";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
 const SUPPORT_TICKETS_COLLECTION = "supportTickets";
+const BRANDING_SETTINGS_COLLECTION = "branding";
 
 
 // User & Role Functions
@@ -141,4 +142,17 @@ export async function getSupportTicket(id: string): Promise<SupportTicket | null
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
         lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
     };
+}
+
+// Branding Functions
+export async function getBrandingSettings(): Promise<BrandingSettings | null> {
+    const doc = await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').get();
+    if (!doc.exists) {
+        return null;
+    }
+    return doc.data() as BrandingSettings;
+}
+
+export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
+    await db.collection(BRANDING_SETTINGS_COLLECTION).doc('config').set(settings, { merge: true });
 }

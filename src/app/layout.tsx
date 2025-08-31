@@ -9,14 +9,18 @@ import { Footer } from "@/components/footer";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { UserSidebar } from "@/components/user-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getBrandingSettings } from "@/lib/firebase/firestore";
 
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Gc Fiber Net",
-  description: "Customer management for broadband providers",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getBrandingSettings();
+  return {
+    title: branding?.brandName || "Gc Fiber Net",
+    description: "Customer management for broadband providers",
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -24,6 +28,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getUser();
+  const branding = await getBrandingSettings();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -37,13 +42,13 @@ export default async function RootLayout({
           <div className="flex min-h-screen">
             {user && (
               <>
-                {user.role === 'admin' ? <AdminSidebar user={user} /> : <UserSidebar user={user} />}
+                {user.role === 'admin' ? <AdminSidebar user={user} branding={branding} /> : <UserSidebar user={user} branding={branding} />}
               </>
             )}
             <div className="flex-1 flex flex-col">
-              <Header user={user} />
+              <Header user={user} branding={branding}/>
               <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
-              <Footer />
+              <Footer branding={branding} />
             </div>
           </div>
         </ThemeProvider>
