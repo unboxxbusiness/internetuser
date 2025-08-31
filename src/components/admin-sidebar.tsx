@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -11,7 +10,8 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight,
-  Wifi
+  Wifi,
+  Users2
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
 import { Button } from './ui/button';
@@ -31,6 +31,7 @@ interface SidebarProps {
 const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/admin/dashboard" },
   { id: "customers", name: "Customers", icon: Users, href: "/admin/customers" },
+  { id: "users", name: "Users", icon: Users2, href: "/admin/users" },
 ];
 
 export function AdminSidebar({ className = "", user }: SidebarProps) {
