@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Avatar,
   AvatarFallback,
@@ -24,14 +24,32 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Gauge, Users, Wifi, Network } from 'lucide-react';
+import { Gauge, Users, Wifi, Network, ShieldCheck, User } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAdmin } = useAuth();
+  
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/auth/login');
+  };
+
+  const menuItems = isAdmin
+    ? [
+        { href: '/admin', label: 'Dashboard', icon: Gauge },
+        { href: '/customers', label: 'Customers', icon: Users },
+        { href: '/plans', label: 'Plans', icon: Wifi },
+      ]
+    : [
+        { href: '/user', label: 'Dashboard', icon: Gauge },
+      ];
+
 
   return (
     <SidebarProvider>
@@ -44,47 +62,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === '/'}
-                tooltip="Dashboard"
-              >
-                <Link href="/">
-                  <Gauge />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith('/customers')}
-                tooltip="Customers"
-              >
-                <Link href="/customers">
-                  <Users />
-                  <span>Customers</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith('/plans')}
-                tooltip="Plans"
-              >
-                <Link href="/plans">
-                  <Wifi />
-                  <span>Plans</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {menuItems.map(item => (
+                 <SidebarMenuItem key={item.href}>
+                 <SidebarMenuButton
+                   asChild
+                   isActive={pathname === item.href}
+                   tooltip={item.label}
+                 >
+                   <Link href={item.href}>
+                     <item.icon />
+                     <span>{item.label}</span>
+                   </Link>
+                 </SidebarMenuButton>
+               </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-          {/* Footer content if any */}
-        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="flex items-center justify-between p-4 bg-card/80 backdrop-blur-sm border-b sticky top-0 z-10">
@@ -93,22 +86,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://picsum.photos/100" alt="@user" data-ai-hint="profile picture" />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarImage src={user?.photoURL || "https://picsum.photos/100"} alt={user?.displayName || "User"} data-ai-hint="profile picture" />
+                  <AvatarFallback>{user?.email?.[0].toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Admin</p>
+                  <p className="text-sm font-medium leading-none">{isAdmin ? 'Admin' : 'User'}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    admin@gcfiber.net
+                    {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
