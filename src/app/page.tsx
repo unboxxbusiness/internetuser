@@ -1,3 +1,4 @@
+import { AppLayout } from '@/components/layout/app-layout';
 import { summarizeServiceOverview } from '@/ai/flows/summarize-service-overview';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { customers } from '@/lib/data';
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
   const priorityCustomers = usersAtRisk.filter(u => aiSummary.priorityUsersForReminder.includes(u.userId));
 
   return (
+   <AppLayout>
     <div className="grid gap-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -138,5 +140,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
     </div>
+   </AppLayout>
   );
 }

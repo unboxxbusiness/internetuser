@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,27 +18,30 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const handleAuthSuccess = async (idToken: string) => {
+    await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    // The AuthProvider will handle the redirect
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
-      await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      router.push('/');
+      await handleAuthSuccess(idToken);
     } catch (error: any) {
       toast({
         title: 'Sign In Failed',
         description: error.message,
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -48,20 +52,13 @@ export default function LoginPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const idToken = await result.user.getIdToken();
-        await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${idToken}`,
-            },
-        });
-        router.push('/');
+        await handleAuthSuccess(idToken);
     } catch (error: any) {
         toast({
             title: 'Google Sign In Failed',
             description: error.message,
             variant: 'destructive',
         });
-    } finally {
         setLoading(false);
     }
   };
@@ -99,7 +96,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? <><Loader2 className="animate-spin" /> Signing in...</> : 'Sign in'}
             </Button>
           </form>
           <div className="relative my-4">
@@ -111,6 +108,7 @@ export default function LoginPage() {
             </div>
           </div>
           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" /> : <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12.18V13.83H18.69C18.36 17.64 15.19 19.27 12.19 19.27C8.36 19.27 5.03 16.33 5.03 12.5C5.03 8.67 8.36 5.73 12.19 5.73C14.04 5.73 15.63 6.36 16.85 7.48L19.09 5.34C17.11 3.53 14.85 2.5 12.19 2.5C6.96 2.5 2.75 6.78 2.75 12.5C2.75 18.22 6.96 22.5 12.19 22.5C17.6 22.5 21.5 18.42 21.5 12.72C21.5 12.06 21.43 11.58 21.35 11.1Z"></path></svg>}
             Google
           </Button>
         </CardContent>

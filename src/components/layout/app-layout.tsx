@@ -27,7 +27,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Gauge, Users, Wifi, Network, ShieldCheck, User } from 'lucide-react';
+import { Gauge, Users, Wifi, Network, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = isAdmin
     ? [
-        { href: '/admin', label: 'Dashboard', icon: Gauge },
+        { href: '/', label: 'Dashboard', icon: Gauge },
         { href: '/customers', label: 'Customers', icon: Users },
         { href: '/plans', label: 'Plans', icon: Wifi },
       ]
@@ -101,7 +101,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

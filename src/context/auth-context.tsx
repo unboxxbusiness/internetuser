@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { onIdTokenChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebaseClient';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePathname, useRouter } from 'next/navigation';
+
 
 interface AuthContextType {
   user: User | null;
@@ -21,30 +23,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
+  const router = useRouter();
+
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (user) {
         setUser(user);
         const tokenResult = await user.getIdTokenResult();
-        setIsAdmin(tokenResult.claims.admin === true);
+        const isAdminUser = tokenResult.claims.admin === true;
+        setIsAdmin(isAdminUser);
+
+        if (pathname.startsWith('/auth')) {
+          router.push(isAdminUser ? '/' : '/user');
+        }
+
       } else {
         setUser(null);
         setIsAdmin(false);
+        if (!pathname.startsWith('/auth')) {
+            router.push('/auth/login');
+        }
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
   
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2 ml-4">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
+      <div className="flex items-center justify-center h-screen bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Loading authentication...</p>
           </div>
       </div>
     );

@@ -22,15 +22,28 @@ export async function middleware(request: NextRequest) {
     const isAdmin = decodedToken.admin === true;
 
     if (isAuthPage) {
-      return NextResponse.redirect(new URL(isAdmin ? '/admin' : '/user', request.url));
+      return NextResponse.redirect(new URL(isAdmin ? '/' : '/user', request.url));
+    }
+    
+    // Redirect root access to the correct dashboard
+    if (pathname === '/') {
+      if (isAdmin) {
+         return NextResponse.next();
+      } else {
+        return NextResponse.redirect(new URL('/user', request.url));
+      }
     }
 
     if (pathname.startsWith('/admin') && !isAdmin) {
       return NextResponse.redirect(new URL('/user', request.url));
     }
+    
+    if ((pathname.startsWith('/customers') || pathname.startsWith('/plans')) && !isAdmin) {
+        return NextResponse.redirect(new URL('/user', request.url));
+    }
 
     if (pathname.startsWith('/user') && isAdmin) {
-      return NextResponse.redirect(new URL('/admin', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
     return NextResponse.next();
