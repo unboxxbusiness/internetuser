@@ -27,13 +27,9 @@ export default function LandingPage() {
                   </Button>
                 </div>
               </div>
-              <Image
-                src="https://picsum.photos/600/400"
-                width="600"
-                height="400"
-                alt="Hero"
+              <div
+                className="mx-auto aspect-[3/2] overflow-hidden rounded-xl bg-primary/20 sm:w-full"
                 data-ai-hint="network abstract"
-                className="mx-auto aspect-[3/2] overflow-hidden rounded-xl object-cover sm:w-full"
               />
             </div>
           </div>
