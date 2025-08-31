@@ -1,10 +1,11 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan } from "@/lib/firebase/firestore";
+import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan, getUsers, createNotification, getSupportTicket } from "@/lib/firebase/firestore";
 import { BrandingSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
@@ -100,19 +101,20 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
     }
 
     try {
-        // In a real application, you would integrate an email/notification service here.
-        // For this example, we'll just log the notification to the console.
-        console.log('--- Sending Notification ---');
-        console.log('Subject:', subject);
-        console.log('Message:', message);
-        console.log('--------------------------');
+        const users = await getUsers();
+        const notificationPromises = users.map(user => 
+            createNotification({
+                userId: user.uid,
+                title: subject,
+                message: message,
+                type: 'general',
+                isRead: false,
+                createdAt: new Date(),
+            })
+        );
+        await Promise.all(notificationPromises);
         
-        // You could fetch all user emails from Firestore here to send a bulk email.
-        // const usersSnapshot = await db.collection('users').get();
-        // const emails = usersSnapshot.docs.map(doc => doc.data().email);
-        // console.log('Target emails:', emails);
-        
-        return { message: 'Notification has been successfully sent (logged to console).' };
+        return { message: `Notification has been successfully sent to ${users.length} users.` };
 
     } catch (error) {
         console.error('Error sending notification:', error);
@@ -266,15 +268,24 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
     }
     
     try {
-        // In a real app, this would send an email to the user.
-        // For now, we log it and update the ticket status.
-        console.log(`--- Replying to ticket ${ticketId} ---`);
-        console.log(reply);
-        console.log('------------------------------------');
+        const ticket = await getSupportTicket(ticketId);
+        if (!ticket) {
+            return { error: "Ticket not found." };
+        }
+
+        await createNotification({
+            userId: ticket.userId,
+            title: `Reply to your ticket: "${ticket.subject}"`,
+            message: reply,
+            type: 'general',
+            isRead: false,
+            createdAt: new Date(),
+        });
 
         await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
         revalidatePath(`/admin/support/${ticketId}`);
-        return { message: "Your reply has been sent (logged) and the ticket status is now 'in-progress'." };
+        revalidatePath(`/user/notifications`);
+        return { message: "Your reply has been sent as a notification and the ticket status is now 'in-progress'." };
 
     } catch (error) {
         console.error("Error replying to ticket:", error);

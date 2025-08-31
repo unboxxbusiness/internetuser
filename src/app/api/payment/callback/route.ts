@@ -1,6 +1,8 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/server";
 import { sha512 } from "js-sha512";
+import { createNotification } from "@/lib/firebase/firestore";
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData();
@@ -62,6 +64,16 @@ export async function POST(req: NextRequest) {
                 amount: paymentAmount,
                 date: new Date(),
                 transactionId: txnid,
+            });
+
+            // 3. Create a notification for the user
+            await createNotification({
+                userId,
+                title: 'Subscription Changed Successfully',
+                message: `Your plan has been successfully updated to ${plan?.name}.`,
+                type: 'plan-change',
+                isRead: false,
+                createdAt: new Date(),
             });
             
             return NextResponse.redirect(new URL('/user/dashboard?payment=success', req.url));

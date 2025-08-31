@@ -1,3 +1,4 @@
+
 import { db } from "./server";
 import { AppUser } from "@/app/auth/actions";
 import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings } from "@/lib/types";
@@ -265,8 +266,12 @@ export async function updateBrandingSettings(settings: BrandingSettings): Promis
 }
 
 // Notification Functions
+export async function createNotification(notificationData: Omit<Notification, 'id'>): Promise<void> {
+    await db.collection(NOTIFICATIONS_COLLECTION).add(notificationData);
+}
+
 export async function getUserNotifications(userId: string): Promise<Notification[]> {
-    const snapshot = await db.collection(NOTIFICATIONS_COLlection)
+    const snapshot = await db.collection(NOTIFICATIONS_COLLECTION)
         .where('userId', '==', userId)
         .orderBy('createdAt', 'desc')
         .get();
