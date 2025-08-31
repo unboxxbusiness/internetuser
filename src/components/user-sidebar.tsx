@@ -147,7 +147,7 @@ export function UserSidebar({ className = "", user }: SidebarProps) {
           </ul>
         </nav>
 
-        <div className="mt-auto border-t">
+        <div className="border-t">
           <div className={`p-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
             {!isCollapsed ? (
               <div className="flex items-center gap-3 w-full">
@@ -180,11 +180,6 @@ export function UserSidebar({ className = "", user }: SidebarProps) {
           </form>
         </div>
       </aside>
-       <div className={`
-          transition-all duration-300 ease-in-out
-          ${isCollapsed ? "md:ml-20" : "md:ml-64"}
-        `}>
-      </div>
     </>
   );
 }

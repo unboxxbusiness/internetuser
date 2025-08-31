@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, redirect } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { 
   Home, 
   Users,
@@ -145,7 +145,7 @@ export function AdminSidebar({ className = "", user }: SidebarProps) {
           </ul>
         </nav>
 
-        <div className="mt-auto border-t">
+        <div className="border-t">
           <div className={`p-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
             {!isCollapsed ? (
               <div className="flex items-center gap-3 w-full">
@@ -178,11 +178,6 @@ export function AdminSidebar({ className = "", user }: SidebarProps) {
           </form>
         </div>
       </aside>
-       <div className={`
-          transition-all duration-300 ease-in-out
-          ${isCollapsed ? "md:ml-20" : "md:ml-64"}
-        `}>
-      </div>
     </>
   );
 }
