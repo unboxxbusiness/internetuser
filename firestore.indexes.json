@@ -1,15 +1,6 @@
+
 {
   "indexes": [
-    {
-      "collectionGroup": "payments",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
-        }
-      ]
-    },
     {
       "collectionGroup": "supportTickets",
       "queryScope": "COLLECTION",
