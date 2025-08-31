@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +30,7 @@ export default function SignupPage() {
 
       if (res.ok) {
         // New users are always 'user' role by default
-        router.push("/user/dashboard");
+        window.location.assign("/user/dashboard");
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to create session");

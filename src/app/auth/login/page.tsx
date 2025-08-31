@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +31,9 @@ export default function LoginPage() {
       if (res.ok) {
         const { role } = await res.json();
         if (role === 'admin') {
-          router.push("/admin/dashboard");
+          window.location.assign("/admin/dashboard");
         } else {
-          router.push("/user/dashboard");
+          window.location.assign("/user/dashboard");
         }
       } else {
         const errorData = await res.json();
