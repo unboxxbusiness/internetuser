@@ -4,7 +4,7 @@ import { DynamicIcon } from "./dynamic-icon";
 
 function SocialLink({ href, icon: Icon }: { href: string; icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <a href={href} className="hover:text-white transition-colors">
+    <a href={href} className="text-muted-foreground hover:text-primary transition-colors">
       <Icon className="w-6 h-6" />
     </a>
   );
@@ -47,18 +47,18 @@ export function Footer({ branding }: { branding: BrandingSettings | null }) {
   const footerText = branding?.footerText || `© ${new Date().getFullYear()} Gc Fiber Net. All rights reserved.`;
 
   return (
-    <footer className="bg-slate-800 text-slate-400">
+    <footer className="bg-card border-t">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
 
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="flex items-center gap-3">
               <DynamicIcon iconName={branding?.icon || "Wifi"} className="h-8 w-8 text-primary" />
-              <h2 className="text-2xl font-bold tracking-tight text-white">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
                 {branding?.brandName || "Gc Fiber Net"}
               </h2>
             </div>
-            <p>{footerText}</p>
+            <p className="text-sm text-muted-foreground">{footerText}</p>
           </div>
           
           <div className="flex justify-center gap-6">
