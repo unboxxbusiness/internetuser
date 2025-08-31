@@ -36,6 +36,10 @@ export async function getUser(uid: string): Promise<AppUser | null> {
   };
 }
 
+export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
+  await db.collection(USERS_COLLECTION).doc(uid).update(data);
+}
+
 
 export async function getUsers(): Promise<AppUser[]> {
   const snapshot = await db.collection(USERS_COLLECTION).get();

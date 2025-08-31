@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { getUser } from "@/app/auth/actions";
+import { getUser, AppUser } from "@/app/auth/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ProfileForm } from "@/components/profile-form";
 
 
 export default async function AdminSettingsPage() {
@@ -51,13 +52,8 @@ export default async function AdminSettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-                Profile management features will be available here.
-            </p>
+            <ProfileForm user={user} />
           </CardContent>
-           <CardFooter>
-            <Button variant="outline">Update Profile</Button>
-          </CardFooter>
         </Card>
         
         <Card>

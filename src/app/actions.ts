@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
+import { getUser } from "./auth/actions";
+import { updateUser } from "@/lib/firebase/firestore";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -113,4 +115,33 @@ export async function sendNotificationAction(formData: FormData): Promise<{ mess
         console.error('Error sending notification:', error);
         return { error: 'Failed to send notification.' };
     }
+}
+
+export async function updateUserProfileAction(
+  formData: FormData
+): Promise<{ message?: string; error?: string }> {
+  const user = await getUser();
+  if (!user) {
+    return { error: "You must be logged in to update your profile." };
+  }
+
+  const name = formData.get("name") as string;
+  const updates: { name?: string } = {};
+
+  if (name && name !== user.name) {
+    updates.name = name;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return { message: "No changes to save." };
+  }
+
+  try {
+    await updateUser(user.uid, updates);
+    revalidatePath("/admin/settings");
+    return { message: "Profile updated successfully." };
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return { error: "Failed to update profile." };
+  }
 }
