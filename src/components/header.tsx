@@ -27,8 +27,7 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
-import { Menu, MenuItem, HoveredLink, ProductItem } from "./ui/hover-menu";
+import { Menu, MenuItem, HoveredLink } from "./ui/hover-menu";
 
 interface HeaderProps {
   user: AppUser | null;
