@@ -5,7 +5,90 @@ import Link from "next/link";
 import { getUser } from "./auth/actions";
 import { getHeroSettings } from "@/lib/firebase/server-actions";
 import { Button } from "@/components/ui/button";
-import { Users, Package, CreditCard, LayoutDashboard, Search, LifeBuoy } from "lucide-react";
+import { 
+  Users, 
+  Package, 
+  CreditCard, 
+  LayoutDashboard, 
+  WandSparkles, 
+  LifeBuoy,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const features = [
+  {
+    title: "Effortless Profile Management",
+    description: "Easily view and update your contact and service details in one central, secure location.",
+    icon: <Users size={28} />,
+  },
+  {
+    title: "Flexible Subscription Plans",
+    description: "Browse, compare, and switch between a variety of high-speed internet plans that perfectly fit your needs.",
+    icon: <Package size={28} />,
+  },
+  {
+    title: "Secure & Transparent Billing",
+    description: "Track your payments, view your billing history, and download invoices with just a few clicks.",
+    icon: <CreditCard size={28} />,
+  },
+  {
+    title: "Real-Time Service Dashboard",
+    description: "Get an at-a-glance overview of your current plan, data usage, and service status anytime.",
+    icon: <LayoutDashboard size={28} />,
+  },
+  {
+    title: "AI-Powered Plan Recommender",
+    description: "Let our smart assistant analyze your usage and recommend the best-value plan for you.",
+    icon: <WandSparkles size={28} />,
+  },
+  {
+    title: "24/7 Customer Support",
+    description: "Need help? Create and track support tickets directly from your dashboard, anytime you need assistance.",
+    icon: <LifeBuoy size={28} />,
+  },
+];
+
+const Feature = ({
+  title,
+  description,
+  icon,
+  index,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  index: number;
+}) => {
+  return (
+    <div
+      className={cn(
+        "flex flex-col lg:border-r py-10 relative group/feature dark:border-neutral-800",
+        (index === 0 || index === 4) && "lg:border-l dark:border-neutral-800",
+        index < 4 && "lg:border-b dark:border-neutral-800"
+      )}
+    >
+      {index < 4 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-muted/50 to-transparent pointer-events-none" />
+      )}
+      {index >= 4 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-muted/50 to-transparent pointer-events-none" />
+      )}
+      <div className="mb-4 relative z-10 px-10 text-primary">
+        {icon}
+      </div>
+      <div className="text-lg font-bold mb-2 relative z-10 px-10">
+        <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-primary transition-all duration-200 origin-center" />
+        <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-foreground">
+          {title}
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground max-w-xs relative z-10 px-10">
+        {description}
+      </p>
+    </div>
+  );
+};
+
 
 export default async function LandingPage() {
   const user = await getUser();
@@ -52,7 +135,7 @@ export default async function LandingPage() {
               width={800}
               height={600}
               alt="Hero"
-              data-ai-hint="earth space"
+              data-ai-hint="abstract illustration"
               className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
             />
           </div>
@@ -69,49 +152,10 @@ export default async function LandingPage() {
               </p>
             </div>
           </div>
-          <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:grid-cols-3 lg:gap-12 mt-12">
-            <div className="grid gap-1 text-center">
-              <div className="flex justify-center items-center">
-                <Users className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-bold">Profile Management</h3>
-              <p className="text-sm text-muted-foreground">Keep your contact and service details up-to-date in one central location.</p>
-            </div>
-            <div className="grid gap-1 text-center">
-              <div className="flex justify-center items-center">
-                <Package className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-bold">Flexible Subscription Plans</h3>
-              <p className="text-sm text-muted-foreground">View, compare, and switch between subscription plans that fit your needs.</p>
-            </div>
-            <div className="grid gap-1 text-center">
-              <div className="flex justify-center items-center">
-                <CreditCard className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-bold">Secure Billing</h3>
-              <p className="text-sm text-muted-foreground">Track your payments, view history, and download invoices with ease.</p>
-            </div>
-            <div className="grid gap-1 text-center">
-              <div className="flex justify-center items-center">
-                <LayoutDashboard className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-bold">Service Dashboard</h3>
-              <p className="text-sm text-muted-foreground">Get an at-a-glance overview of your current plan and service status.</p>
-            </div>
-             <div className="grid gap-1 text-center">
-                <div className="flex justify-center items-center">
-                    <Search className="h-10 w-10 text-primary" />
-                </div>
-                <h3 className="text-lg font-bold">Plan Recommender</h3>
-                <p className="text-sm text-muted-foreground">Get smart recommendations for the best plan based on your usage.</p>
-            </div>
-            <div className="grid gap-1 text-center">
-              <div className="flex justify-center items-center">
-                <LifeBuoy className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-bold">24/7 Support</h3>
-              <p className="text-sm text-muted-foreground">Create and track support tickets anytime you need assistance.</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative z-10 py-10 max-w-7xl mx-auto">
+            {features.slice(0, 6).map((feature, index) => (
+              <Feature key={feature.title} {...feature} index={index} />
+            ))}
           </div>
         </div>
       </section>
