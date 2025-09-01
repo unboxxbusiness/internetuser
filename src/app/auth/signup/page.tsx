@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -14,9 +15,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth as clientAuth } from "@/lib/firebase/client";
+import { auth as clientAuth, db as clientDb } from "@/lib/firebase/client";
+import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { createUser as createClientUser } from "@/lib/firebase/client-actions";
+
+
+async function createClientUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
+  await setDoc(doc(clientDb, "users", uid), {
+    uid,
+    name,
+    email,
+    role,
+    photoURL,
+    settings: {
+        paperlessBilling: true,
+        paymentReminders: true,
+    }
+  });
+}
+
 
 export default function SignupPage() {
   const [error, setError] = useState("");

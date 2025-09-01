@@ -27,9 +27,12 @@ import {
     deleteNotification as deleteNotificationFirestore,
     deleteAllUserNotifications as deleteAllUserNotificationsFirestore,
     markAllUserNotificationsAsRead as markAllUserNotificationsAsReadFirestore,
+    getUserPayments as getUserPaymentsFirestore,
+    getUserNotifications as getUserNotificationsFirestore,
+    getUserSupportTickets as getUserSupportTicketsFirestore,
 } from "./firestore";
-import { AppUser } from "@/app/auth/actions";
-import { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, UserSettings } from "../types";
+import type { AppUser } from "@/app/auth/actions";
+import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, UserSettings } from "../types";
 
 export async function getUsers(): Promise<AppUser[]> {
     return getUsersFirestore(db);
@@ -59,6 +62,10 @@ export async function getPayments(): Promise<Payment[]> {
     return getPaymentsFirestore(db);
 }
 
+export async function getUserPayments(userId: string): Promise<Payment[]> {
+    return getUserPaymentsFirestore(db, userId);
+}
+
 export async function getUserSubscription(userId: string): Promise<Subscription | null> {
     return getUserSubscriptionFirestore(db, userId);
 }
@@ -67,12 +74,20 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
     return getSupportTicketsFirestore(db);
 }
 
+export async function getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
+    return getUserSupportTicketsFirestore(db, userId);
+}
+
 export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
     return getSupportTicketFirestore(db, id);
 }
 
 export async function getAllNotifications(): Promise<Notification[]> {
     return getAllNotificationsFirestore(db);
+}
+
+export async function getUserNotifications(userId: string): Promise<Notification[]> {
+    return getUserNotificationsFirestore(db, userId);
 }
 
 export async function getUserSettings(userId: string): Promise<UserSettings | null> {
