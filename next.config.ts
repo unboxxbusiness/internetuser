@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
     serverComponentsExternalPackages: ['firebase-admin'],
   },
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+    ],
   },
 };
 
