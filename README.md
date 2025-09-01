@@ -15,3 +15,4 @@ To grant a user admin privileges:
 5.  Edit the `role` field in that document and change its value from `user` to `admin`.
 
 The user will have admin access the next time they log in.
+# internetuser
