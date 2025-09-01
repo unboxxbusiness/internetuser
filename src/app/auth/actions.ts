@@ -14,6 +14,8 @@ export interface AppUser {
   name: string | undefined;
   photoURL: string | undefined;
   role: string;
+  accountStatus: 'active' | 'suspended';
+  paymentStatus: 'paid' | 'pending';
 }
 
 export async function getUser(): Promise<AppUser | null> {
@@ -38,6 +40,8 @@ export async function getUser(): Promise<AppUser | null> {
       name: firestoreUser.name,
       photoURL: firestoreUser.photoURL,
       role: firestoreUser.role,
+      accountStatus: firestoreUser.accountStatus,
+      paymentStatus: firestoreUser.paymentStatus,
     };
   } catch (error) {
     console.error("Error verifying session cookie:", error);

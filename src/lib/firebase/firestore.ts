@@ -36,6 +36,9 @@ export async function getUser(db: Firestore, uid: string): Promise<AppUser | nul
   }
   const data = docSnap.data()
   if (!data) return null;
+
+  const payments = await getUserPayments(db, uid);
+  const hasPaid = payments.some(p => p.status === 'succeeded');
   
   return {
     uid: data.uid,
@@ -43,6 +46,8 @@ export async function getUser(db: Firestore, uid: string): Promise<AppUser | nul
     name: data.name,
     photoURL: data.photoURL,
     role: data.role,
+    accountStatus: 'active', // Placeholder
+    paymentStatus: hasPaid ? 'paid' : 'pending',
   };
 }
 
@@ -53,16 +58,22 @@ export async function updateUser(db: Firestore, uid: string, data: Partial<AppUs
 
 
 export async function getUsers(db: Firestore): Promise<AppUser[]> {
-  const q = db.collection(USERS_COLLECTION);
-  const snapshot = await q.get();
-  return snapshot.docs.map((doc) => {
+  const usersSnapshot = await db.collection(USERS_COLLECTION).get();
+  const paymentsSnapshot = await db.collection(PAYMENTS_COLLECTION).where('status', '==', 'succeeded').get();
+
+  const successfulPaymentUserIds = new Set(paymentsSnapshot.docs.map(doc => doc.data().userId));
+
+  return usersSnapshot.docs.map((doc) => {
     const data = doc.data();
+    const hasPaid = successfulPaymentUserIds.has(data.uid);
     return {
       uid: data.uid,
       name: data.name,
       email: data.email,
       role: data.role,
       photoURL: data.photoURL,
+      accountStatus: 'active', // Placeholder, can be enhanced later
+      paymentStatus: hasPaid ? 'paid' : 'pending',
     };
   });
 }

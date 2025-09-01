@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useTransition } from "react";
@@ -49,6 +50,30 @@ export const columns: ColumnDef<AppUser>[] = [
       return (
         <Badge variant={role === "admin" ? "default" : "secondary"}>
           {role}
+        </Badge>
+      );
+    },
+  },
+    {
+    accessorKey: "accountStatus",
+    header: "Account Status",
+    cell: ({ row }) => {
+      const status = row.getValue("accountStatus") as string;
+      return (
+        <Badge variant={status === "active" ? "secondary" : "destructive"}>
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "paymentStatus",
+    header: "Payment Status",
+    cell: ({ row }) => {
+      const status = row.getValue("paymentStatus") as string;
+      return (
+        <Badge variant={status === "paid" ? "secondary" : "outline"}>
+          {status}
         </Badge>
       );
     },
