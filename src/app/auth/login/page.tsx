@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -12,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth as clientAuth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
@@ -21,10 +22,14 @@ import { getUser } from "@/lib/firebase/server-actions";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
+    setIsLoading(true);
+
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -55,6 +60,8 @@ export default function LoginPage() {
     } catch (e: any) {
       console.error("Login failed:", e.code, e.message);
       setError("Invalid email or password.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +94,7 @@ export default function LoginPage() {
                   name="email"
                   placeholder="m@example.com"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="grid gap-2">
@@ -97,11 +105,13 @@ export default function LoginPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                    disabled={isLoading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -115,8 +125,9 @@ export default function LoginPage() {
                 </div>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
             <div className="mt-4 text-center text-sm">
