@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { login } from "../actions";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -29,67 +29,75 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-      <Card className="mx-auto max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={handleSubmit}
-            className="grid gap-4"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] w-full">
+      <div className="w-full max-w-sm">
+        <Button variant="ghost" asChild className="mb-4">
+          <Link href="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Link>
+        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Login</CardTitle>
+            <CardDescription>
+              Enter your email below to login to your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={handleSubmit}
+              className="grid gap-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="m@example.com"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">
-                    {showPassword ? "Hide password" : "Show password"}
-                  </span>
-                </button>
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                    <span className="sr-only">
+                      {showPassword ? "Hide password" : "Show password"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+            </form>
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link href="/auth/signup" className="underline">
+                Sign up
+              </Link>
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="underline">
-              Sign up
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
