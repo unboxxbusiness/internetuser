@@ -33,7 +33,7 @@ export default async function AdminSupportPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SupportTicketTable data={tickets} />
+          <SupportTicketTable tickets={tickets} />
         </CardContent>
       </Card>
     </div>

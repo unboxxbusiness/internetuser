@@ -10,8 +10,7 @@ import {
 import { getUser } from "@/app/auth/actions";
 import { getUserPayments } from "@/lib/firebase/server-actions";
 import { Payment } from "@/lib/types";
-import { columns } from "@/components/tables/user-payments-columns";
-import { DataTable } from "@/components/ui/data-table";
+import { UserPaymentTable } from "@/components/user-payment-table";
 
 export default async function UserBillingPage() {
   const user = await getUser();
@@ -35,7 +34,7 @@ export default async function UserBillingPage() {
           <CardDescription>A complete record of your payments.</CardDescription>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={paymentHistory} filterColumn="id" filterPlaceholder="Filter by Invoice ID..." />
+            <UserPaymentTable payments={paymentHistory} user={user} />
         </CardContent>
       </Card>
     </div>

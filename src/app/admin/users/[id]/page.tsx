@@ -143,7 +143,7 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <PaymentTable data={payments} />
+                            <PaymentTable payments={payments} />
                         </CardContent>
                     </Card>
 
@@ -158,7 +158,7 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <UserSupportTicketTable data={supportTickets} />
+                            <UserSupportTicketTable tickets={supportTickets} />
                         </CardContent>
                     </Card>
                 </div>

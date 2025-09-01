@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
-import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee } from "lucide-react";
-import { getUserSubscription, getUserPayments } from "@/lib/firebase/server-actions";
+import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Bell, ArrowRight } from "lucide-react";
+import { getUserSubscription, getUserPayments, getUserNotifications } from "@/lib/firebase/server-actions";
 import Link from "next/link";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "@/components/tables/user-payments-columns";
+import { UserPaymentTable } from "@/components/user-payment-table";
 
 
 export default async function UserDashboardPage() {
@@ -24,12 +24,16 @@ export default async function UserDashboardPage() {
     redirect('/auth/login');
   }
 
-  const [subscription, recentPayments] = await Promise.all([
+  const [subscription, recentPayments, notifications] = await Promise.all([
     getUserSubscription(user.uid),
     getUserPayments(user.uid),
+    getUserNotifications(user.uid),
   ]);
 
   const latestPayments = recentPayments.slice(0, 5);
+  const unreadNotifications = notifications.filter(n => !n.isRead);
+  const latestUnreadNotification = unreadNotifications.length > 0 ? unreadNotifications[0] : null;
+
 
   return (
     <div className="space-y-6">
@@ -38,6 +42,22 @@ export default async function UserDashboardPage() {
           Welcome, {user?.name || "User"}!
         </h2>
       </div>
+
+       {latestUnreadNotification && (
+          <Alert>
+            <Bell className="h-4 w-4" />
+            <AlertTitle className="font-semibold">{latestUnreadNotification.title}</AlertTitle>
+            <AlertDescription>
+                <div className="flex justify-between items-center">
+                    <p>{latestUnreadNotification.message}</p>
+                    <Button asChild variant="link" className="pr-0">
+                        <Link href="/user/notifications">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                </div>
+            </AlertDescription>
+          </Alert>
+       )}
+
 
       {subscription ? (
         <>
@@ -125,7 +145,7 @@ export default async function UserDashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={latestPayments} />
+          <UserPaymentTable payments={latestPayments} user={user} />
         </CardContent>
       </Card>
     </div>
