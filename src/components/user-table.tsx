@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -15,11 +16,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2, Mail, KeyRound } from "lucide-react";
+import { MoreHorizontal, Trash2, KeyRound, User } from "lucide-react";
 import type { AppUser } from "@/app/auth/actions";
 import { deleteUserAction, resetPasswordAction } from "@/app/actions";
 import { useTransition } from "react";
+import Link from "next/link";
 
 export function UserTable({ users }: { users: AppUser[] }) {
   const [isPending, startTransition] = useTransition();
@@ -91,6 +94,13 @@ export function UserTable({ users }: { users: AppUser[] }) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                         <DropdownMenuItem asChild>
+                           <Link href={`/admin/users/${user.uid}`}>
+                              <User className="mr-2 h-4 w-4" />
+                              View Profile
+                           </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuSeparator />
                          <DropdownMenuItem
                           onClick={() => handleResetPassword(user.email)}
                           disabled={isPending}
