@@ -4,7 +4,13 @@
 import { useEffect, useState, useTransition } from "react";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
-import { getUserNotifications } from "@/lib/firebase/firestore";
+import { 
+    getUserNotifications, 
+    markNotificationAsRead, 
+    deleteNotification,
+    markAllUserNotificationsAsRead,
+    deleteAllUserNotifications
+} from "@/lib/firebase/client-actions";
 import {
   Card,
   CardContent,
@@ -17,12 +23,7 @@ import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, MailCheck, Loader
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
 import { AppUser } from "@/app/auth/actions";
-import { 
-    markNotificationAsReadAction, 
-    markAllNotificationsAsReadAction, 
-    deleteNotificationAction, 
-    deleteAllUserNotificationsAction 
-} from "@/app/actions";
+
 
 function getNotificationIcon(type: NotificationType['type']) {
     switch (type) {
@@ -77,29 +78,31 @@ export default function UserNotificationsPage() {
 
   const handleMarkAsRead = (id: string) => {
     startTransition(async () => {
-      await markNotificationAsReadAction(id);
+      await markNotificationAsRead(id, { isRead: true });
       setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
     });
   };
   
   const handleDelete = (id: string) => {
       startTransition(async () => {
-          await deleteNotificationAction(id);
+          await deleteNotification(id);
           setNotifications(notifications.filter(n => n.id !== id));
       });
   };
 
   const handleMarkAllAsRead = () => {
+    if (!user) return;
       startTransition(async () => {
-          await markAllNotificationsAsReadAction();
+          await markAllUserNotificationsAsRead(user.uid);
           setNotifications(notifications.map(n => ({...n, isRead: true })));
       });
   };
 
   const handleDeleteAll = () => {
+    if (!user) return;
       if (confirm("Are you sure you want to delete all notifications?")) {
         startTransition(async () => {
-            await deleteAllUserNotificationsAction();
+            await deleteAllUserNotifications(user.uid);
             setNotifications([]);
         });
       }

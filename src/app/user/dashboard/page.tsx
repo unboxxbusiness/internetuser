@@ -1,4 +1,6 @@
 
+"use client";
+
 import {
   Card,
   CardContent,
@@ -17,26 +19,56 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getUser } from "@/app/auth/actions";
+import { getUser, AppUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
-import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee } from "lucide-react";
-import { getUserSubscription, getUserPayments } from "@/lib/firebase/firestore";
+import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Loader2 } from "lucide-react";
+import { getUserSubscription } from "@/lib/firebase/server-actions";
+import { getUserPayments } from "@/lib/firebase/client-actions";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Payment, Subscription } from "@/lib/types";
 
-export default async function UserDashboard() {
-  const user = await getUser();
-  if (!user || user.role !== "user") {
-    redirect("/auth/login");
+export default function UserDashboard() {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const currentUser = await getUser();
+      if (!currentUser || currentUser.role !== "user") {
+        redirect("/auth/login");
+        return;
+      }
+      setUser(currentUser);
+      
+      const [sub, payments] = await Promise.all([
+        getUserSubscription(currentUser.uid),
+        getUserPayments(currentUser.uid),
+      ]);
+
+      setSubscription(sub);
+      setRecentPayments(payments.slice(0,3));
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
   }
-
-  const subscription = await getUserSubscription(user.uid);
-  const recentPayments = (await getUserPayments(user.uid)).slice(0, 3);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">
-          Welcome, {user.name || "User"}!
+          Welcome, {user?.name || "User"}!
         </h2>
       </div>
 

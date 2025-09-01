@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getPlans, getUserSubscription } from "@/lib/firebase/firestore";
+import { getPlans, getUserSubscription } from "@/lib/firebase/server-actions";
 import { CheckCircle } from "lucide-react";
 import { SwitchPlanButton } from "@/components/switch-plan-button";
 

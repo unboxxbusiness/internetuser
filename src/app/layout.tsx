@@ -8,7 +8,7 @@ import { Footer } from "@/components/footer";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { UserSidebar } from "@/components/user-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { getBrandingSettings } from "@/lib/firebase/firestore";
+import { getBrandingSettings } from "@/lib/firebase/server-actions";
 
 
 const inter = Inter({ subsets: ["latin"] });

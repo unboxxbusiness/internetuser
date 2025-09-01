@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -8,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getUser } from "@/app/auth/actions";
-import { getPlans } from "@/lib/firebase/firestore";
+import { getPlans } from "@/lib/firebase/server-actions";
 import { PlanTable } from "@/components/plan-table";
 import { PlusCircle } from "lucide-react";
 

@@ -12,7 +12,7 @@ import { getUser } from "@/app/auth/actions";
 import { NotificationForm } from "@/components/notification-form";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getAllNotifications } from "@/lib/firebase/firestore";
+import { getAllNotifications } from "@/lib/firebase/server-actions";
 import { NotificationHistory } from "@/components/notification-history";
 
 export default async function AdminNotificationsPage() {

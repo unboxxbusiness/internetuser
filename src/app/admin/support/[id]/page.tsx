@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
-import { getSupportTicket } from "@/lib/firebase/firestore";
+import { getSupportTicket } from "@/lib/firebase/server-actions";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TicketReplyForm } from "@/components/ticket-reply-form";

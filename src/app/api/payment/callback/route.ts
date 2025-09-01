@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/server";
 import { sha512 } from "js-sha512";
-import { createNotification } from "@/lib/firebase/firestore";
+import { createNotification } from "@/lib/firebase/server-actions";
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData();

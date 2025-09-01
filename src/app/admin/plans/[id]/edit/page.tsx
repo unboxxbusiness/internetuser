@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -6,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getPlan } from "@/lib/firebase/firestore";
+import { getPlan } from "@/lib/firebase/server-actions";
 import { PlanForm } from "@/components/plan-form";
 
 export default async function EditPlanPage({

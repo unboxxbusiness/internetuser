@@ -14,7 +14,7 @@ import { PasswordForm } from "@/components/password-form";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { BillingPreferencesForm } from "@/components/billing-preferences-form";
-import { getUserSettings } from "@/lib/firebase/firestore";
+import { getUserSettings } from "@/lib/firebase/server-actions";
 
 export default async function UserProfilePage() {
   const user = await getUser();

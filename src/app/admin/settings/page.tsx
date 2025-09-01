@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -11,7 +12,7 @@ import { getUser, AppUser } from "@/app/auth/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ProfileForm } from "@/components/profile-form";
 import { BrandingForm } from "@/components/branding-form";
-import { getBrandingSettings } from "@/lib/firebase/firestore";
+import { getBrandingSettings } from "@/lib/firebase/server-actions";
 
 
 export default async function AdminSettingsPage() {

@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -6,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getUsers } from "@/lib/firebase/firestore";
+import { getUsers } from "@/lib/firebase/server-actions";
 import { UserTable } from "@/components/user-table";
 
 export default async function AdminUsersPage() {

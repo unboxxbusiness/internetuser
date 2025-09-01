@@ -5,7 +5,26 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan, getUsers, createNotification, getSupportTicket, updateHeroSettings, deleteAllUserNotifications, markAllUserNotificationsAsRead, deleteNotification, updateNotification, deleteAllNotifications } from "@/lib/firebase/firestore";
+import { 
+    updateUser, 
+    updateBrandingSettings, 
+    createSupportTicket, 
+    updateUserSettings,
+    updateHeroSettings,
+} from "@/lib/firebase/client-actions";
+import { 
+    getPlan,
+    getUsers, 
+    createNotification, 
+    getSupportTicket, 
+    updateSupportTicket,
+    deleteAllNotifications as deleteAllNotificationsServer,
+    updateNotification,
+    deleteNotification,
+    deleteAllUserNotifications,
+    markAllUserNotificationsAsRead,
+} from "@/lib/firebase/server-actions";
+
 import { BrandingSettings, HeroSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
@@ -409,7 +428,7 @@ export async function deleteAllNotificationsAction() {
       return { error: "You do not have permission to perform this action." };
     }
     try {
-        await deleteAllNotifications();
+        await deleteAllNotificationsServer();
         revalidatePath('/admin/notifications');
     } catch (error) {
         console.error("Error deleting all notifications:", error);

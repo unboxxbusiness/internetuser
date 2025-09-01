@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -7,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getSupportTickets } from "@/lib/firebase/firestore";
+import { getSupportTickets } from "@/lib/firebase/server-actions";
 import { SupportTicketTable } from "@/components/support-ticket-table";
 import { SupportTicket } from "@/lib/types";
 

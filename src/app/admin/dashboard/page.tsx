@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -7,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getPayments, getUsers } from "@/lib/firebase/firestore";
+import { getPayments, getUsers } from "@/lib/firebase/server-actions";
 import { RecentSales } from "@/components/recent-sales";
 import { OverviewChart } from "@/components/overview-chart";
 import { AppUser } from "@/app/auth/actions";

@@ -1,9 +1,7 @@
 
-import { db as serverDb } from "./server";
-import { db as clientDb } from "./client";
 import { AppUser } from "@/app/auth/actions";
 import { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings } from "@/lib/types";
-import { collection, getDocs, getDoc, doc, updateDoc, addDoc, query, where, orderBy, setDoc, deleteDoc, writeBatch } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, updateDoc, addDoc, query, where, orderBy, setDoc, deleteDoc, writeBatch, Firestore } from "firebase/firestore";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
@@ -14,8 +12,8 @@ const NOTIFICATIONS_COLLECTION = "notifications";
 const LANDING_PAGE_COLLECTION = "landingPage";
 
 // User & Role Functions
-export async function createUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
-  await setDoc(doc(clientDb, USERS_COLLECTION, uid), {
+export async function createUser(db: Firestore, uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
+  await setDoc(doc(db, USERS_COLLECTION, uid), {
     uid,
     name,
     email,
@@ -28,8 +26,8 @@ export async function createUser(uid: string, name:string, email: string, role: 
   });
 }
 
-export async function getUser(uid: string): Promise<AppUser | null> {
-  const docRef = doc(serverDb, USERS_COLLECTION, uid);
+export async function getUser(db: Firestore, uid: string): Promise<AppUser | null> {
+  const docRef = doc(db, USERS_COLLECTION, uid);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) {
     return null;
@@ -46,14 +44,14 @@ export async function getUser(uid: string): Promise<AppUser | null> {
   };
 }
 
-export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
-  const docRef = doc(clientDb, USERS_COLLECTION, uid);
+export async function updateUser(db: Firestore, uid: string, data: Partial<AppUser>): Promise<void> {
+  const docRef = doc(db, USERS_COLLECTION, uid);
   await updateDoc(docRef, data);
 }
 
 
-export async function getUsers(): Promise<AppUser[]> {
-  const q = query(collection(serverDb, USERS_COLLECTION));
+export async function getUsers(db: Firestore): Promise<AppUser[]> {
+  const q = query(collection(db, USERS_COLLECTION));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -68,8 +66,8 @@ export async function getUsers(): Promise<AppUser[]> {
 }
 
 // Subscription Plan Functions
-export async function getPlans(): Promise<SubscriptionPlan[]> {
-  const q = query(collection(serverDb, PLANS_COLLECTION));
+export async function getPlans(db: Firestore): Promise<SubscriptionPlan[]> {
+  const q = query(collection(db, PLANS_COLLECTION));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -83,8 +81,8 @@ export async function getPlans(): Promise<SubscriptionPlan[]> {
   });
 }
 
-export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
-  const docRef = doc(serverDb, PLANS_COLlection, id);
+export async function getPlan(db: Firestore, id: string): Promise<SubscriptionPlan | null> {
+  const docRef = doc(db, PLANS_COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) {
     return null;
@@ -102,8 +100,8 @@ export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
 }
 
 
-export async function getUserSubscription(userId: string): Promise<Subscription | null> {
-    const userDocRef = doc(serverDb, USERS_COLLECTION, userId);
+export async function getUserSubscription(db: Firestore, userId: string): Promise<Subscription | null> {
+    const userDocRef = doc(db, USERS_COLLECTION, userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists() || !userDoc.data()?.subscriptionPlanId) {
         return null;
@@ -111,7 +109,7 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     const user = userDoc.data();
     const planId = user?.subscriptionPlanId;
 
-    const plan = await getPlan(planId);
+    const plan = await getPlan(db, planId);
     if (!plan) return null;
 
     const nextBillingDate = new Date();
@@ -128,15 +126,15 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     };
 }
 
-export async function updateUserSubscription(userId: string, planId: string): Promise<void> {
-    const docRef = doc(clientDb, USERS_COLLECTION, userId);
+export async function updateUserSubscription(db: Firestore, userId: string, planId: string): Promise<void> {
+    const docRef = doc(db, USERS_COLLECTION, userId);
     await updateDoc(docRef, { subscriptionPlanId: planId });
 }
 
 
 // Payment Functions
-export async function getPayments(): Promise<Payment[]> {
-  const q = query(collection(serverDb, PAYMENTS_COLLECTION), orderBy("date", "desc"));
+export async function getPayments(db: Firestore): Promise<Payment[]> {
+  const q = query(collection(db, PAYMENTS_COLLECTION), orderBy("date", "desc"));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -153,8 +151,8 @@ export async function getPayments(): Promise<Payment[]> {
   });
 }
 
-export async function getUserPayments(userId: string): Promise<Payment[]> {
-    const q = query(collection(serverDb, PAYMENTS_COLLECTION), where('userId', '==', userId), orderBy('date', 'desc'));
+export async function getUserPayments(db: Firestore, userId: string): Promise<Payment[]> {
+    const q = query(collection(db, PAYMENTS_COLLECTION), where('userId', '==', userId), orderBy('date', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -174,17 +172,17 @@ export async function getUserPayments(userId: string): Promise<Payment[]> {
 
 
 // Support Ticket Functions
-export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
-    await addDoc(collection(clientDb, SUPPORT_TICKETS_COLLECTION), ticketData);
+export async function createSupportTicket(db: Firestore, ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
+    await addDoc(collection(db, SUPPORT_TICKETS_COLLECTION), ticketData);
 }
 
-export async function updateSupportTicket(ticketId: string, data: Partial<SupportTicket>): Promise<void> {
-    const docRef = doc(clientDb, SUPPORT_TICKETS_COLLECTION, ticketId);
+export async function updateSupportTicket(db: Firestore, ticketId: string, data: Partial<SupportTicket>): Promise<void> {
+    const docRef = doc(db, SUPPORT_TICKETS_COLLECTION, ticketId);
     await updateDoc(docRef, data);
 }
 
-export async function getSupportTickets(): Promise<SupportTicket[]> {
-  const q = query(collection(serverDb, SUPPORT_TICKETS_COLLECTION), orderBy("lastUpdated", "desc"));
+export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]> {
+  const q = query(collection(db, SUPPORT_TICKETS_COLLECTION), orderBy("lastUpdated", "desc"));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -202,8 +200,8 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
   });
 }
 
-export async function getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
-    const q = query(collection(clientDb, SUPPORT_TICKETS_COLLECTION), where('userId', '==', userId), orderBy('lastUpdated', 'desc'));
+export async function getUserSupportTickets(db: Firestore, userId: string): Promise<SupportTicket[]> {
+    const q = query(collection(db, SUPPORT_TICKETS_COLLECTION), where('userId', '==', userId), orderBy('lastUpdated', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -222,8 +220,8 @@ export async function getUserSupportTickets(userId: string): Promise<SupportTick
     });
 }
 
-export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
-    const docRef = doc(serverDb, SUPPORT_TICKETS_COLLECTION, id);
+export async function getSupportTicket(db: Firestore, id: string): Promise<SupportTicket | null> {
+    const docRef = doc(db, SUPPORT_TICKETS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
         return null;
@@ -245,9 +243,9 @@ export async function getSupportTicket(id: string): Promise<SupportTicket | null
 }
 
 // Branding Functions
-export async function getBrandingSettings(): Promise<BrandingSettings | null> {
+export async function getBrandingSettings(db: Firestore): Promise<BrandingSettings | null> {
     try {
-        const docRef = doc(serverDb, BRANDING_SETTINGS_COLLECTION, 'config');
+        const docRef = doc(db, BRANDING_SETTINGS_COLLECTION, 'config');
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             return null;
@@ -259,15 +257,15 @@ export async function getBrandingSettings(): Promise<BrandingSettings | null> {
     }
 }
 
-export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
-    const docRef = doc(clientDb, BRANDING_SETTINGS_COLLECTION, 'config');
+export async function updateBrandingSettings(db: Firestore, settings: BrandingSettings): Promise<void> {
+    const docRef = doc(db, BRANDING_SETTINGS_COLLECTION, 'config');
     await setDoc(docRef, settings, { merge: true });
 }
 
 // Landing Page Functions
-export async function getHeroSettings(): Promise<HeroSettings | null> {
+export async function getHeroSettings(db: Firestore): Promise<HeroSettings | null> {
     try {
-        const docRef = doc(serverDb, LANDING_PAGE_COLLECTION, 'hero');
+        const docRef = doc(db, LANDING_PAGE_COLLECTION, 'hero');
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             return null;
@@ -279,19 +277,19 @@ export async function getHeroSettings(): Promise<HeroSettings | null> {
     }
 }
 
-export async function updateHeroSettings(settings: HeroSettings): Promise<void> {
-    const docRef = doc(clientDb, LANDING_PAGE_COLLECTION, 'hero');
+export async function updateHeroSettings(db: Firestore, settings: HeroSettings): Promise<void> {
+    const docRef = doc(db, LANDING_PAGE_COLLECTION, 'hero');
     await setDoc(docRef, settings, { merge: true });
 }
 
 
 // Notification Functions
-export async function createNotification(notificationData: Omit<Notification, 'id'>): Promise<void> {
-    await addDoc(collection(serverDb, NOTIFICATIONS_COLLECTION), notificationData);
+export async function createNotification(db: Firestore, notificationData: Omit<Notification, 'id'>): Promise<void> {
+    await addDoc(collection(db, NOTIFICATIONS_COLLECTION), notificationData);
 }
 
-export async function getUserNotifications(userId: string): Promise<Notification[]> {
-    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+export async function getUserNotifications(db: Firestore, userId: string): Promise<Notification[]> {
+    const q = query(collection(db, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -308,8 +306,8 @@ export async function getUserNotifications(userId: string): Promise<Notification
     });
 }
 
-export async function getAllNotifications(): Promise<Notification[]> {
-    const q = query(collection(serverDb, NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
+export async function getAllNotifications(db: Firestore): Promise<Notification[]> {
+    const q = query(collection(db, NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -326,21 +324,21 @@ export async function getAllNotifications(): Promise<Notification[]> {
     });
 }
 
-export async function updateNotification(notificationId: string, data: Partial<Notification>): Promise<void> {
-    const docRef = doc(clientDb, NOTIFICATIONS_COLLECTION, notificationId);
+export async function updateNotification(db: Firestore, notificationId: string, data: Partial<Notification>): Promise<void> {
+    const docRef = doc(db, NOTIFICATIONS_COLLECTION, notificationId);
     await updateDoc(docRef, data);
 }
 
-export async function deleteNotification(notificationId: string): Promise<void> {
-    const docRef = doc(clientDb, NOTIFICATIONS_COLLECTION, notificationId);
+export async function deleteNotification(db: Firestore, notificationId: string): Promise<void> {
+    const docRef = doc(db, NOTIFICATIONS_COLLECTION, notificationId);
     await deleteDoc(docRef);
 }
 
-export async function deleteAllUserNotifications(userId: string): Promise<void> {
-    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId));
+export async function deleteAllUserNotifications(db: Firestore, userId: string): Promise<void> {
+    const q = query(collection(db, NOTIFICATIONS_COLLECTION), where('userId', '==', userId));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(clientDb);
+    const batch = writeBatch(db);
     snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
     });
@@ -348,11 +346,11 @@ export async function deleteAllUserNotifications(userId: string): Promise<void> 
     await batch.commit();
 }
 
-export async function markAllUserNotificationsAsRead(userId: string): Promise<void> {
-    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), where('isRead', '==', false));
+export async function markAllUserNotificationsAsRead(db: Firestore, userId: string): Promise<void> {
+    const q = query(collection(db, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), where('isRead', '==', false));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(clientDb);
+    const batch = writeBatch(db);
     snapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isRead: true });
     });
@@ -360,11 +358,11 @@ export async function markAllUserNotificationsAsRead(userId: string): Promise<vo
     await batch.commit();
 }
 
-export async function deleteAllNotifications(): Promise<void> {
-    const q = query(collection(serverDb, NOTIFICATIONS_COLLECTION));
+export async function deleteAllNotifications(db: Firestore, ): Promise<void> {
+    const q = query(collection(db, NOTIFICATIONS_COLLECTION));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(serverDb);
+    const batch = writeBatch(db);
     snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
     });
@@ -374,15 +372,15 @@ export async function deleteAllNotifications(): Promise<void> {
 
 
 // User Settings
-export async function getUserSettings(userId: string): Promise<UserSettings | null> {
-    const docRef = doc(serverDb, USERS_COLLECTION, userId);
+export async function getUserSettings(db: Firestore, userId: string): Promise<UserSettings | null> {
+    const docRef = doc(db, USERS_COLLECTION, userId);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;
     const data = docSnap.data();
     return data?.settings || null;
 }
 
-export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
-    const docRef = doc(clientDb, USERS_COLLECTION, userId);
+export async function updateUserSettings(db: Firestore, userId: string, settings: UserSettings): Promise<void> {
+    const docRef = doc(db, USERS_COLLECTION, userId);
     await updateDoc(docRef, { settings: settings });
 }

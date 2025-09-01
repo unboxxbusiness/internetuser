@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -7,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getPayments } from "@/lib/firebase/firestore";
+import { getPayments } from "@/lib/firebase/server-actions";
 import { PaymentTable } from "@/components/payment-table";
 
 export default async function AdminPaymentsPage() {

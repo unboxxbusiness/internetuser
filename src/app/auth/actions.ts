@@ -10,7 +10,9 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { createUser, getUser as getFirestoreUser } from "@/lib/firebase/firestore";
+import { createUser as createClientUser } from "@/lib/firebase/client-actions";
+import { getUser as getServerUser } from "@/lib/firebase/server-actions";
+
 
 export interface AppUser {
   uid: string;
@@ -42,7 +44,7 @@ export async function getUser(): Promise<AppUser | null> {
       sessionCookie,
       true
     );
-    const firestoreUser = await getFirestoreUser(decodedClaims.uid);
+    const firestoreUser = await getServerUser(decodedClaims.uid);
 
     if (!firestoreUser) {
         return null;
@@ -95,7 +97,7 @@ export async function login(
   } else {
     const user = await clientAuth.currentUser;
     if (user) {
-        const firestoreUser = await getFirestoreUser(user.uid);
+        const firestoreUser = await getServerUser(user.uid);
         const redirectTo = firestoreUser?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
         redirect(redirectTo);
     } else {
@@ -122,7 +124,7 @@ export async function signup(
     const { user } = userCredential;
 
     // Create a user document in Firestore
-    await createUser(user.uid, name, user.email || '', "user", user.photoURL || '');
+    await createClientUser(user.uid, name, user.email || '', "user", user.photoURL || '');
 
     const idToken = await user.getIdToken();
     await createSession(idToken);
