@@ -1,7 +1,10 @@
 <svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="800" height="600" fill="#f0f0f0"/>
-<circle cx="400" cy="300" r="150" fill="#3498db"/>
-<path d="M300 300 L500 300" stroke="white" stroke-width="10"/>
-<path d="M400 200 L400 400" stroke="white" stroke-width="10"/>
-<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="#ffffff">Placeholder Image</text>
+<rect width="800" height="600" fill="#0F172A"/>
+<circle cx="400" cy="300" r="150" fill="url(#paint0_linear_1_1)"/>
+<defs>
+<linearGradient id="paint0_linear_1_1" x1="400" y1="150" x2="400" y2="450" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3498DB"/>
+<stop offset="1" stop-color="#7CC6FE"/>
+</linearGradient>
+</defs>
 </svg>

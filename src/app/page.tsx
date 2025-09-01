@@ -52,7 +52,7 @@ export default async function LandingPage() {
               width={800}
               height={600}
               alt="Hero"
-              data-ai-hint="abstract illustration"
+              data-ai-hint="earth space"
               className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
             />
           </div>
