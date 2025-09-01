@@ -6,8 +6,8 @@ export function Footer({ branding }: { branding: BrandingSettings | null }) {
 
   return (
     <footer className="bg-card border-t py-6">
-      <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between">
-        <p className="text-center md:text-left text-sm text-muted-foreground">
+      <div className="container mx-auto px-4 md:px-6 flex items-center justify-center">
+        <p className="text-sm text-muted-foreground text-center">
           {footerText}
         </p>
       </div>
