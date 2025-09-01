@@ -73,7 +73,7 @@ export function PaymentTable({ payments }: { payments: Payment[] }) {
                       {payment.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                  <TableCell>₹{payment.amount.toFixed(2)}</TableCell>
                   <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

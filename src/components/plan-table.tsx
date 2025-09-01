@@ -57,7 +57,7 @@ export function PlanTable({ plans }: { plans: SubscriptionPlan[] }) {
               {plans.map((plan) => (
                 <TableRow key={plan.id}>
                   <TableCell className="font-medium">{plan.name}</TableCell>
-                  <TableCell>${plan.price.toFixed(2)}/mo</TableCell>
+                  <TableCell>₹{plan.price.toFixed(2)}/mo</TableCell>
                   <TableCell>{plan.speed} Mbps</TableCell>
                   <TableCell>{plan.dataLimit} GB</TableCell>
                   <TableCell className="text-right">

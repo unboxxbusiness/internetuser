@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
-import { Wifi, Gauge, PieChart, Download, AlertTriangle } from "lucide-react";
+import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee } from "lucide-react";
 import { getUserSubscription, getUserPayments } from "@/lib/firebase/firestore";
 import Link from "next/link";
 
@@ -91,10 +91,10 @@ export default async function UserDashboard() {
             <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Monthly Price</CardTitle>
-                <Wifi className="h-4 w-4 text-muted-foreground" />
+                <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">${subscription.price.toFixed(2)}</div>
+                <div className="text-2xl font-bold">₹{subscription.price.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">Auto-renews monthly</p>
             </CardContent>
             </Card>
@@ -142,7 +142,7 @@ export default async function UserDashboard() {
                         <TableRow key={payment.id}>
                         <TableCell className="font-medium">{payment.id.substring(0,8)}...</TableCell>
                         <TableCell>{payment.date.toLocaleDateString()}</TableCell>
-                        <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                        <TableCell>₹{payment.amount.toFixed(2)}</TableCell>
                         <TableCell>
                             <Badge
                             variant={

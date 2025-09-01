@@ -48,7 +48,7 @@ export default async function UserPlansPage() {
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <CardDescription>
                   <span className="text-3xl font-bold">
-                    ${plan.price.toFixed(2)}
+                    ₹{plan.price.toFixed(2)}
                   </span>
                   /month
                 </CardDescription>

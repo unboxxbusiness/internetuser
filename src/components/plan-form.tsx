@@ -35,13 +35,13 @@ export function PlanForm({ plan }: { plan?: SubscriptionPlan }) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="price">Price (USD per month)</Label>
+          <Label htmlFor="price">Price (INR per month)</Label>
           <Input
             id="price"
             name="price"
             type="number"
             step="0.01"
-            placeholder="e.g., 29.99"
+            placeholder="e.g., 499.00"
             defaultValue={plan?.price}
             required
           />

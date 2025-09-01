@@ -50,12 +50,12 @@ export function DownloadInvoiceButton({ payment, user }: { payment: Payment, use
               <tbody>
                 <tr>
                   <td>Subscription: ${payment.plan}</td>
-                  <td>$${payment.amount.toFixed(2)}</td>
+                  <td>₹${payment.amount.toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
             <div class="total">
-              Total: $${payment.amount.toFixed(2)}
+              Total: ₹${payment.amount.toFixed(2)}
             </div>
             <div class="footer">
               Thank you for your business!

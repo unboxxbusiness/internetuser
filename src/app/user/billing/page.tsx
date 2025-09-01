@@ -56,7 +56,7 @@ export default async function UserBillingPage() {
                   <TableRow key={payment.id}>
                     <TableCell className="font-medium">{payment.id.substring(0,8)}...</TableCell>
                     <TableCell>{payment.date.toLocaleDateString()}</TableCell>
-                    <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                    <TableCell>₹{payment.amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
