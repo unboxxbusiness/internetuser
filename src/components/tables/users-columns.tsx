@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 export const columns: ColumnDef<AppUser>[] = [
   {
     accessorKey: "name",
+    id: "email", // Set the column ID to 'email' for filtering
     header: ({ column }) => {
       return (
         <Button
