@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -28,6 +29,7 @@ const getStatusVariant = (status: "succeeded" | "failed" | "refunded") => {
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "customer",
+    id: "email", // Explicitly set the ID for filtering
     header: ({ column }) => {
       return (
         <Button
