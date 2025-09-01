@@ -13,26 +13,9 @@ const BRANDING_SETTINGS_COLLECTION = "branding";
 const NOTIFICATIONS_COLLECTION = "notifications";
 const LANDING_PAGE_COLLECTION = "landingPage";
 
-function getDb(useServer: boolean = false) {
-    // This function is a placeholder for a better solution
-    // to distinguish between server and client environments.
-    // For now, we assume server if headers() are available.
-    try {
-        // `headers()` is a Next.js function that only works in Server Components.
-        // If it runs, we are on the server. If it throws, we are on the client.
-        if (typeof window === 'undefined') {
-          return serverDb;
-        }
-        return clientDb;
-    } catch (error) {
-        return clientDb;
-    }
-}
-
-
 // User & Role Functions
 export async function createUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
-  await setDoc(doc(getDb(), USERS_COLLECTION, uid), {
+  await setDoc(doc(clientDb, USERS_COLLECTION, uid), {
     uid,
     name,
     email,
@@ -46,7 +29,7 @@ export async function createUser(uid: string, name:string, email: string, role: 
 }
 
 export async function getUser(uid: string): Promise<AppUser | null> {
-  const docRef = doc(getDb(), USERS_COLLECTION, uid);
+  const docRef = doc(serverDb, USERS_COLLECTION, uid);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) {
     return null;
@@ -64,13 +47,13 @@ export async function getUser(uid: string): Promise<AppUser | null> {
 }
 
 export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
-  const docRef = doc(getDb(), USERS_COLLECTION, uid);
+  const docRef = doc(clientDb, USERS_COLLECTION, uid);
   await updateDoc(docRef, data);
 }
 
 
 export async function getUsers(): Promise<AppUser[]> {
-  const q = query(collection(getDb(), USERS_COLLECTION));
+  const q = query(collection(serverDb, USERS_COLLECTION));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -86,7 +69,7 @@ export async function getUsers(): Promise<AppUser[]> {
 
 // Subscription Plan Functions
 export async function getPlans(): Promise<SubscriptionPlan[]> {
-  const q = query(collection(getDb(), PLANS_COLLECTION));
+  const q = query(collection(serverDb, PLANS_COLLECTION));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -101,7 +84,7 @@ export async function getPlans(): Promise<SubscriptionPlan[]> {
 }
 
 export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
-  const docRef = doc(getDb(), PLANS_COLLECTION, id);
+  const docRef = doc(serverDb, PLANS_COLlection, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) {
     return null;
@@ -120,7 +103,7 @@ export async function getPlan(id: string): Promise<SubscriptionPlan | null> {
 
 
 export async function getUserSubscription(userId: string): Promise<Subscription | null> {
-    const userDocRef = doc(getDb(), USERS_COLLECTION, userId);
+    const userDocRef = doc(serverDb, USERS_COLLECTION, userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists() || !userDoc.data()?.subscriptionPlanId) {
         return null;
@@ -146,14 +129,14 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
 }
 
 export async function updateUserSubscription(userId: string, planId: string): Promise<void> {
-    const docRef = doc(getDb(), USERS_COLLECTION, userId);
+    const docRef = doc(clientDb, USERS_COLLECTION, userId);
     await updateDoc(docRef, { subscriptionPlanId: planId });
 }
 
 
 // Payment Functions
 export async function getPayments(): Promise<Payment[]> {
-  const q = query(collection(getDb(), PAYMENTS_COLLECTION), orderBy("date", "desc"));
+  const q = query(collection(serverDb, PAYMENTS_COLLECTION), orderBy("date", "desc"));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -171,7 +154,7 @@ export async function getPayments(): Promise<Payment[]> {
 }
 
 export async function getUserPayments(userId: string): Promise<Payment[]> {
-    const q = query(collection(getDb(), PAYMENTS_COLLECTION), where('userId', '==', userId), orderBy('date', 'desc'));
+    const q = query(collection(serverDb, PAYMENTS_COLLECTION), where('userId', '==', userId), orderBy('date', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -192,16 +175,16 @@ export async function getUserPayments(userId: string): Promise<Payment[]> {
 
 // Support Ticket Functions
 export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
-    await addDoc(collection(getDb(), SUPPORT_TICKETS_COLLECTION), ticketData);
+    await addDoc(collection(clientDb, SUPPORT_TICKETS_COLLECTION), ticketData);
 }
 
 export async function updateSupportTicket(ticketId: string, data: Partial<SupportTicket>): Promise<void> {
-    const docRef = doc(getDb(), SUPPORT_TICKETS_COLLECTION, ticketId);
+    const docRef = doc(clientDb, SUPPORT_TICKETS_COLLECTION, ticketId);
     await updateDoc(docRef, data);
 }
 
 export async function getSupportTickets(): Promise<SupportTicket[]> {
-  const q = query(collection(getDb(), SUPPORT_TICKETS_COLLECTION), orderBy("lastUpdated", "desc"));
+  const q = query(collection(serverDb, SUPPORT_TICKETS_COLLECTION), orderBy("lastUpdated", "desc"));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -220,7 +203,7 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
 }
 
 export async function getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
-    const q = query(collection(getDb(), SUPPORT_TICKETS_COLLECTION), where('userId', '==', userId), orderBy('lastUpdated', 'desc'));
+    const q = query(collection(clientDb, SUPPORT_TICKETS_COLLECTION), where('userId', '==', userId), orderBy('lastUpdated', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -240,7 +223,7 @@ export async function getUserSupportTickets(userId: string): Promise<SupportTick
 }
 
 export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
-    const docRef = doc(getDb(), SUPPORT_TICKETS_COLLECTION, id);
+    const docRef = doc(serverDb, SUPPORT_TICKETS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
         return null;
@@ -264,7 +247,7 @@ export async function getSupportTicket(id: string): Promise<SupportTicket | null
 // Branding Functions
 export async function getBrandingSettings(): Promise<BrandingSettings | null> {
     try {
-        const docRef = doc(getDb(true), BRANDING_SETTINGS_COLLECTION, 'config');
+        const docRef = doc(serverDb, BRANDING_SETTINGS_COLLECTION, 'config');
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             return null;
@@ -277,14 +260,14 @@ export async function getBrandingSettings(): Promise<BrandingSettings | null> {
 }
 
 export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
-    const docRef = doc(getDb(), BRANDING_SETTINGS_COLLECTION, 'config');
+    const docRef = doc(clientDb, BRANDING_SETTINGS_COLLECTION, 'config');
     await setDoc(docRef, settings, { merge: true });
 }
 
 // Landing Page Functions
 export async function getHeroSettings(): Promise<HeroSettings | null> {
     try {
-        const docRef = doc(getDb(true), LANDING_PAGE_COLLECTION, 'hero');
+        const docRef = doc(serverDb, LANDING_PAGE_COLLECTION, 'hero');
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             return null;
@@ -297,18 +280,18 @@ export async function getHeroSettings(): Promise<HeroSettings | null> {
 }
 
 export async function updateHeroSettings(settings: HeroSettings): Promise<void> {
-    const docRef = doc(getDb(), LANDING_PAGE_COLLECTION, 'hero');
+    const docRef = doc(clientDb, LANDING_PAGE_COLLECTION, 'hero');
     await setDoc(docRef, settings, { merge: true });
 }
 
 
 // Notification Functions
 export async function createNotification(notificationData: Omit<Notification, 'id'>): Promise<void> {
-    await addDoc(collection(getDb(), NOTIFICATIONS_COLLECTION), notificationData);
+    await addDoc(collection(serverDb, NOTIFICATIONS_COLLECTION), notificationData);
 }
 
 export async function getUserNotifications(userId: string): Promise<Notification[]> {
-    const q = query(collection(getDb(), NOTIFICATIONS_COLLECTION), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -326,7 +309,7 @@ export async function getUserNotifications(userId: string): Promise<Notification
 }
 
 export async function getAllNotifications(): Promise<Notification[]> {
-    const q = query(collection(getDb(), NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
+    const q = query(collection(serverDb, NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -344,20 +327,20 @@ export async function getAllNotifications(): Promise<Notification[]> {
 }
 
 export async function updateNotification(notificationId: string, data: Partial<Notification>): Promise<void> {
-    const docRef = doc(getDb(), NOTIFICATIONS_COLLECTION, notificationId);
+    const docRef = doc(clientDb, NOTIFICATIONS_COLLECTION, notificationId);
     await updateDoc(docRef, data);
 }
 
 export async function deleteNotification(notificationId: string): Promise<void> {
-    const docRef = doc(getDb(), NOTIFICATIONS_COLLECTION, notificationId);
+    const docRef = doc(clientDb, NOTIFICATIONS_COLLECTION, notificationId);
     await deleteDoc(docRef);
 }
 
 export async function deleteAllUserNotifications(userId: string): Promise<void> {
-    const q = query(collection(getDb(), NOTIFICATIONS_COLLECTION), where('userId', '==', userId));
+    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(getDb());
+    const batch = writeBatch(clientDb);
     snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
     });
@@ -366,10 +349,10 @@ export async function deleteAllUserNotifications(userId: string): Promise<void> 
 }
 
 export async function markAllUserNotificationsAsRead(userId: string): Promise<void> {
-    const q = query(collection(getDb(), NOTIFICATIONS_COLLECTION), where('userId', '==', userId), where('isRead', '==', false));
+    const q = query(collection(clientDb, NOTIFICATIONS_COLLECTION), where('userId', '==', userId), where('isRead', '==', false));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(getDb());
+    const batch = writeBatch(clientDb);
     snapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isRead: true });
     });
@@ -378,10 +361,10 @@ export async function markAllUserNotificationsAsRead(userId: string): Promise<vo
 }
 
 export async function deleteAllNotifications(): Promise<void> {
-    const q = query(collection(getDb(), NOTIFICATIONS_COLLECTION));
+    const q = query(collection(serverDb, NOTIFICATIONS_COLLECTION));
     const snapshot = await getDocs(q);
     
-    const batch = writeBatch(getDb());
+    const batch = writeBatch(serverDb);
     snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
     });
@@ -392,7 +375,7 @@ export async function deleteAllNotifications(): Promise<void> {
 
 // User Settings
 export async function getUserSettings(userId: string): Promise<UserSettings | null> {
-    const docRef = doc(getDb(), USERS_COLLECTION, userId);
+    const docRef = doc(serverDb, USERS_COLLECTION, userId);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;
     const data = docSnap.data();
@@ -400,6 +383,6 @@ export async function getUserSettings(userId: string): Promise<UserSettings | nu
 }
 
 export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
-    const docRef = doc(getDb(), USERS_COLLECTION, userId);
+    const docRef = doc(clientDb, USERS_COLLECTION, userId);
     await updateDoc(docRef, { settings: settings });
 }
