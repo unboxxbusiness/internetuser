@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Header } from "@/components/header";
 import { getUser } from "./auth/actions";
 import { Footer } from "@/components/footer";
 import { AdminSidebar } from "@/components/admin-sidebar";
@@ -46,7 +45,6 @@ export default async function RootLayout({
               </>
             )}
             <div className="flex-1 flex flex-col">
-              <Header user={user} branding={branding}/>
               <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
               <Footer branding={branding} />
             </div>
