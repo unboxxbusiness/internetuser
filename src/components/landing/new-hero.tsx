@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Network } from 'lucide-react'
 import Image from "next/image"
 
 const menuItems = [
@@ -104,26 +104,9 @@ export const HeroSection = () => {
                         </div>
                     </div>
 
-                    <div className="mx-auto -mt-16 max-w-7xl [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
-                        <div className="[perspective:1200px] [mask-image:linear-gradient(to_right,black_50%,transparent_100%)] -mr-16 pl-16 lg:-mr-56 lg:pl-56">
-                            <div className="[transform:rotateX(20deg);]">
-                                <div className="lg:h-[44rem] relative skew-x-[.36rad]">
-                                    <Image
-                                        className="rounded-[--radius] z-[2] relative border dark:hidden"
-                                        src="https://tailark.com/_next/image?url=%2Fcard.png&w=3840&q=75"
-                                        alt="Tailark hero section"
-                                        width={2880}
-                                        height={2074}
-                                    />
-                                    <Image
-                                        className="rounded-[--radius] z-[2] relative hidden border dark:block"
-                                        src="https://tailark.com/_next/image?url=%2Fdark-card.webp&w=3840&q=75"
-                                        alt="Tailark hero section"
-                                        width={2880}
-                                        height={2074}
-                                    />
-                                </div>
-                            </div>
+                    <div className="mx-auto -mt-16 flex max-w-7xl items-center justify-center">
+                        <div className="rounded-full bg-muted/50 p-16">
+                            <Network className="h-64 w-64 text-primary" />
                         </div>
                     </div>
                 </section>
