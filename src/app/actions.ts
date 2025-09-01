@@ -24,6 +24,7 @@ import {
     archiveNotification as archiveNotificationServer,
     archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
     addTicketMessage,
+    createUser,
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, SupportTicket, UserSettings } from "@/lib/types";
@@ -544,4 +545,67 @@ export async function deleteAllNotificationsAction() {
         console.error("Error deleting all notifications:", error);
         return { error: "Failed to delete all notifications." };
     }
+}
+
+interface NewUser {
+    name: string;
+    email: string;
+    password?: string;
+}
+
+interface BulkCreateResult {
+    successCount: number;
+    errorCount: number;
+    errors: { email: string; reason: string }[];
+}
+
+
+export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreateResult> {
+    const adminUser = await getUser();
+    if (!adminUser || adminUser.role !== 'admin') {
+        return {
+            successCount: 0,
+            errorCount: users.length,
+            errors: users.map(u => ({ email: u.email, reason: 'Permission denied.' }))
+        };
+    }
+
+    const results: BulkCreateResult = {
+        successCount: 0,
+        errorCount: 0,
+        errors: [],
+    };
+
+    for (const user of users) {
+        try {
+            if (!user.email || !user.name) {
+                throw new Error("Missing email or name");
+            }
+            // Generate a random password if not provided
+            const password = user.password || randomBytes(8).toString('hex');
+            
+            // 1. Create Firebase Auth user
+            const userRecord = await adminAuth.createUser({
+                email: user.email,
+                password: password,
+                displayName: user.name,
+            });
+
+            // 2. Create Firestore user document
+            await createUser(userRecord.uid, user.name, user.email, "user");
+            
+            results.successCount++;
+
+        } catch (error: any) {
+            results.errorCount++;
+            results.errors.push({ email: user.email, reason: error.message || "Unknown error" });
+            console.error(`Failed to import user ${user.email}:`, error);
+        }
+    }
+
+    if (results.successCount > 0) {
+        revalidatePath("/admin/users");
+    }
+
+    return results;
 }

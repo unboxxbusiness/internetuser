@@ -15,6 +15,7 @@ import {
     getAllNotifications as getAllNotificationsFirestore,
     getUserSettings as getUserSettingsFirestore,
     getUser as getUserFirestore,
+    createUser as createUserFirestore,
     createNotification as createNotificationFirestore,
     updateSupportTicket as updateSupportTicketFirestore,
     deleteAllNotifications as deleteAllNotificationsFirestore,
@@ -43,6 +44,10 @@ export async function getUsers(): Promise<AppUser[]> {
 
 export async function getUser(uid: string): Promise<AppUser | null> {
     return getUserFirestore(db, uid);
+}
+
+export async function createUser(uid: string, name: string, email: string, role: string, photoURL?: string): Promise<void> {
+    return createUserFirestore(db, uid, name, email, role, photoURL);
 }
 
 export async function getPlans(): Promise<SubscriptionPlan[]> {
