@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -9,15 +10,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUser } from "@/app/auth/actions";
 import { NotificationForm } from "@/components/notification-form";
-import { AlertCircle, Terminal } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
+import { getAllNotifications } from "@/lib/firebase/firestore";
+import { NotificationHistory } from "@/components/notification-history";
 
 export default async function AdminNotificationsPage() {
   const user = await getUser();
   if (!user || user.role !== "admin") {
     redirect("/auth/login");
   }
+
+  const allNotifications = await getAllNotifications();
 
   return (
     <div className="flex-1 space-y-4">
@@ -74,13 +78,11 @@ export default async function AdminNotificationsPage() {
                 <CardHeader>
                 <CardTitle>Notification History</CardTitle>
                 <CardDescription>
-                    A log of all sent notifications would be displayed here.
+                    A log of all sent notifications to all users.
                 </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground h-64">
-                    <Terminal className="w-16 h-16 mb-4" />
-                    <p className="text-lg font-medium">No notification history yet.</p>
-                    <p className="text-sm">Once notifications are sent, they will appear here.</p>
+                <CardContent>
+                    <NotificationHistory notifications={allNotifications} />
                 </CardContent>
             </Card>
         </TabsContent>

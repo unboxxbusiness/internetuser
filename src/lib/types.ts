@@ -40,6 +40,12 @@ export interface BrandingSettings {
     footerText: string;
 }
 
+export interface HeroSettings {
+    heading: string;
+    subheading: string;
+    ctaText: string;
+}
+
 export interface Subscription {
     planId: string;
     planName: string;

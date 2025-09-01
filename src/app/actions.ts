@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
-import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan, getUsers, createNotification, getSupportTicket } from "@/lib/firebase/firestore";
-import { BrandingSettings } from "@/lib/types";
+import { updateUser, updateBrandingSettings, createSupportTicket, updateUserSubscription, updateUserSettings, updateSupportTicket, getPlan, getUsers, createNotification, getSupportTicket, updateHeroSettings, deleteAllUserNotifications, markAllUserNotificationsAsRead, deleteNotification, updateNotification, deleteAllNotifications } from "@/lib/firebase/firestore";
+import { BrandingSettings, HeroSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
 
@@ -114,6 +114,7 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
         );
         await Promise.all(notificationPromises);
         
+        revalidatePath('/admin/notifications');
         return { message: `Notification has been successfully sent to ${users.length} users.` };
 
     } catch (error) {
@@ -173,6 +174,28 @@ export async function updateBrandingAction(prevState: any, formData: FormData): 
         return { error: 'Failed to update branding settings.' };
     }
 }
+
+export async function updateHeroAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const heading = formData.get('heading') as string;
+    const subheading = formData.get('subheading') as string;
+    const ctaText = formData.get('ctaText') as string;
+
+    const settings: HeroSettings = {
+        heading,
+        subheading,
+        ctaText,
+    };
+
+    try {
+        await updateHeroSettings(settings);
+        revalidatePath('/');
+        return { message: 'Landing page content updated successfully.' };
+    } catch (error) {
+        console.error('Error updating hero settings:', error);
+        return { error: 'Failed to update landing page content.' };
+    }
+}
+
 
 export async function createSupportTicketAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const user = await getUser();
@@ -334,4 +357,62 @@ export async function createPayUTransactionAction(planId: string) {
     hash: hash,
     payu_url: "https://sandboxsecure.payu.in/_payment", // Sandbox URL, change for production
   };
+}
+
+export async function markNotificationAsReadAction(notificationId: string) {
+    try {
+        await updateNotification(notificationId, { isRead: true });
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        return { error: "Failed to mark notification as read." };
+    }
+}
+
+export async function markAllNotificationsAsReadAction() {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
+    try {
+        await markAllUserNotificationsAsRead(user.uid);
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        return { error: "Failed to mark all notifications as read." };
+    }
+}
+
+export async function deleteNotificationAction(notificationId: string) {
+    try {
+        await deleteNotification(notificationId);
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error deleting notification:", error);
+        return { error: "Failed to delete notification." };
+    }
+}
+
+export async function deleteAllUserNotificationsAction() {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
+    try {
+        await deleteAllUserNotifications(user.uid);
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error deleting all notifications:", error);
+        return { error: "Failed to delete all notifications." };
+    }
+}
+
+export async function deleteAllNotificationsAction() {
+     const user = await getUser();
+    if (!user || user.role !== 'admin') {
+      return { error: "You do not have permission to perform this action." };
+    }
+    try {
+        await deleteAllNotifications();
+        revalidatePath('/admin/notifications');
+    } catch (error) {
+        console.error("Error deleting all notifications:", error);
+        return { error: "Failed to delete all notifications." };
+    }
 }

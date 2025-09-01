@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
 import { getUserNotifications } from "@/lib/firebase/firestore";
@@ -9,9 +12,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, CheckCircle, DollarSign, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, MailCheck, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
+import { AppUser } from "@/app/auth/actions";
+import { 
+    markNotificationAsReadAction, 
+    markAllNotificationsAsReadAction, 
+    deleteNotificationAction, 
+    deleteAllUserNotificationsAction 
+} from "@/app/actions";
 
 function getNotificationIcon(type: NotificationType['type']) {
     switch (type) {
@@ -30,37 +41,75 @@ function getNotificationIcon(type: NotificationType['type']) {
 function timeAgo(date: Date): string {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
   let interval = seconds / 31536000;
-  if (interval > 1) {
-    return Math.floor(interval) + " years ago";
-  }
+  if (interval > 1) return Math.floor(interval) + " years ago";
   interval = seconds / 2592000;
-  if (interval > 1) {
-    return Math.floor(interval) + " months ago";
-  }
+  if (interval > 1) return Math.floor(interval) + " months ago";
   interval = seconds / 86400;
-  if (interval > 1) {
-    return Math.floor(interval) + " days ago";
-  }
+  if (interval > 1) return Math.floor(interval) + " days ago";
   interval = seconds / 3600;
-  if (interval > 1) {
-    return Math.floor(interval) + " hours ago";
-  }
+  if (interval > 1) return Math.floor(interval) + " hours ago";
   interval = seconds / 60;
-  if (interval > 1) {
-    return Math.floor(interval) + " minutes ago";
-  }
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
   return Math.floor(seconds) + " seconds ago";
 }
 
+export default function UserNotificationsPage() {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
-export default async function UserNotificationsPage() {
-  const user = await getUser();
-  if (!user) {
-    redirect("/auth/login");
+  useEffect(() => {
+    async function fetchData() {
+      const currentUser = await getUser();
+      if (!currentUser) {
+        redirect("/auth/login");
+      }
+      setUser(currentUser);
+      const userNotifications = await getUserNotifications(currentUser.uid);
+      setNotifications(userNotifications);
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
+  
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleMarkAsRead = (id: string) => {
+    startTransition(async () => {
+      await markNotificationAsReadAction(id);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+    });
+  };
+  
+  const handleDelete = (id: string) => {
+      startTransition(async () => {
+          await deleteNotificationAction(id);
+          setNotifications(notifications.filter(n => n.id !== id));
+      });
+  };
+
+  const handleMarkAllAsRead = () => {
+      startTransition(async () => {
+          await markAllNotificationsAsReadAction();
+          setNotifications(notifications.map(n => ({...n, isRead: true })));
+      });
+  };
+
+  const handleDeleteAll = () => {
+      if (confirm("Are you sure you want to delete all notifications?")) {
+        startTransition(async () => {
+            await deleteAllUserNotificationsAction();
+            setNotifications([]);
+        });
+      }
+  };
+
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin" /></div>;
   }
-
-  const notifications = await getUserNotifications(user.uid);
-
+  
   return (
     <div className="space-y-6">
       <div>
@@ -71,10 +120,22 @@ export default async function UserNotificationsPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Recent Notifications</CardTitle>
-          <CardDescription>
-            You have {notifications.length} unread notifications.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+              <div>
+                  <CardTitle>Recent Notifications</CardTitle>
+                  <CardDescription>
+                    You have {unreadCount} unread notifications.
+                  </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={isPending || unreadCount === 0}>
+                    <MailCheck className="mr-2 h-4 w-4" /> Mark all as read
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleDeleteAll} disabled={isPending || notifications.length === 0}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Clear all
+                </Button>
+              </div>
+          </div>
         </CardHeader>
         <CardContent>
           {notifications.length > 0 ? (
@@ -83,8 +144,8 @@ export default async function UserNotificationsPage() {
                 <div
                   key={notification.id}
                   className={cn(
-                    "flex items-start gap-4 p-4 rounded-lg border",
-                    !notification.isRead && "bg-muted/50"
+                    "flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50",
+                    !notification.isRead && "bg-muted/40"
                   )}
                 >
                   <div className="mt-1">
@@ -92,7 +153,7 @@ export default async function UserNotificationsPage() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium leading-none">
+                        <p className={cn("text-sm font-medium leading-none", !notification.isRead && "font-bold")}>
                             {notification.title}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -103,6 +164,16 @@ export default async function UserNotificationsPage() {
                       {notification.message}
                     </p>
                   </div>
+                   <div className="flex items-center gap-2">
+                    {!notification.isRead && (
+                        <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notification.id)} disabled={isPending} title="Mark as read">
+                           <Check className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(notification.id)} disabled={isPending} title="Delete notification">
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                   </div>
                 </div>
               ))}
             </div>
