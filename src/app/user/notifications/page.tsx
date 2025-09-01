@@ -4,7 +4,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { redirect } from "next/navigation";
 import { getUser, AppUser } from "@/app/auth/actions";
-import { getUserNotifications } from "@/lib/firebase/client-actions";
+import { getUserNotifications as getUserNotificationsServer } from "@/lib/firebase/server-actions";
 import {
     markNotificationAsReadAction,
     deleteNotificationAction,
@@ -60,7 +60,7 @@ export default function UserNotificationsPage() {
   const [isPending, startTransition] = useTransition();
 
   const fetchNotifications = async (uid: string) => {
-      const userNotifications = await getUserNotifications(uid);
+      const userNotifications = await getUserNotificationsServer(uid);
       setNotifications(userNotifications);
   }
 
@@ -196,5 +196,3 @@ export default function UserNotificationsPage() {
     </div>
   );
 }
-
-    

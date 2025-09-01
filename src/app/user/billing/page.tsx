@@ -1,6 +1,4 @@
 
-"use client";
-
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -18,31 +16,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getUser, AppUser } from "@/app/auth/actions";
-import { getUserPayments } from "@/lib/firebase/client-actions";
+import { getUser } from "@/app/auth/actions";
+import { getUserPayments } from "@/lib/firebase/server-actions";
 import { DownloadInvoiceButton } from "@/components/download-invoice-button";
-import { useEffect, useState } from "react";
 import { Payment } from "@/lib/types";
-import { Loader2 } from "lucide-react";
 
-export default function UserBillingPage() {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [paymentHistory, setPaymentHistory] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function UserBillingPage() {
+  const user = await getUser();
+  if (!user || user.role !== "user") {
+    redirect("/auth/login");
+  }
 
-  useEffect(() => {
-    async function fetchData() {
-      const currentUser = await getUser();
-      if (!currentUser || currentUser.role !== "user") {
-        redirect("/auth/login");
-      }
-      setUser(currentUser);
-      const payments = await getUserPayments(currentUser.uid);
-      setPaymentHistory(payments);
-      setIsLoading(false);
-    }
-    fetchData();
-  }, []);
+  const paymentHistory: Payment[] = await getUserPayments(user.uid);
 
   return (
     <div className="space-y-6">
@@ -56,9 +41,7 @@ export default function UserBillingPage() {
           <CardDescription>A complete record of your payments.</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin" /></div>
-          ) : paymentHistory.length > 0 ? (
+          {paymentHistory.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>

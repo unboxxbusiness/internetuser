@@ -1,6 +1,4 @@
 
-"use client";
-
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -11,31 +9,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlusCircle, Loader2 } from "lucide-react";
-import { getUser, AppUser } from "@/app/auth/actions";
-import { getUserSupportTickets } from "@/lib/firebase/client-actions";
+import { PlusCircle } from "lucide-react";
+import { getUser } from "@/app/auth/actions";
+import { getUserSupportTickets } from "@/lib/firebase/server-actions";
 import { UserSupportTicketTable } from "@/components/user-support-ticket-table";
-import { useEffect, useState } from "react";
 import { SupportTicket } from "@/lib/types";
 
-export default function UserSupportPage() {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      const currentUser = await getUser();
-      if (!currentUser) {
-        redirect("/auth/login");
-      }
-      setUser(currentUser);
-      const userTickets = await getUserSupportTickets(currentUser.uid);
-      setTickets(userTickets);
-      setIsLoading(false);
-    }
-    fetchData();
-  }, []);
+export default async function UserSupportPage() {
+  const user = await getUser();
+  if (!user) {
+    redirect("/auth/login");
+  }
+  
+  const tickets: SupportTicket[] = await getUserSupportTickets(user.uid);
 
   return (
     <div className="space-y-6">
@@ -59,11 +45,7 @@ export default function UserSupportPage() {
           <CardDescription>A list of your past and current support tickets.</CardDescription>
         </CardHeader>
         <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin" /></div>
-            ) : (
-              <UserSupportTicketTable tickets={tickets} />
-            )}
+            <UserSupportTicketTable tickets={tickets} />
         </CardContent>
       </Card>
     </div>
