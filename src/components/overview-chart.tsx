@@ -1,30 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-export function OverviewChart() {
-  const [data, setData] = useState<any[]>([]);
+interface OverviewChartProps {
+  data: { name: string; total: number }[];
+}
 
-  useEffect(() => {
-    // Generate random data on the client side to avoid hydration mismatch
-    const graphData = [
-      { name: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Apr", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Aug", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-      { name: "Dec", total: Math.floor(Math.random() * 5000) + 1000 },
-    ];
-    setData(graphData);
-  }, []);
-
+export function OverviewChart({ data }: OverviewChartProps) {
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>

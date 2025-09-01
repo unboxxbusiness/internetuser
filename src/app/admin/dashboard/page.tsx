@@ -7,11 +7,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getUser } from "@/app/auth/actions";
-import { getUsers } from "@/lib/firebase/firestore";
+import { getPayments, getUsers } from "@/lib/firebase/firestore";
 import { RecentSales } from "@/components/recent-sales";
 import { OverviewChart } from "@/components/overview-chart";
 import { AppUser } from "@/app/auth/actions";
 import { IndianRupee, Users, CreditCard, Activity } from "lucide-react";
+import { Payment } from "@/lib/types";
 
 export default async function AdminDashboardPage() {
   const user = await getUser();
@@ -19,12 +20,32 @@ export default async function AdminDashboardPage() {
     redirect("/auth/login");
   }
 
-  const users: AppUser[] = await getUsers();
+  const [users, payments]: [AppUser[], Payment[]] = await Promise.all([
+    getUsers(),
+    getPayments(),
+  ]);
+  
   const totalCustomers = users.length;
-  // Dummy data for now - these would be derived from user properties
-  const activeSubscriptions = users.length; 
-  const pendingPayments = 0;
-  const monthlyRevenue = 0;
+  const activeSubscriptions = users.filter(u => u.role !== 'admin').length; // A proxy for active subscriptions
+  const pendingPayments = 0; // Placeholder
+
+  // Calculate monthly revenue for the chart
+  const monthlyRevenueData = Array(12).fill(0).map((_, i) => {
+    const monthName = new Date(0, i).toLocaleString('default', { month: 'short' });
+    return { name: monthName, total: 0 };
+  });
+
+  payments.forEach(payment => {
+      if (payment.status === 'succeeded') {
+        const month = new Date(payment.date).getMonth();
+        monthlyRevenueData[month].total += payment.amount;
+      }
+  });
+
+  // Calculate total revenue for the current month for the card
+  const currentMonth = new Date().getMonth();
+  const currentMonthRevenue = monthlyRevenueData[currentMonth].total;
+
 
   return (
     <div className="flex-1 space-y-4">
@@ -36,20 +57,20 @@ export default async function AdminDashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Revenue
+                  Total Revenue (This Month)
                 </CardTitle>
                 <IndianRupee className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   ₹
-                  {monthlyRevenue.toLocaleString("en-IN", {
+                  {currentMonthRevenue.toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  total monthly recurring revenue
+                  revenue for the current month
                 </p>
               </CardContent>
             </Card>
@@ -108,14 +129,14 @@ export default async function AdminDashboardPage() {
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="pl-2">
-                <OverviewChart />
+                <OverviewChart data={monthlyRevenueData} />
               </CardContent>
             </Card>
             <Card className="col-span-4 md:col-span-3">
               <CardHeader>
                 <CardTitle>Recent Signups</CardTitle>
                 <CardDescription>
-                  {users.length} users joined this month.
+                  {users.length} total users have joined.
                 </CardDescription>
               </CardHeader>
               <CardContent>
