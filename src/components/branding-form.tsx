@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ function SubmitButton() {
   );
 }
 export function BrandingForm({ brandingSettings }: { brandingSettings: BrandingSettings | null }) {
-  const [state, formAction] = useActionState(updateBrandingAction, undefined);
+  const [state, formAction] = useFormState(updateBrandingAction, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentIcon, setCurrentIcon] = useState(brandingSettings?.icon || "Wifi");
 

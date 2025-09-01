@@ -1,8 +1,7 @@
-
 "use client";
 
-import { useActionState, useEffect, useState, useRef } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useState, useRef } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +20,7 @@ function SubmitButton() {
 
 export function PasswordForm() {
     const [showPassword, setShowPassword] = useState(false);
-    const [state, formAction] = useActionState(changeUserPasswordAction, undefined);
+    const [state, formAction] = useFormState(changeUserPasswordAction, undefined);
     const [showSuccess, setShowSuccess] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
 

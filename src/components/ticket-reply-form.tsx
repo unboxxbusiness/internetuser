@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useRef, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import {
   Card,
   CardContent,
@@ -27,7 +27,7 @@ function SubmitButton() {
 
 export function TicketReplyForm({ ticketId }: { ticketId: string }) {
   const action = replyToSupportTicketAction.bind(null, ticketId);
-  const [state, formAction] = useActionState(action, undefined);
+  const [state, formAction] = useFormState(action, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 

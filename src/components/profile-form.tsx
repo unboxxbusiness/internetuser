@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ function SubmitButton() {
 }
 
 export function ProfileForm({ user }: { user: AppUser }) {
-  const [state, formAction] = useActionState(updateUserProfileAction, undefined);
+  const [state, formAction] = useFormState(updateUserProfileAction, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {

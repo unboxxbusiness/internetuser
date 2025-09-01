@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -20,7 +20,7 @@ function SubmitButton() {
   );
 }
 export function BillingPreferencesForm({ settings }: { settings: UserSettings | null }) {
-  const [state, formAction] = useActionState(updateUserPreferencesAction, undefined);
+  const [state, formAction] = useFormState(updateUserPreferencesAction, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {

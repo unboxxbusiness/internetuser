@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +26,7 @@ function SubmitButton() {
 }
 
 export function NewTicketForm() {
-  const [state, formAction] = useActionState(createSupportTicketAction, undefined);
+  const [state, formAction] = useFormState(createSupportTicketAction, undefined);
 
   return (
     <form action={formAction} className="space-y-6">
