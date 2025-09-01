@@ -31,8 +31,7 @@
     "@radix-ui/react-collapsible": "^1.1.0",
     "next-themes": "^0.3.0",
     "@radix-ui/react-switch": "^1.1.0",
-    "js-sha512": "^0.8.0",
-    "@tabler/icons-react": "^3.6.0"
+    "js-sha512": "^0.8.0"
   },
   "devDependencies": {
     "typescript": "^5",
