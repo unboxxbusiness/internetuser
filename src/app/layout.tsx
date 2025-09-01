@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { getUser } from "./auth/actions";
 import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { UserSidebar } from "@/components/user-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -39,15 +40,21 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex min-h-screen">
-            {user && (
+            {user ? (
               <>
                 {user.role === 'admin' ? <AdminSidebar user={user} branding={branding} /> : <UserSidebar user={user} branding={branding} />}
+                <div className="flex-1 flex flex-col">
+                  <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
+                  <Footer branding={branding} />
+                </div>
               </>
+            ) : (
+               <div className="flex-1 flex flex-col">
+                  <Header user={user} branding={branding} />
+                  <main className="flex-1">{children}</main>
+                  <Footer branding={branding} />
+               </div>
             )}
-            <div className="flex-1 flex flex-col">
-              <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
-              <Footer branding={branding} />
-            </div>
           </div>
         </ThemeProvider>
       </body>

@@ -28,7 +28,6 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Menu, MenuItem, HoveredLink } from "./ui/hover-menu";
 
 interface HeaderProps {
   user: AppUser | null;
@@ -41,7 +40,6 @@ export function Header({ user, branding }: HeaderProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [active, setActive] = useState<string | null>(null);
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -53,39 +51,34 @@ export function Header({ user, branding }: HeaderProps) {
       .toUpperCase();
   };
 
+  const navLinks = [
+    { href: "/user/plans", label: "Plans" },
+    { href: "#features", label: "Features" },
+    { href: "/user/support", label: "Support" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex items-center justify-between p-4">
-        <Link href="/" className="flex items-center gap-3">
+      <div className="container mx-auto flex h-16 items-center justify-between p-4">
+        <Link href="/" className="flex items-center gap-2">
           <DynamicIcon
             iconName={branding?.icon || "Wifi"}
-            className="h-8 w-8 text-primary"
+            className="h-6 w-6 text-primary"
           />
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight">
             {branding?.brandName || "Gc Fiber Net"}
           </h2>
         </Link>
         
-        {isDesktop ? (
-            <Menu setActive={setActive}>
-                <div className="flex items-center space-x-4">
-                    <MenuItem setActive={setActive} active={active} item="Plans">
-                        <div className="flex flex-col space-y-4 text-sm">
-                            <HoveredLink href="/user/plans">All Plans</HoveredLink>
-                            <HoveredLink href="/user/plans">Residential</HoveredLink>
-                            <HoveredLink href="/user/plans">Business</HoveredLink>
-                        </div>
-                    </MenuItem>
-                    <MenuItem setActive={setActive} active={active} item="Support">
-                        <div className="flex flex-col space-y-4 text-sm">
-                            <HoveredLink href="/user/support">My Tickets</HoveredLink>
-                            <HoveredLink href="/user/support/new">Create Ticket</HoveredLink>
-                            <HoveredLink href="#">FAQ</HoveredLink>
-                        </div>
-                    </MenuItem>
-                </div>
-            </Menu>
-        ) : null}
+        {isDesktop && (
+            <nav className="hidden md:flex gap-6 text-sm font-medium">
+                {navLinks.map(link => (
+                    <Link key={link.href} href={link.href} className="text-muted-foreground transition-colors hover:text-foreground">
+                        {link.label}
+                    </Link>
+                ))}
+            </nav>
+        )}
 
 
         <div className="flex items-center gap-2">
@@ -135,13 +128,13 @@ export function Header({ user, branding }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
+            <>
                 <div className="hidden md:flex items-center gap-2">
-                    <Button asChild className="font-bold tracking-wide" size="sm">
-                        <Link href="/auth/signup">Sign Up</Link>
-                    </Button>
-                    <Button asChild variant="secondary" className="font-bold tracking-wide bg-slate-200 text-slate-800 hover:bg-slate-300" size="sm">
+                    <Button asChild variant="ghost" size="sm">
                         <Link href="/auth/login">Log In</Link>
+                    </Button>
+                    <Button asChild size="sm">
+                        <Link href="/auth/signup">Sign Up</Link>
                     </Button>
                 </div>
                 <Collapsible asChild open={isOpen} onOpenChange={setIsOpen} className="md:hidden">
@@ -153,18 +146,24 @@ export function Header({ user, branding }: HeaderProps) {
                             </Button>
                         </CollapsibleTrigger>
                         <CollapsibleContent asChild>
-                            <div className="absolute top-full right-4 mt-2 w-48 bg-background border rounded-md shadow-lg p-2 flex flex-col gap-2">
-                                <Button asChild className="font-bold tracking-wide w-full" size="sm">
-                                    <Link href="/auth/signup">Sign Up</Link>
+                            <div className="absolute top-full right-4 mt-2 w-48 bg-background border rounded-md shadow-lg p-2 flex flex-col gap-1">
+                                {navLinks.map(link => (
+                                    <Button key={link.href} asChild variant="ghost" className="justify-start">
+                                        <Link href={link.href} onClick={() => setIsOpen(false)}>{link.label}</Link>
+                                    </Button>
+                                ))}
+                                <DropdownMenuSeparator />
+                                <Button asChild variant="ghost" className="justify-start">
+                                    <Link href="/auth/login" onClick={() => setIsOpen(false)}>Log In</Link>
                                 </Button>
-                                <Button asChild variant="secondary" className="font-bold tracking-wide w-full bg-slate-200 text-slate-800 hover:bg-slate-300" size="sm">
-                                    <Link href="/auth/login">Log In</Link>
+                                <Button asChild >
+                                    <Link href="/auth/signup" onClick={() => setIsOpen(false)}>Sign Up</Link>
                                 </Button>
                             </div>
                         </CollapsibleContent>
                     </div>
                 </Collapsible>
-            </div>
+            </>
           )}
         </div>
       </div>
