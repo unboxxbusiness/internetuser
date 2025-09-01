@@ -57,7 +57,8 @@ export const columns: ColumnDef<SupportTicket>[] = [
                 <div className="text-sm text-muted-foreground">{user.email}</div>
             </div>
         )
-    }
+    },
+    accessorFn: (row) => row.user.name,
   },
   {
     accessorKey: "status",

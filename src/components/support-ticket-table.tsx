@@ -9,8 +9,8 @@ export function SupportTicketTable({ tickets }: { tickets: SupportTicket[] }) {
      <DataTable 
         columns={columns} 
         data={tickets}
-        filterColumnId="subject"
-        filterPlaceholder="Filter by subject..."
+        filterColumnId="user"
+        filterPlaceholder="Filter by user name..."
      />
   )
 }
