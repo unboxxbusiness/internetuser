@@ -24,6 +24,7 @@ import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, Archive, ArchiveR
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 
 function getNotificationIcon(type: NotificationType['type']) {
