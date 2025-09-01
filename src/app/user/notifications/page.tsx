@@ -3,10 +3,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { redirect } from "next/navigation";
-import { getUser } from "@/app/auth/actions";
-import { 
-    getUserNotifications,
-} from "@/lib/firebase/client-actions";
+import { getUser, AppUser } from "@/app/auth/actions";
+import { getUserNotifications } from "@/lib/firebase/client-actions";
 import {
     markNotificationAsReadAction,
     deleteNotificationAction,
@@ -24,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, MailCheck, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
-import { AppUser } from "@/app/auth/actions";
 
 
 function getNotificationIcon(type: NotificationType['type']) {

@@ -12,19 +12,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { login } from "../actions";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth as clientAuth } from "@/lib/firebase/client";
+import { useRouter } from "next/navigation";
+import { getUser } from "@/lib/firebase/server-actions";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const result = await login(formData);
-    if (result?.error) {
-      setError(result.error);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        clientAuth,
+        email,
+        password
+      );
+      const idToken = await userCredential.user.getIdToken();
+
+      const res = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const redirectTo = data.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        router.push(redirectTo);
+      } else {
+        throw new Error("Failed to create session");
+      }
+
+    } catch (e: any) {
+      console.error("Login failed:", e.code, e.message);
+      setError("Invalid email or password.");
     }
   };
 

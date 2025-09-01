@@ -12,19 +12,58 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signup } from "../actions";
 import { Eye, EyeOff } from "lucide-react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth as clientAuth } from "@/lib/firebase/client";
+import { useRouter } from "next/navigation";
+import { createUser as createClientUser } from "@/lib/firebase/client-actions";
 
 export default function SignupPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const result = await signup(formData);
-    if (result?.error) {
-      setError(result.error);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        clientAuth,
+        email,
+        password
+      );
+      const { user } = userCredential;
+
+      // Create a user document in Firestore
+      await createClientUser(user.uid, name, user.email || '', "user", user.photoURL || '');
+
+      const idToken = await user.getIdToken();
+
+      const res = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (res.ok) {
+         router.push("/user/dashboard");
+      } else {
+        throw new Error("Failed to create session");
+      }
+    } catch (e: any) {
+      console.error("Signup failed:", e.code, e.message);
+      if (e.code === "auth/email-already-in-use") {
+        setError("This email is already in use.");
+      } else if (e.code === "auth/weak-password") {
+        setError("Password should be at least 6 characters.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     }
   };
 
