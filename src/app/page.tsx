@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
 import { HeroGeometric } from "@/components/hero-geometric";
