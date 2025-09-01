@@ -1,6 +1,4 @@
 
-"use client";
-
 import {
   Card,
   CardContent,
@@ -19,49 +17,25 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getUser, AppUser } from "@/app/auth/actions";
+import { getUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
-import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Loader2 } from "lucide-react";
+import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee } from "lucide-react";
 import { getUserSubscription, getUserPayments } from "@/lib/firebase/server-actions";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Payment, Subscription } from "@/lib/types";
+import { DownloadInvoiceButton } from "@/components/download-invoice-button";
 
-export default function UserDashboard() {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      const currentUser = await getUser();
-      if (!currentUser || currentUser.role !== "user") {
-        redirect("/auth/login");
-        return;
-      }
-      setUser(currentUser);
-      
-      const [sub, payments] = await Promise.all([
-        getUserSubscription(currentUser.uid),
-        getUserPayments(currentUser.uid),
-      ]);
-
-      setSubscription(sub);
-      setRecentPayments(payments.slice(0,3));
-      setIsLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
+export default async function UserDashboardPage() {
+  const user = await getUser();
+  if (!user || user.role !== 'user') {
+    redirect('/auth/login');
   }
+
+  const [subscription, recentPayments] = await Promise.all([
+    getUserSubscription(user.uid),
+    getUserPayments(user.uid),
+  ]);
+
+  const latestPayments = recentPayments.slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -157,7 +131,7 @@ export default function UserDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            {recentPayments.length > 0 ? (
+            {latestPayments.length > 0 ? (
                 <Table>
                     <TableHeader>
                     <TableRow>
@@ -169,7 +143,7 @@ export default function UserDashboard() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {recentPayments.map((payment) => (
+                    {latestPayments.map((payment) => (
                         <TableRow key={payment.id}>
                         <TableCell className="font-medium">{payment.id.substring(0,8)}...</TableCell>
                         <TableCell>{payment.date.toLocaleDateString()}</TableCell>
@@ -186,10 +160,7 @@ export default function UserDashboard() {
                             </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                            <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            Download
-                            </Button>
+                           <DownloadInvoiceButton payment={payment} user={user} />
                         </TableCell>
                         </TableRow>
                     ))}
