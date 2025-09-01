@@ -5,12 +5,14 @@ import { useEffect, useState, useTransition } from "react";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
 import { 
-    getUserNotifications, 
-    markNotificationAsRead, 
-    deleteNotification,
-    markAllUserNotificationsAsRead,
-    deleteAllUserNotifications
+    getUserNotifications,
 } from "@/lib/firebase/client-actions";
+import {
+    markNotificationAsReadAction,
+    deleteNotificationAction,
+    markAllNotificationsAsReadAction,
+    deleteAllUserNotificationsAction,
+} from "@/app/actions";
 import {
   Card,
   CardContent,
@@ -60,15 +62,20 @@ export default function UserNotificationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
 
+  const fetchNotifications = async (uid: string) => {
+      const userNotifications = await getUserNotifications(uid);
+      setNotifications(userNotifications);
+  }
+
   useEffect(() => {
     async function fetchData() {
       const currentUser = await getUser();
       if (!currentUser) {
         redirect("/auth/login");
+        return;
       }
       setUser(currentUser);
-      const userNotifications = await getUserNotifications(currentUser.uid);
-      setNotifications(userNotifications);
+      await fetchNotifications(currentUser.uid);
       setIsLoading(false);
     }
     fetchData();
@@ -78,32 +85,30 @@ export default function UserNotificationsPage() {
 
   const handleMarkAsRead = (id: string) => {
     startTransition(async () => {
-      await markNotificationAsRead(id, { isRead: true });
-      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+      await markNotificationAsReadAction(id);
+      if(user) await fetchNotifications(user.uid);
     });
   };
   
   const handleDelete = (id: string) => {
       startTransition(async () => {
-          await deleteNotification(id);
-          setNotifications(notifications.filter(n => n.id !== id));
+          await deleteNotificationAction(id);
+          if(user) await fetchNotifications(user.uid);
       });
   };
 
   const handleMarkAllAsRead = () => {
-    if (!user) return;
       startTransition(async () => {
-          await markAllUserNotificationsAsRead(user.uid);
-          setNotifications(notifications.map(n => ({...n, isRead: true })));
+          await markAllNotificationsAsReadAction();
+          if(user) await fetchNotifications(user.uid);
       });
   };
 
   const handleDeleteAll = () => {
-    if (!user) return;
       if (confirm("Are you sure you want to delete all notifications?")) {
         startTransition(async () => {
-            await deleteAllUserNotifications(user.uid);
-            setNotifications([]);
+            await deleteAllUserNotificationsAction();
+            if(user) await fetchNotifications(user.uid);
         });
       }
   };
@@ -194,3 +199,5 @@ export default function UserNotificationsPage() {
     </div>
   );
 }
+
+    

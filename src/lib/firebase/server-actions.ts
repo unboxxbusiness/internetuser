@@ -18,6 +18,15 @@ import {
     createNotification as createNotificationFirestore,
     updateSupportTicket as updateSupportTicketFirestore,
     deleteAllNotifications as deleteAllNotificationsFirestore,
+    updateUser as updateUserFirestore,
+    createSupportTicket as createSupportTicketFirestore,
+    updateUserSettings as updateUserSettingsFirestore,
+    updateHeroSettings as updateHeroSettingsFirestore,
+    updateBrandingSettings as updateBrandingSettingsFirestore,
+    updateNotification as updateNotificationFirestore,
+    deleteNotification as deleteNotificationFirestore,
+    deleteAllUserNotifications as deleteAllUserNotificationsFirestore,
+    markAllUserNotificationsAsRead as markAllUserNotificationsAsReadFirestore,
 } from "./firestore";
 import { AppUser } from "@/app/auth/actions";
 import { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, UserSettings } from "../types";
@@ -80,4 +89,40 @@ export async function updateSupportTicket(ticketId: string, data: Partial<Suppor
 
 export async function deleteAllNotifications(): Promise<void> {
     return deleteAllNotificationsFirestore(db);
+}
+
+export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
+    return updateUserFirestore(db, uid, data);
+}
+
+export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
+    return createSupportTicketFirestore(db, ticketData);
+}
+
+export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
+    return updateUserSettingsFirestore(db, userId, settings);
+}
+
+export async function updateHeroSettings(settings: HeroSettings): Promise<void> {
+    return updateHeroSettingsFirestore(db, settings);
+}
+
+export async function updateBrandingSettings(settings: BrandingSettings): Promise<void> {
+    return updateBrandingSettingsFirestore(db, settings);
+}
+
+export async function updateNotification(notificationId: string, data: Partial<Notification>): Promise<void> {
+    return updateNotificationFirestore(db, notificationId, data);
+}
+
+export async function deleteNotification(notificationId: string): Promise<void> {
+    return deleteNotificationFirestore(db, notificationId);
+}
+
+export async function deleteAllUserNotifications(userId: string): Promise<void> {
+    return deleteAllUserNotificationsFirestore(db, userId);
+}
+
+export async function markAllUserNotificationsAsRead(userId: string): Promise<void> {
+    return markAllUserNotificationsAsReadFirestore(db, userId);
 }

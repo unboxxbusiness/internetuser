@@ -6,26 +6,24 @@ import { auth as adminAuth, db } from "@/lib/firebase/server";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
 import { 
-    updateUser, 
-    updateBrandingSettings, 
-    createSupportTicket, 
-    updateUserSettings,
-    updateHeroSettings,
-} from "@/lib/firebase/client-actions";
-import { 
-    getPlan,
-    getUsers, 
+    updateUser as updateUserServer,
+    updateBrandingSettings as updateBrandingSettingsServer,
+    createSupportTicket as createSupportTicketServer,
+    updateUserSettings as updateUserSettingsServer,
+    updateHeroSettings as updateHeroSettingsServer,
+    getPlan as getPlanServer,
+    getUsers as getUsersServer, 
     createNotification, 
     getSupportTicket, 
     updateSupportTicket,
     deleteAllNotifications as deleteAllNotificationsServer,
-    updateNotification,
-    deleteNotification,
-    deleteAllUserNotifications,
-    markAllUserNotificationsAsRead,
+    updateNotification as updateNotificationServer,
+    deleteNotification as deleteNotificationServer,
+    deleteAllUserNotifications as deleteAllUserNotificationsServer,
+    markAllUserNotificationsAsRead as markAllUserNotificationsAsReadServer,
 } from "@/lib/firebase/server-actions";
 
-import { BrandingSettings, HeroSettings } from "@/lib/types";
+import { BrandingSettings, HeroSettings, SupportTicket, UserSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
 
@@ -120,7 +118,7 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
     }
 
     try {
-        const users = await getUsers();
+        const users = await getUsersServer();
         const notificationPromises = users.map(user => 
             createNotification({
                 userId: user.uid,
@@ -163,7 +161,7 @@ export async function updateUserProfileAction(
   }
 
   try {
-    await updateUser(user.uid, updates);
+    await updateUserServer(user.uid, updates);
     revalidatePath("/admin/settings");
     revalidatePath("/user/profile");
     return { message: "Profile updated successfully." };
@@ -185,7 +183,7 @@ export async function updateBrandingAction(prevState: any, formData: FormData): 
     };
 
     try {
-        await updateBrandingSettings(settings);
+        await updateBrandingSettingsServer(settings);
         revalidatePath('/', 'layout'); // Revalidate the whole site
         return { message: 'Branding settings updated successfully.' };
     } catch (error) {
@@ -206,7 +204,7 @@ export async function updateHeroAction(prevState: any, formData: FormData): Prom
     };
 
     try {
-        await updateHeroSettings(settings);
+        await updateHeroSettingsServer(settings);
         revalidatePath('/');
         return { message: 'Landing page content updated successfully.' };
     } catch (error) {
@@ -230,20 +228,22 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
         return { error: 'Please fill out all fields.' };
     }
 
+    const ticketData: Omit<SupportTicket, 'id'> = {
+        subject,
+        description,
+        priority,
+        userId: user.uid,
+        user: {
+            name: user.name || 'N/A',
+            email: user.email || 'N/A'
+        },
+        status: 'open',
+        lastUpdated: new Date(),
+        createdAt: new Date(),
+    };
+
     try {
-        await createSupportTicket({
-            subject,
-            description,
-            priority,
-            userId: user.uid,
-            user: {
-                name: user.name || 'N/A',
-                email: user.email || 'N/A'
-            },
-            status: 'open',
-            lastUpdated: new Date(),
-            createdAt: new Date(),
-        });
+        await createSupportTicketServer(ticketData);
     } catch (error) {
         console.error('Error creating support ticket:', error);
         return { error: 'Failed to create support ticket.' };
@@ -287,9 +287,14 @@ export async function updateUserPreferencesAction(prevState: any, formData: Form
 
     const paperlessBilling = formData.get('paperless-billing') === 'on';
     const paymentReminders = formData.get('payment-reminders') === 'on';
+    
+    const settings: UserSettings = {
+        paperlessBilling,
+        paymentReminders
+    };
 
     try {
-        await updateUserSettings(user.uid, { paperlessBilling, paymentReminders });
+        await updateUserSettingsServer(user.uid, settings);
         revalidatePath('/user/profile');
         return { message: 'Preferences updated successfully.' };
     } catch (error) {
@@ -341,7 +346,7 @@ export async function createPayUTransactionAction(planId: string) {
     return { error: "You must be logged in to create a transaction." };
   }
 
-  const plan = await getPlan(planId);
+  const plan = await getPlanServer(planId);
   if (!plan) {
     return { error: "The selected plan does not exist." };
   }
@@ -379,8 +384,10 @@ export async function createPayUTransactionAction(planId: string) {
 }
 
 export async function markNotificationAsReadAction(notificationId: string) {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
     try {
-        await updateNotification(notificationId, { isRead: true });
+        await updateNotificationServer(notificationId, { isRead: true });
         revalidatePath('/user/notifications');
     } catch (error) {
         console.error("Error marking notification as read:", error);
@@ -392,7 +399,7 @@ export async function markAllNotificationsAsReadAction() {
     const user = await getUser();
     if (!user) return { error: "User not found" };
     try {
-        await markAllUserNotificationsAsRead(user.uid);
+        await markAllUserNotificationsAsReadServer(user.uid);
         revalidatePath('/user/notifications');
     } catch (error) {
         console.error("Error marking all notifications as read:", error);
@@ -401,8 +408,10 @@ export async function markAllNotificationsAsReadAction() {
 }
 
 export async function deleteNotificationAction(notificationId: string) {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
     try {
-        await deleteNotification(notificationId);
+        await deleteNotificationServer(notificationId);
         revalidatePath('/user/notifications');
     } catch (error) {
         console.error("Error deleting notification:", error);
@@ -414,7 +423,7 @@ export async function deleteAllUserNotificationsAction() {
     const user = await getUser();
     if (!user) return { error: "User not found" };
     try {
-        await deleteAllUserNotifications(user.uid);
+        await deleteAllUserNotificationsServer(user.uid);
         revalidatePath('/user/notifications');
     } catch (error) {
         console.error("Error deleting all notifications:", error);
@@ -435,3 +444,5 @@ export async function deleteAllNotificationsAction() {
         return { error: "Failed to delete all notifications." };
     }
 }
+
+    
