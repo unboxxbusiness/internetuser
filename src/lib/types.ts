@@ -1,4 +1,26 @@
 
+export interface TicketMessage {
+    sender: string;
+    senderRole: 'user' | 'admin';
+    message: string;
+    timestamp: Date;
+}
+
+export interface SupportTicket {
+    id: string;
+    userId: string;
+    subject: string;
+    description?: string;
+    user: {
+        name: string;
+        email: string;
+    };
+    status: 'open' | 'in-progress' | 'closed';
+    priority: 'low' | 'medium' | 'high';
+    createdAt?: Date;
+    lastUpdated: Date;
+    messages?: TicketMessage[];
+}
 
 export interface SubscriptionPlan {
   id: string;
@@ -17,21 +39,6 @@ export interface Payment {
   status: "succeeded" | "failed" | "refunded";
   amount: number;
   date: Date;
-}
-
-export interface SupportTicket {
-    id: string;
-    userId: string;
-    subject: string;
-    description?: string;
-    user: {
-        name: string;
-        email: string;
-    };
-    status: 'open' | 'in-progress' | 'closed';
-    priority: 'low' | 'medium' | 'high';
-    createdAt?: Date;
-    lastUpdated: Date;
 }
 
 export interface BrandingSettings {
@@ -61,10 +68,11 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'billing' | 'plan-change' | 'general' | 'warning';
+  type: 'billing' | 'plan-change' | 'general' | 'warning' | 'support';
   isRead: boolean;
   isArchived: boolean;
   createdAt: Date;
+  relatedId?: string;
 }
 
 export interface UserSettings {

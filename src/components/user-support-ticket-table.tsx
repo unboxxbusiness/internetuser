@@ -1,6 +1,7 @@
 
 "use client";
 
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -10,7 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SupportTicket } from "@/lib/types";
+import { Eye } from "lucide-react";
+
 
 const getStatusVariant = (status: "open" | "in-progress" | "closed") => {
   switch (status) {
@@ -64,12 +68,13 @@ export function UserSupportTicketTable({ tickets }: { tickets: SupportTicket[] }
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
             <TableHead>Last Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {tickets.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center">
+              <TableCell colSpan={5} className="h-24 text-center">
                 No support tickets found.
               </TableCell>
             </TableRow>
@@ -88,6 +93,13 @@ export function UserSupportTicketTable({ tickets }: { tickets: SupportTicket[] }
                   </Badge>
                 </TableCell>
                 <TableCell>{timeSince(new Date(ticket.lastUpdated))}</TableCell>
+                 <TableCell className="text-right">
+                   <Button variant="outline" size="sm" asChild>
+                        <Link href={`/user/support/${ticket.id}`}>
+                            <Eye className="mr-2 h-4 w-4" /> View
+                        </Link>
+                    </Button>
+                </TableCell>
               </TableRow>
             ))
           )}

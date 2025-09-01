@@ -23,6 +23,7 @@ import {
     markAllUserNotificationsAsRead as markAllUserNotificationsAsReadServer,
     archiveNotification as archiveNotificationServer,
     archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
+    addTicketMessage,
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, SupportTicket, UserSettings } from "@/lib/types";
@@ -231,7 +232,7 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
         return { error: 'Please fill out all fields.' };
     }
 
-    const ticketData: Omit<SupportTicket, 'id'> = {
+    const ticketData: Omit<SupportTicket, 'id' | 'messages'> = {
         subject,
         description,
         priority,
@@ -246,7 +247,14 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
     };
 
     try {
-        await createSupportTicketServer(ticketData);
+        const ticketId = await createSupportTicketServer(ticketData);
+        await addTicketMessage(ticketId, {
+            sender: user.name || 'User',
+            senderRole: 'user',
+            message: description,
+            timestamp: new Date(),
+        });
+
     } catch (error) {
         console.error('Error creating support ticket:', error);
         return { error: 'Failed to create support ticket.' };
@@ -323,24 +331,89 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
             return { error: "Ticket not found." };
         }
 
+        await addTicketMessage(ticketId, {
+            sender: user.name || 'Admin',
+            senderRole: 'admin',
+            message: reply,
+            timestamp: new Date(),
+        });
+        
         await createNotification({
             userId: ticket.userId,
             title: `Reply to your ticket: "${ticket.subject}"`,
             message: reply,
-            type: 'general',
+            type: 'support',
             isRead: false,
             isArchived: false,
             createdAt: new Date(),
+            relatedId: ticketId
         });
 
         await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
         revalidatePath(`/admin/support/${ticketId}`);
+        revalidatePath(`/user/support/${ticketId}`);
         revalidatePath(`/user/notifications`);
-        return { message: "Your reply has been sent as a notification and the ticket status is now 'in-progress'." };
+        return { message: "Your reply has been sent and the ticket status is now 'in-progress'." };
 
     } catch (error) {
         console.error("Error replying to ticket:", error);
         return { error: "Failed to send reply." };
+    }
+}
+
+export async function userReplyToTicketAction(ticketId: string, prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const user = await getUser();
+    if (!user) return { error: "You must be logged in to reply." };
+
+    const reply = formData.get('reply') as string;
+    if (!reply) return { error: "Reply message cannot be empty." };
+
+    try {
+        await addTicketMessage(ticketId, {
+            sender: user.name || 'User',
+            senderRole: 'user',
+            message: reply,
+            timestamp: new Date(),
+        });
+        await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
+        revalidatePath(`/user/support/${ticketId}`);
+        revalidatePath(`/admin/support/${ticketId}`);
+        return { message: "Your reply has been submitted." };
+    } catch (error) {
+        console.error("Error submitting user reply:", error);
+        return { error: "Failed to submit reply." };
+    }
+}
+
+
+export async function closeSupportTicketAction(ticketId: string) {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') {
+        return { error: "You do not have permission to perform this action." };
+    }
+
+    try {
+        await updateSupportTicket(ticketId, { status: 'closed', lastUpdated: new Date() });
+        revalidatePath(`/admin/support/${ticketId}`);
+    } catch (error) {
+        console.error("Error closing ticket:", error);
+        return { error: "Failed to close the ticket." };
+    }
+}
+
+export async function reopenSupportTicketAction(ticketId: string) {
+    const user = await getUser();
+    if (!user) {
+        return { error: "You must be logged in to perform this action." };
+    }
+    
+    try {
+        await updateSupportTicket(ticketId, { status: 'open', lastUpdated: new Date() });
+        revalidatePath(`/user/support/${ticketId}`);
+         revalidatePath(`/admin/support/${ticketId}`);
+    } catch (error) {
+        console.error("Error reopening ticket:", error);
+        return { error: "Failed to reopen the ticket." };
     }
 }
 

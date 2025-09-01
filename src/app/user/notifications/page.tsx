@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import Link from "next/link";
 import { getUser, AppUser } from "@/app/auth/actions";
 import { getUserNotifications as getUserNotificationsServer } from "@/lib/firebase/server-actions";
 import {
@@ -20,7 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, Archive, ArchiveRestore, Loader2, Check } from "lucide-react";
+import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, Archive, ArchiveRestore, Loader2, Check, LifeBuoy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +36,8 @@ function getNotificationIcon(type: NotificationType['type']) {
             return <CheckCircle className="h-5 w-5 text-green-500" />;
         case 'warning':
             return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+        case 'support':
+            return <LifeBuoy className="h-5 w-5 text-purple-500" />;
         case 'general':
         default:
             return <Bell className="h-5 w-5 text-muted-foreground" />;
@@ -61,6 +64,7 @@ export default function UserNotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const fetchNotifications = async (uid: string) => {
       const userNotifications = await getUserNotificationsServer(uid);
@@ -85,6 +89,16 @@ export default function UserNotificationsPage() {
   const archivedNotifications = notifications.filter(n => n.isArchived);
   const unreadCount = inboxNotifications.filter(n => !n.isRead).length;
   const readCount = inboxNotifications.filter(n => n.isRead).length;
+
+  const handleNotificationClick = async (notification: NotificationType) => {
+      if (!notification.isRead) {
+        await markNotificationAsReadAction(notification.id);
+      }
+      if (notification.type === 'support' && notification.relatedId) {
+          router.push(`/user/support/${notification.relatedId}`);
+      }
+  };
+
 
   const handleMarkAsRead = (id: string) => {
     startTransition(async () => {
@@ -176,8 +190,10 @@ export default function UserNotificationsPage() {
                       key={notification.id}
                       className={cn(
                         "flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50",
-                        !notification.isRead && "bg-muted/40"
+                        !notification.isRead && "bg-muted/40",
+                        notification.type === 'support' && 'cursor-pointer'
                       )}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="mt-1">
                         {getNotificationIcon(notification.type)}
@@ -195,7 +211,7 @@ export default function UserNotificationsPage() {
                           {notification.message}
                         </p>
                       </div>
-                       <div className="flex items-center gap-2">
+                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         {!notification.isRead && (
                             <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notification.id)} disabled={isPending} title="Mark as read">
                                <Check className="h-4 w-4" />

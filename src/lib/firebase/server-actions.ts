@@ -32,9 +32,10 @@ import {
     getUserPayments as getUserPaymentsFirestore,
     getUserNotifications as getUserNotificationsFirestore,
     getUserSupportTickets as getUserSupportTicketsFirestore,
+    addTicketMessage as addTicketMessageFirestore,
 } from "./firestore";
 import type { AppUser } from "@/app/auth/actions";
-import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, UserSettings } from "../types";
+import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, TicketMessage, UserSettings } from "../types";
 
 export async function getUsers(): Promise<AppUser[]> {
     return getUsersFirestore(db);
@@ -112,9 +113,14 @@ export async function updateUser(uid: string, data: Partial<AppUser>): Promise<v
     return updateUserFirestore(db, uid, data);
 }
 
-export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
+export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id' | 'messages'>): Promise<string> {
     return createSupportTicketFirestore(db, ticketData);
 }
+
+export async function addTicketMessage(ticketId: string, message: TicketMessage): Promise<void> {
+    return addTicketMessageFirestore(db, ticketId, message);
+}
+
 
 export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
     return updateUserSettingsFirestore(db, userId, settings);

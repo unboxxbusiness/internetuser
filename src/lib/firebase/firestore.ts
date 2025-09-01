@@ -2,8 +2,8 @@
 import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
-import type { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings } from "@/lib/types";
-import type { Firestore } from "firebase-admin/firestore";
+import type { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings, TicketMessage } from "@/lib/types";
+import type { Firestore, FieldValue } from "firebase-admin/firestore";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
@@ -199,8 +199,16 @@ export async function getUserPayments(db: Firestore, userId: string): Promise<Pa
 
 
 // Support Ticket Functions
-export async function createSupportTicket(db: Firestore, ticketData: Omit<SupportTicket, 'id'>): Promise<void> {
-    await db.collection(SUPPORT_TICKETS_COLLECTION).add(ticketData);
+export async function createSupportTicket(db: Firestore, ticketData: Omit<SupportTicket, 'id' | 'messages'>): Promise<string> {
+    const docRef = await db.collection(SUPPORT_TICKETS_COLLECTION).add(ticketData);
+    return docRef.id;
+}
+
+export async function addTicketMessage(db: Firestore, ticketId: string, message: TicketMessage): Promise<void> {
+    const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId);
+    await docRef.update({
+        messages: FieldValue.arrayUnion(message)
+    });
 }
 
 export async function updateSupportTicket(db: Firestore, ticketId: string, data: Partial<SupportTicket>): Promise<void> {
@@ -223,6 +231,7 @@ export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]>
       priority: data.priority,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
       lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+      messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
     };
   });
 }
@@ -243,6 +252,7 @@ export async function getUserSupportTickets(db: Firestore, userId: string): Prom
             priority: data.priority,
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
             lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+            messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
         };
     });
 }
@@ -266,6 +276,7 @@ export async function getSupportTicket(db: Firestore, id: string): Promise<Suppo
         priority: data.priority,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
         lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
+        messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
     };
 }
 
@@ -330,6 +341,7 @@ export async function getUserNotifications(db: Firestore, userId: string): Promi
             isRead: data.isRead,
             isArchived: data.isArchived,
             createdAt: data.createdAt.toDate(),
+            relatedId: data.relatedId,
         };
     });
 }
@@ -349,6 +361,7 @@ export async function getAllNotifications(db: Firestore): Promise<Notification[]
             isRead: data.isRead,
             isArchived: data.isArchived,
             createdAt: data.createdAt.toDate(),
+            relatedId: data.relatedId,
         };
     });
 }
