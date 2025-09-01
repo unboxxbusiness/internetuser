@@ -70,9 +70,10 @@ export const columns: ColumnDef<AppUser>[] = [
     accessorKey: "paymentStatus",
     header: "Payment Status",
     cell: ({ row }) => {
-      const status = row.getValue("paymentStatus") as string;
+      const status = row.getValue("paymentStatus") as AppUser['paymentStatus'];
+      const variant = status === 'paid' ? 'secondary' : status === 'pending' ? 'outline' : 'default';
       return (
-        <Badge variant={status === "paid" ? "secondary" : "outline"}>
+        <Badge variant={variant}>
           {status}
         </Badge>
       );

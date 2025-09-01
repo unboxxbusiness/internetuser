@@ -37,8 +37,14 @@ export async function getUser(db: Firestore, uid: string): Promise<AppUser | nul
   const data = docSnap.data()
   if (!data) return null;
 
-  const payments = await getUserPayments(db, uid);
-  const hasPaid = payments.some(p => p.status === 'succeeded');
+  let paymentStatus: AppUser['paymentStatus'] = 'pending';
+  if (data.role === 'admin') {
+      paymentStatus = 'N/A';
+  } else {
+      const payments = await getUserPayments(db, uid);
+      const hasPaid = payments.some(p => p.status === 'succeeded');
+      paymentStatus = hasPaid ? 'paid' : 'pending';
+  }
   
   return {
     uid: data.uid,
@@ -47,7 +53,7 @@ export async function getUser(db: Firestore, uid: string): Promise<AppUser | nul
     photoURL: data.photoURL,
     role: data.role,
     accountStatus: 'active', // Placeholder
-    paymentStatus: hasPaid ? 'paid' : 'pending',
+    paymentStatus: paymentStatus,
   };
 }
 
@@ -65,7 +71,15 @@ export async function getUsers(db: Firestore): Promise<AppUser[]> {
 
   return usersSnapshot.docs.map((doc) => {
     const data = doc.data();
-    const hasPaid = successfulPaymentUserIds.has(data.uid);
+    
+    let paymentStatus: AppUser['paymentStatus'] = 'pending';
+    if (data.role === 'admin') {
+        paymentStatus = 'N/A';
+    } else {
+        const hasPaid = successfulPaymentUserIds.has(data.uid);
+        paymentStatus = hasPaid ? 'paid' : 'pending';
+    }
+
     return {
       uid: data.uid,
       name: data.name,
@@ -73,7 +87,7 @@ export async function getUsers(db: Firestore): Promise<AppUser[]> {
       role: data.role,
       photoURL: data.photoURL,
       accountStatus: 'active', // Placeholder, can be enhanced later
-      paymentStatus: hasPaid ? 'paid' : 'pending',
+      paymentStatus: paymentStatus,
     };
   });
 }

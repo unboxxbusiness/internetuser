@@ -15,7 +15,7 @@ export interface AppUser {
   photoURL: string | undefined;
   role: string;
   accountStatus: 'active' | 'suspended';
-  paymentStatus: 'paid' | 'pending';
+  paymentStatus: 'paid' | 'pending' | 'N/A';
 }
 
 export async function getUser(): Promise<AppUser | null> {
