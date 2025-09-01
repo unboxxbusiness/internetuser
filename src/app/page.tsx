@@ -46,7 +46,7 @@ export default async function LandingPage() {
               </div>
             </div>
             <Image
-              src="https://picsum.photos/800/600"
+              src="/hero-image.svg"
               width={800}
               height={600}
               alt="Hero"
@@ -58,3 +58,5 @@ export default async function LandingPage() {
       </section>
   );
 }
+
+

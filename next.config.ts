@@ -12,16 +12,7 @@ const nextConfig: NextConfig = {
     serverComponentsExternalPackages: ['firebase-admin'],
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-      },
-      {
-        protocol: 'https',
-        hostname: 'html.tailus.io',
-      },
-    ],
+    remotePatterns: [],
   },
 };
 
