@@ -16,14 +16,11 @@ import Link from "next/link";
 import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth as clientAuth } from "@/lib/firebase/client";
-import { useRouter } from "next/navigation";
-import { getUser } from "@/lib/firebase/server-actions";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -52,7 +49,8 @@ export default function LoginPage() {
       if (res.ok) {
         const data = await res.json();
         const redirectTo = data.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-        router.push(redirectTo);
+        // Use window.location.href for a full page reload to ensure the server-rendered layout has the new session.
+        window.location.href = redirectTo;
       } else {
         throw new Error("Failed to create session");
       }

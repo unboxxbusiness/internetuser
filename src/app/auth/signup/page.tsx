@@ -17,7 +17,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth as clientAuth, db as clientDb } from "@/lib/firebase/client";
 import { doc, setDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
 
 
 async function createClientUser(uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
@@ -38,7 +37,6 @@ async function createClientUser(uid: string, name:string, email: string, role: s
 export default function SignupPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -68,7 +66,8 @@ export default function SignupPage() {
       });
 
       if (res.ok) {
-         router.push("/user/dashboard");
+         // Use window.location.href for a full page reload to ensure the server-rendered layout has the new session.
+         window.location.href = "/user/dashboard";
       } else {
         throw new Error("Failed to create session");
       }
