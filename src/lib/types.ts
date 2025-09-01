@@ -63,6 +63,7 @@ export interface Notification {
   message: string;
   type: 'billing' | 'plan-change' | 'general' | 'warning';
   isRead: boolean;
+  isArchived: boolean;
   createdAt: Date;
 }
 

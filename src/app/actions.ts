@@ -21,6 +21,8 @@ import {
     deleteNotification as deleteNotificationServer,
     deleteAllUserNotifications as deleteAllUserNotificationsServer,
     markAllUserNotificationsAsRead as markAllUserNotificationsAsReadServer,
+    archiveNotification as archiveNotificationServer,
+    archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, SupportTicket, UserSettings } from "@/lib/types";
@@ -126,6 +128,7 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
                 message: message,
                 type: 'general',
                 isRead: false,
+                isArchived: false,
                 createdAt: new Date(),
             })
         );
@@ -326,6 +329,7 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
             message: reply,
             type: 'general',
             isRead: false,
+            isArchived: false,
             createdAt: new Date(),
         });
 
@@ -407,6 +411,30 @@ export async function markAllNotificationsAsReadAction() {
     }
 }
 
+export async function archiveNotificationAction(notificationId: string) {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
+    try {
+        await archiveNotificationServer(notificationId);
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error archiving notification:", error);
+        return { error: "Failed to archive notification." };
+    }
+}
+
+export async function archiveAllReadNotificationsAction() {
+    const user = await getUser();
+    if (!user) return { error: "User not found" };
+    try {
+        await archiveAllReadUserNotificationsServer(user.uid);
+        revalidatePath('/user/notifications');
+    } catch (error) {
+        console.error("Error archiving all read notifications:", error);
+        return { error: "Failed to archive all read notifications." };
+    }
+}
+
 export async function deleteNotificationAction(notificationId: string) {
     const user = await getUser();
     if (!user) return { error: "User not found" };
@@ -444,5 +472,3 @@ export async function deleteAllNotificationsAction() {
         return { error: "Failed to delete all notifications." };
     }
 }
-
-    

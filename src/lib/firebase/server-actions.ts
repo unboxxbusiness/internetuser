@@ -27,6 +27,8 @@ import {
     deleteNotification as deleteNotificationFirestore,
     deleteAllUserNotifications as deleteAllUserNotificationsFirestore,
     markAllUserNotificationsAsRead as markAllUserNotificationsAsReadFirestore,
+    archiveNotification as archiveNotificationFirestore,
+    archiveAllReadUserNotifications as archiveAllReadUserNotificationsFirestore,
     getUserPayments as getUserPaymentsFirestore,
     getUserNotifications as getUserNotificationsFirestore,
     getUserSupportTickets as getUserSupportTicketsFirestore,
@@ -140,4 +142,12 @@ export async function deleteAllUserNotifications(userId: string): Promise<void> 
 
 export async function markAllUserNotificationsAsRead(userId: string): Promise<void> {
     return markAllUserNotificationsAsReadFirestore(db, userId);
+}
+
+export async function archiveNotification(notificationId: string): Promise<void> {
+    return archiveNotificationFirestore(db, notificationId);
+}
+
+export async function archiveAllReadUserNotifications(userId: string): Promise<void> {
+    return archiveAllReadUserNotificationsFirestore(db, userId);
 }

@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
                 message: `Your plan has been successfully updated to ${plan?.name}.`,
                 type: 'plan-change',
                 isRead: false,
+                isArchived: false,
                 createdAt: new Date(),
             });
             

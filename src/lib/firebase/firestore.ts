@@ -303,6 +303,7 @@ export async function getUserNotifications(db: Firestore, userId: string): Promi
             message: data.message,
             type: data.type,
             isRead: data.isRead,
+            isArchived: data.isArchived,
             createdAt: data.createdAt.toDate(),
         };
     });
@@ -321,6 +322,7 @@ export async function getAllNotifications(db: Firestore): Promise<Notification[]
             message: data.message,
             type: data.type,
             isRead: data.isRead,
+            isArchived: data.isArchived,
             createdAt: data.createdAt.toDate(),
         };
     });
@@ -355,6 +357,23 @@ export async function markAllUserNotificationsAsRead(db: Firestore, userId: stri
     const batch = db.batch();
     snapshot.docs.forEach((doc) => {
         batch.update(doc.ref, { isRead: true });
+    });
+
+    await batch.commit();
+}
+
+export async function archiveNotification(db: Firestore, notificationId: string): Promise<void> {
+    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId);
+    await docRef.update({ isArchived: true });
+}
+
+export async function archiveAllReadUserNotifications(db: Firestore, userId: string): Promise<void> {
+    const q = db.collection(NOTIFICATIONS_COLLECTION).where('userId', '==', userId).where('isRead', '==', true).where('isArchived', '==', false);
+    const snapshot = await q.get();
+    
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, { isArchived: true });
     });
 
     await batch.commit();
