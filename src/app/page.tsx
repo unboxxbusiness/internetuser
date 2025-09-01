@@ -11,6 +11,7 @@ import {
   WandSparkles,
   LifeBuoy,
 } from "lucide-react";
+import { CTASection } from "@/components/cta-section";
 
 const features = [
   {
@@ -138,6 +139,14 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
+        <CTASection
+            title="Ready to Get Started?"
+            description="Sign up today and experience the future of internet connectivity."
+            action={{
+                text: "Create Your Account",
+                href: "/auth/signup",
+            }}
+        />
     </>
   );
 }
