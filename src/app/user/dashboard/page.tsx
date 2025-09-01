@@ -7,14 +7,6 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/app/auth/actions";
@@ -22,7 +14,9 @@ import { redirect } from "next/navigation";
 import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee } from "lucide-react";
 import { getUserSubscription, getUserPayments } from "@/lib/firebase/server-actions";
 import Link from "next/link";
-import { DownloadInvoiceButton } from "@/components/download-invoice-button";
+import { DataTable } from "@/components/ui/data-table";
+import { columns } from "@/components/tables/user-payments-columns";
+
 
 export default async function UserDashboardPage() {
   const user = await getUser();
@@ -35,7 +29,7 @@ export default async function UserDashboardPage() {
     getUserPayments(user.uid),
   ]);
 
-  const latestPayments = recentPayments.slice(0, 3);
+  const latestPayments = recentPayments.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -131,46 +125,7 @@ export default async function UserDashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            {latestPayments.length > 0 ? (
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Invoice ID</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {latestPayments.map((payment) => (
-                        <TableRow key={payment.id}>
-                        <TableCell className="font-medium">{payment.id.substring(0,8)}...</TableCell>
-                        <TableCell>{payment.date.toLocaleDateString()}</TableCell>
-                        <TableCell>₹{payment.amount.toFixed(2)}</TableCell>
-                        <TableCell>
-                            <Badge
-                            variant={
-                                payment.status === "succeeded"
-                                ? "secondary"
-                                : "destructive"
-                            }
-                            >
-                            {payment.status}
-                            </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                           <DownloadInvoiceButton payment={payment} user={user} />
-                        </TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-            ) : (
-                <div className="text-center text-muted-foreground py-8">
-                    <p>No recent payments found.</p>
-                </div>
-            )}
+          <DataTable columns={columns} data={latestPayments} />
         </CardContent>
       </Card>
     </div>

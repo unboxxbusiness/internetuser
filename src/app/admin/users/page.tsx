@@ -28,7 +28,7 @@ export default async function AdminUsersPage() {
           <CardTitle>All Users</CardTitle>
         </CardHeader>
         <CardContent>
-          <UserTable users={users} />
+          <UserTable data={users} />
         </CardContent>
       </Card>
     </div>

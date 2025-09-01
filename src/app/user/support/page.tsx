@@ -45,7 +45,7 @@ export default async function UserSupportPage() {
           <CardDescription>A list of your past and current support tickets.</CardDescription>
         </CardHeader>
         <CardContent>
-            <UserSupportTicketTable tickets={tickets} />
+            <UserSupportTicketTable data={tickets} />
         </CardContent>
       </Card>
     </div>

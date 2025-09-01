@@ -36,7 +36,7 @@ export default async function AdminPlansPage() {
           <CardTitle>Available Plans</CardTitle>
         </CardHeader>
         <CardContent>
-          <PlanTable plans={plans} />
+          <PlanTable data={plans} />
         </CardContent>
       </Card>
     </div>

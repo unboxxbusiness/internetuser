@@ -32,7 +32,7 @@ export default async function AdminPaymentsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PaymentTable payments={payments} />
+          <PaymentTable data={payments} />
         </CardContent>
       </Card>
     </div>
