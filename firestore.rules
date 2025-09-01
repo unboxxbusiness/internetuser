@@ -2,80 +2,33 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Helper function to check if a user is an admin
-    function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
     
-    // Helper function to check if the user is the owner of the document
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+    // Users can create their own document, and read/update it.
+    // They cannot delete their own account from the client, nor see other user docs.
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
     }
 
-    // Users collection rules
-    match /users/{userId} {
-      // Allow create for any user creating their own document (signup)
-      allow create: if isOwner(userId);
-      // Allow read for the owner of the document or an admin
-      allow read: if isOwner(userId) || isAdmin();
-      // Allow update for the owner of the document or an admin
-      allow update: if isOwner(userId) || isAdmin();
-      // Allow delete only for admins
-      allow delete: if isAdmin();
-    }
-    
-    // Subscription Plans collection rules
+    // Subscription plans are publically readable
     match /subscriptionPlans/{planId} {
-      // Allow read for any authenticated user
-      allow read: if request.auth != null;
-      // Allow write (create, update, delete) only for admins
-      allow write: if isAdmin();
+        allow read: if request.auth != null;
+        allow write: if false; // Only server can write
     }
-    
-    // Payments collection rules
-    match /payments/{paymentId} {
-      // Allow create for authenticated users (server-side action will be authenticated)
-      allow create: if request.auth != null;
-      // Allow read for the user who owns the payment or an admin
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      // Payments are immutable from the client
-      allow update, delete: if false; 
-    }
-    
-    // Support Tickets collection rules
-    match /supportTickets/{ticketId} {
-      // Allow read for the ticket owner or an admin
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      // Allow create for any authenticated user creating their own ticket
-      allow create: if isOwner(request.resource.data.userId);
-      // Allow update only for admins (e.g., to change status)
-      allow update: if isAdmin();
-      // No one can delete tickets from the client
-      allow delete: if false;
-    }
-    
-    // Notifications collection rules
-    match /notifications/{notificationId} {
-        // Allow read for the notification owner or an admin
-        allow read: if isOwner(resource.data.userId) || isAdmin();
-        // Allow create for admins (sending bulk notifications) or server processes
-        allow create: if isAdmin(); 
-        // Allow users to update their own notifications (e.g., mark as read/archived)
-        allow update: if isOwner(resource.data.userId);
-        // Allow users to delete their own notifications
-        allow delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-    
-    // Branding and Landing Page collections should only be writable by admins
+
+    // Branding and Landing Page settings are publically readable
     match /branding/config {
-        allow read: if true; // Publicly readable for theme
-        allow write: if isAdmin();
+      allow read: if true;
+      allow write: if false; // Only server can write
     }
-    
      match /landingPage/hero {
-        allow read: if true; // Publicly readable for landing page
-        allow write: if isAdmin();
+      allow read: if true;
+      allow write: if false; // Only server can write
+    }
+
+    // All other collections are locked down to only be accessed from the server.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
