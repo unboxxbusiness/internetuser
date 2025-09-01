@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import {
   Card,
   CardContent,
@@ -16,14 +17,10 @@ import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Bell, Arro
 import { getUserSubscription, getUserPayments, getUserNotifications } from "@/lib/firebase/server-actions";
 import Link from "next/link";
 import { UserPaymentTable } from "@/components/user-payment-table";
+import { UserDashboardSkeleton } from "@/components/user-dashboard-skeleton";
 
 
-export default async function UserDashboardPage() {
-  const user = await getUser();
-  if (!user || user.role !== 'user') {
-    redirect('/auth/login');
-  }
-
+async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<typeof getUser>>> }) {
   const [subscription, recentPayments, notifications] = await Promise.all([
     getUserSubscription(user.uid),
     getUserPayments(user.uid),
@@ -34,30 +31,22 @@ export default async function UserDashboardPage() {
   const unreadNotifications = notifications.filter(n => !n.isRead);
   const latestUnreadNotification = unreadNotifications.length > 0 ? unreadNotifications[0] : null;
 
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">
-          Welcome, {user?.name || "User"}!
-        </h2>
-      </div>
-
-       {latestUnreadNotification && (
-          <Alert>
-            <Bell className="h-4 w-4" />
-            <AlertTitle className="font-semibold">{latestUnreadNotification.title}</AlertTitle>
-            <AlertDescription>
-                <div className="flex justify-between items-center">
-                    <p>{latestUnreadNotification.message}</p>
-                    <Button asChild variant="link" className="pr-0">
-                        <Link href="/user/notifications">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                    </Button>
-                </div>
-            </AlertDescription>
-          </Alert>
-       )}
-
+      {latestUnreadNotification && (
+        <Alert>
+          <Bell className="h-4 w-4" />
+          <AlertTitle className="font-semibold">{latestUnreadNotification.title}</AlertTitle>
+          <AlertDescription>
+              <div className="flex justify-between items-center">
+                  <p>{latestUnreadNotification.message}</p>
+                  <Button asChild variant="link" className="pr-0">
+                      <Link href="/user/notifications">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  </Button>
+              </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {subscription ? (
         <>
@@ -136,7 +125,6 @@ export default async function UserDashboardPage() {
         </Card>
       )}
 
-
       <Card>
         <CardHeader>
           <CardTitle>Recent Payments</CardTitle>
@@ -148,6 +136,27 @@ export default async function UserDashboardPage() {
           <UserPaymentTable payments={latestPayments} user={user} />
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+
+export default async function UserDashboardPage() {
+  const user = await getUser();
+  if (!user || user.role !== 'user') {
+    redirect('/auth/login');
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">
+          Welcome, {user?.name || "User"}!
+        </h2>
+      </div>
+      <Suspense fallback={<UserDashboardSkeleton />}>
+        <DashboardData user={user} />
+      </Suspense>
     </div>
   );
 }
