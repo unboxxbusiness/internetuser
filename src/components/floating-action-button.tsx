@@ -18,7 +18,7 @@ export function FloatingActionButton({ href }: FloatingActionButtonProps) {
   }
 
   return (
-    <Button asChild className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-40">
+    <Button asChild className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg z-40">
         <Link href={href}>
             <Plus className="h-6 w-6" />
             <span className="sr-only">Create New</span>
