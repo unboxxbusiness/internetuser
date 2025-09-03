@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     if (!salt || !key) {
         console.error("PayU Salt or Key is not configured.");
-        return NextResponse.redirect(new URL('/user/dashboard?payment=error', req.url));
+        return NextResponse.redirect(new URL('/user/billing?payment=error', req.url));
     }
     
     // Verify the hash
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (generatedHash !== postedHash) {
         console.error("PayU hash validation failed.");
-        return NextResponse.redirect(new URL('/user/dashboard?payment=tampered', req.url));
+        return NextResponse.redirect(new URL('/user/billing?payment=tampered', req.url));
     }
 
     const userId = udf1;
@@ -77,16 +77,16 @@ export async function POST(req: NextRequest) {
                 createdAt: new Date(),
             });
             
-            return NextResponse.redirect(new URL('/user/dashboard?payment=success', req.url));
+            return NextResponse.redirect(new URL('/user/billing?payment=success', req.url));
 
         } catch (error) {
             console.error("Error processing successful payment:", error);
             // Even if DB operations fail, the payment was successful. Redirect with error.
-             return NextResponse.redirect(new URL('/user/dashboard?payment=dberror', req.url));
+             return NextResponse.redirect(new URL('/user/billing?payment=dberror', req.url));
         }
 
     } else {
         // Payment failed or was cancelled
-        return NextResponse.redirect(new URL(`/user/dashboard?payment=failed&reason=${payuResponse.error_Message}`, req.url));
+        return NextResponse.redirect(new URL(`/user/billing?payment=failed&reason=${payuResponse.error_Message}`, req.url));
     }
 }

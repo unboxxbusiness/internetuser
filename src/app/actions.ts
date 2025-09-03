@@ -43,6 +43,7 @@ export async function deleteUserAction(uid: string) {
         return { error: "Failed to delete user." };
     }
     revalidatePath("/admin/users");
+    return { message: "User deleted successfully." };
 }
 
 export async function resetPasswordAction(email: string): Promise<{ message?: string; error?: string }> {
