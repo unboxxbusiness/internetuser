@@ -55,8 +55,8 @@ export default async function UserTicketDetailPage({ params }: { params: { id: s
          </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-6">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl">{ticket.subject}</CardTitle>
@@ -78,7 +78,7 @@ export default async function UserTicketDetailPage({ params }: { params: { id: s
                     <CardHeader>
                         <CardTitle>Ticket Closed</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-between">
+                    <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                        <p className="text-muted-foreground">This ticket has been closed. If the issue persists, please re-open it.</p>
                        <ReopenTicketButton ticketId={ticket.id} />
                     </CardContent>

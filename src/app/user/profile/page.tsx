@@ -33,14 +33,14 @@ export default async function UserProfilePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-10">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Password</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
-        <TabsContent value="profile">
+        <TabsContent value="profile" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
@@ -53,7 +53,7 @@ export default async function UserProfilePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="password">
+        <TabsContent value="password" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
@@ -66,7 +66,7 @@ export default async function UserProfilePage() {
             </CardContent>
           </Card>
         </TabsContent>
-         <TabsContent value="appearance">
+         <TabsContent value="appearance" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Appearance</CardTitle>
@@ -85,7 +85,7 @@ export default async function UserProfilePage() {
             </CardContent>
           </Card>
         </TabsContent>
-         <TabsContent value="billing">
+         <TabsContent value="billing" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Billing Preferences</CardTitle>

@@ -38,9 +38,9 @@ async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<ty
           <Bell className="h-4 w-4" />
           <AlertTitle className="font-semibold">{latestUnreadNotification.title}</AlertTitle>
           <AlertDescription>
-              <div className="flex justify-between items-center">
-                  <p>{latestUnreadNotification.message}</p>
-                  <Button asChild variant="link" className="pr-0">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <p className="text-sm">{latestUnreadNotification.message}</p>
+                  <Button asChild variant="link" className="p-0 h-auto self-start sm:self-center">
                       <Link href="/user/notifications">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
               </div>
@@ -110,8 +110,8 @@ async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<ty
         </>
       ) : (
          <Card className="border-dashed">
-            <CardHeader className="flex-row items-center gap-4">
-                <AlertTriangle className="w-10 h-10 text-destructive" />
+            <CardHeader className="flex-col sm:flex-row items-start sm:items-center gap-4">
+                <AlertTriangle className="w-10 h-10 text-destructive flex-shrink-0" />
                 <div>
                     <CardTitle>No Active Subscription</CardTitle>
                     <CardDescription>You do not have an active subscription plan. Please choose a plan to get started.</CardDescription>
@@ -149,7 +149,7 @@ export default async function UserDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">
           Welcome, {user?.name || "User"}!
         </h2>
