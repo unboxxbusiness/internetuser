@@ -7,9 +7,9 @@ import { getUser } from "./auth/actions";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { AdminSidebar } from "@/components/admin-sidebar";
-import { UserSidebar } from "@/components/user-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getBrandingSettings } from "@/lib/firebase/server-actions";
+import { UserLayout } from "@/components/user-layout";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -42,11 +42,19 @@ export default async function RootLayout({
           <div className="flex min-h-screen">
             {user ? (
               <>
-                {user.role === 'admin' ? <AdminSidebar user={user} branding={branding} /> : <UserSidebar user={user} branding={branding} />}
-                <div className="flex-1 flex flex-col">
-                  <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
-                  <Footer branding={branding} />
-                </div>
+                {user.role === 'admin' ? (
+                    <>
+                        <AdminSidebar user={user} branding={branding} />
+                        <div className="flex-1 flex flex-col">
+                            <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
+                            <Footer branding={branding} />
+                        </div>
+                    </>
+                ) : (
+                    <UserLayout user={user} branding={branding}>
+                        {children}
+                    </UserLayout>
+                )}
               </>
             ) : (
                <div className="flex-1 flex flex-col">

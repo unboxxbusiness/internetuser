@@ -14,6 +14,7 @@ import { getUser } from "@/app/auth/actions";
 import { getUserSupportTickets } from "@/lib/firebase/server-actions";
 import { UserSupportTicketTable } from "@/components/user-support-ticket-table";
 import { SupportTicket } from "@/lib/types";
+import { FloatingActionButton } from "@/components/floating-action-button";
 
 export default async function UserSupportPage() {
   const user = await getUser();
@@ -25,7 +26,7 @@ export default async function UserSupportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">My Support Tickets</h2>
           <p className="text-muted-foreground">
@@ -48,6 +49,7 @@ export default async function UserSupportPage() {
             <UserSupportTicketTable tickets={tickets} />
         </CardContent>
       </Card>
+      <FloatingActionButton href="/user/support/new" />
     </div>
   );
 }
