@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Notification } from "@/lib/types";
@@ -8,9 +9,12 @@ import { Terminal, Trash2 } from "lucide-react";
 import { deleteAllNotificationsAction } from "@/app/actions";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "@/components/tables/notifications-columns";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
 
 export function NotificationHistory({ notifications }: { notifications: Notification[] }) {
   const [isPending, startTransition] = useTransition();
+  const isMobile = useMediaQuery("(max-width: 768px)");
   
   const handleClearHistory = () => {
       if (confirm("Are you sure you want to delete ALL notification history? This action is irreversible.")) {
@@ -19,6 +23,15 @@ export function NotificationHistory({ notifications }: { notifications: Notifica
           });
       }
   }
+
+  const mobileColumnVisibility = {
+    userId: false,
+    title: true,
+    message: true,
+    status: false,
+    sent: true,
+  }
+
 
   return (
     <div className="space-y-4">
@@ -40,6 +53,7 @@ export function NotificationHistory({ notifications }: { notifications: Notifica
             data={notifications}
             filterColumnId="title"
             filterPlaceholder="Filter by title..."
+            initialColumnVisibility={isMobile ? mobileColumnVisibility : {}}
         />
         </>
       )}
