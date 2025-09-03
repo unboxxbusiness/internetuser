@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, LayoutGrid, ShoppingCart, LifeBuoy, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Dock, DockIcon } from './ui/dock';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const navigationItems = [
   { href: "/user/dashboard", icon: Home, label: "Home" },
@@ -18,25 +25,34 @@ export function BottomNavBar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t">
-      <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
-        {navigationItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "inline-flex flex-col items-center justify-center px-5 hover:bg-muted group",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <item.icon className="w-5 h-5 mb-1" />
-              <span className="text-xs">{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <div className="fixed bottom-4 left-0 z-50 w-full">
+      <TooltipProvider>
+        <div className="flex justify-center">
+            <Dock>
+                {navigationItems.map((item) => (
+                    <DockIcon key={item.href}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Link
+                                    href={item.href}
+                                    className={cn(
+                                        "flex h-12 w-12 items-center justify-center rounded-full",
+                                        pathname.startsWith(item.href) ? "bg-primary/10 text-primary" : "bg-transparent text-muted-foreground"
+                                    )}
+                                >
+                                    <item.icon className="h-5 w-5" />
+                                    <span className="sr-only">{item.label}</span>
+                                </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{item.label}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </DockIcon>
+                ))}
+            </Dock>
+        </div>
+      </TooltipProvider>
     </div>
   );
 }
