@@ -1,15 +1,12 @@
 
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { AppUser } from "@/app/auth/actions";
-import { getUserNotifications as getUserNotificationsServer } from "@/lib/firebase/server-actions";
 import {
     markNotificationAsReadAction,
     deleteNotificationAction,
-    deleteAllUserNotificationsAction,
     archiveNotificationAction,
     archiveAllReadNotificationsAction,
 } from "@/app/actions";
@@ -21,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, Archive, ArchiveRestore, Loader2, Check, LifeBuoy } from "lucide-react";
+import { Bell, CheckCircle, DollarSign, AlertTriangle, Trash2, Archive, Check, LifeBuoy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,65 +66,107 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const fetchNotifications = async (uid: string) => {
-      const userNotifications = await getUserNotificationsServer(uid);
-      setNotifications(userNotifications);
-  }
-
-  const inboxNotifications = notifications.filter(n => !n.isArchived);
-  const archivedNotifications = notifications.filter(n => n.isArchived);
-  const unreadCount = inboxNotifications.filter(n => !n.isRead).length;
-  const readCount = inboxNotifications.filter(n => n.isRead).length;
-
   const handleNotificationClick = async (notification: NotificationType) => {
       if (!notification.isRead) {
         await markNotificationAsReadAction(notification.id);
+        setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
       }
       if (notification.type === 'support' && notification.relatedId) {
           router.push(`/user/support/${notification.relatedId}`);
       }
   };
 
-
-  const handleMarkAsRead = (id: string) => {
+  const handleAction = (action: (id: string) => Promise<any>, id: string) => {
     startTransition(async () => {
-      await markNotificationAsReadAction(id);
-      if(user) await fetchNotifications(user.uid);
-    });
-  };
-
-  const handleArchive = (id: string) => {
-    startTransition(async () => {
-      await archiveNotificationAction(id);
-      if(user) await fetchNotifications(user.uid);
+        await action(id);
+        const res = await fetch(`/api/user/${user.uid}/notifications`);
+        const updatedNotifications = await res.json();
+        setNotifications(updatedNotifications);
     });
   }
 
-  const handleArchiveAllRead = () => {
+  const handleBulkAction = (action: () => Promise<any>) => {
       startTransition(async () => {
-          await archiveAllReadNotificationsAction();
-          if(user) await fetchNotifications(user.uid);
+          await action();
+          const res = await fetch(`/api/user/${user.uid}/notifications`);
+          const updatedNotifications = await res.json();
+          setNotifications(updatedNotifications);
       });
-  };
-  
-  const handleDelete = (id: string) => {
-      startTransition(async () => {
-          await deleteNotificationAction(id);
-          if(user) await fetchNotifications(user.uid);
-      });
-  };
+  }
 
-  const handleDeleteAll = (forArchived: boolean) => {
-      const notificationsToDelete = forArchived ? archivedNotifications : inboxNotifications;
-      if (confirm(`Are you sure you want to delete all ${forArchived ? 'archived' : 'inbox'} notifications?`)) {
-        startTransition(async () => {
-          for (const notification of notificationsToDelete) {
-            await deleteNotificationAction(notification.id);
-          }
-          if(user) await fetchNotifications(user.uid);
-        });
+
+  const inboxNotifications = notifications.filter(n => !n.isArchived);
+  const archivedNotifications = notifications.filter(n => n.isArchived);
+  const unreadCount = inboxNotifications.filter(n => !n.isRead).length;
+  const readCount = inboxNotifications.filter(n => n.isRead).length;
+
+  const renderNotificationList = (list: NotificationType[], isArchivedList: boolean) => {
+      if (list.length === 0) {
+          return (
+             <div className="text-center text-muted-foreground py-12 flex flex-col items-center">
+                {isArchivedList ? (
+                    <>
+                        <Archive className="w-16 h-16 mb-4 text-primary" />
+                        <p className="text-lg font-medium">No archived notifications.</p>
+                        <p className="text-sm">You can archive notifications from your inbox.</p>
+                    </>
+                ) : (
+                    <>
+                        <Bell className="w-16 h-16 mb-4 text-primary" />
+                        <p className="text-lg font-medium">Your inbox is empty.</p>
+                        <p className="text-sm">We'll let you know when there's something new.</p>
+                    </>
+                )}
+            </div>
+          )
       }
-  };
+
+      return (
+        <div className="space-y-4">
+            {list.map((notification) => (
+            <div
+                key={notification.id}
+                className={cn(
+                "flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50",
+                !notification.isRead && "bg-muted/40",
+                notification.type === 'support' && 'cursor-pointer'
+                )}
+                onClick={() => handleNotificationClick(notification)}
+            >
+                <div className="mt-1">
+                {getNotificationIcon(notification.type)}
+                </div>
+                <div className="flex-1 space-y-1">
+                <div className="flex items-center justify-between">
+                    <p className={cn("text-sm font-medium leading-none", !notification.isRead && "font-bold")}>
+                        {notification.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        {timeAgo(notification.createdAt)}
+                    </p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    {notification.message}
+                </p>
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2" onClick={(e) => e.stopPropagation()}>
+                {!notification.isRead && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAction(markNotificationAsReadAction, notification.id)} disabled={isPending} title="Mark as read">
+                        <Check className="h-4 w-4" />
+                    </Button>
+                )}
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-8 w-8" onClick={() => handleAction(archiveNotificationAction, notification.id)} disabled={isPending} title="Archive notification">
+                    <Archive className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => handleAction(deleteNotificationAction, notification.id)} disabled={isPending} title="Delete notification">
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+                </div>
+            </div>
+            ))}
+        </div>
+      )
+  }
 
   return (
     <Tabs defaultValue="inbox" className="space-y-4">
@@ -142,7 +181,7 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
         <TabsContent value="inbox">
             <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <CardTitle>Inbox</CardTitle>
                         <CardDescription>
@@ -150,69 +189,14 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handleArchiveAllRead} disabled={isPending || readCount === 0}>
+                    <Button variant="outline" size="sm" onClick={() => handleBulkAction(archiveAllReadNotificationsAction)} disabled={isPending || readCount === 0}>
                         <Archive className="mr-2 h-4 w-4" /> Archive all read
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDeleteAll(false)} disabled={isPending || inboxNotifications.length === 0}>
-                        <Trash2 className="mr-2 h-4 w-4" /> Clear Inbox
                     </Button>
                     </div>
                 </div>
             </CardHeader>
             <CardContent>
-                {inboxNotifications.length > 0 ? (
-                <div className="space-y-4">
-                    {inboxNotifications.map((notification) => (
-                    <div
-                        key={notification.id}
-                        className={cn(
-                        "flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50",
-                        !notification.isRead && "bg-muted/40",
-                        notification.type === 'support' && 'cursor-pointer'
-                        )}
-                        onClick={() => handleNotificationClick(notification)}
-                    >
-                        <div className="mt-1">
-                        {getNotificationIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                            <p className={cn("text-sm font-medium leading-none", !notification.isRead && "font-bold")}>
-                                {notification.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                {timeAgo(notification.createdAt)}
-                            </p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                            {notification.message}
-                        </p>
-                        </div>
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        {!notification.isRead && (
-                            <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notification.id)} disabled={isPending} title="Mark as read">
-                                <Check className="h-4 w-4" />
-                            </Button>
-                        )}
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={() => handleArchive(notification.id)} disabled={isPending} title="Archive notification">
-                            <Archive className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(notification.id)} disabled={isPending} title="Delete notification">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                        </div>
-                    </div>
-                    ))}
-                </div>
-                ) : (
-                <div className="text-center text-muted-foreground py-12 flex flex-col items-center">
-                    <Bell className="w-16 h-16 mb-4 text-primary" />
-                    <p className="text-lg font-medium">Your inbox is empty.</p>
-                    <p className="text-sm">
-                    We'll let you know when there's something new.
-                    </p>
-                </div>
-                )}
+                {renderNotificationList(inboxNotifications, false)}
             </CardContent>
             </Card>
         </TabsContent>
@@ -226,52 +210,10 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
                     Notifications you have archived.
                     </CardDescription>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => handleDeleteAll(true)} disabled={isPending || archivedNotifications.length === 0}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Clear Archive
-                </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                {archivedNotifications.length > 0 ? (
-                <div className="space-y-4">
-                    {archivedNotifications.map((notification) => (
-                    <div
-                        key={notification.id}
-                        className="flex items-start gap-4 p-4 rounded-lg border transition-colors hover:bg-muted/50"
-                    >
-                        <div className="mt-1">
-                        {getNotificationIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium leading-none text-muted-foreground">
-                                {notification.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                {timeAgo(notification.createdAt)}
-                            </p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                            {notification.message}
-                        </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(notification.id)} disabled={isPending} title="Delete notification">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                        </div>
-                    </div>
-                    ))}
-                </div>
-                ) : (
-                <div className="text-center text-muted-foreground py-12 flex flex-col items-center">
-                    <Archive className="w-16 h-16 mb-4 text-primary" />
-                    <p className="text-lg font-medium">No archived notifications.</p>
-                    <p className="text-sm">
-                    You can archive notifications from your inbox.
-                    </p>
-                </div>
-                )}
+                {renderNotificationList(archivedNotifications, true)}
             </CardContent>
             </Card>
         </TabsContent>

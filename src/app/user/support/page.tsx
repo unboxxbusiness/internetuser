@@ -26,14 +26,14 @@ export default async function UserSupportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">My Support Tickets</h2>
           <p className="text-muted-foreground">
             Track and manage your support requests.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="hidden sm:inline-flex">
           <Link href="/user/support/new">
             <PlusCircle className="mr-2 h-4 w-4" /> Create New Ticket
           </Link>
