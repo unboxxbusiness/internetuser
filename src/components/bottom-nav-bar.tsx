@@ -23,13 +23,13 @@ import { logout } from '@/app/auth/actions';
 const mainNavItems = [
   { href: "/user/dashboard", icon: Home, label: "Home" },
   { href: "/user/plans", icon: LayoutGrid, label: "Plans" },
-  { href: "/user/support", icon: LifeBuoy, label: "Support" },
   { href: "/user/profile", icon: Settings, label: "Profile" },
 ];
 
 const moreNavItems = [
     { href: "/user/billing", icon: ShoppingCart, label: "Billing" },
     { href: "/user/notifications", icon: Bell, label: "Notifications" },
+    { href: "/user/support", icon: LifeBuoy, label: "Support" },
 ]
 
 export function BottomNavBar() {
