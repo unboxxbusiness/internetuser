@@ -13,9 +13,9 @@ export function UserPaymentTable({ payments, user }: { payments: Payment[], user
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   const mobileColumnVisibility = {
-      id: false,
-      date: true,
-      plan: true,
+      id: true,
+      date: false,
+      plan: false,
       amount: true,
       status: false,
       actions: true,
