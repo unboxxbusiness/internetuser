@@ -14,7 +14,7 @@ export function UserSupportTicketTable({ tickets }: { tickets: SupportTicket[] }
       subject: true,
       status: true,
       priority: false,
-      lastUpdated: true,
+      lastUpdated: false,
       actions: true,
   }
   
