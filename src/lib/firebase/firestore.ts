@@ -295,3 +295,28 @@ export async function getNotifications(db: Firestore): Promise<Notification[]> {
     }) as Notification;
   });
 }
+
+export async function getNotification(db: Firestore, id: string): Promise<Notification | null> {
+  const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(id);
+  const docSnap = await docRef.get();
+  if (!docSnap.exists) {
+    return null;
+  }
+  const data = docSnap.data();
+  if (!data) return null;
+  
+  return toSerializableObject({
+    id: docSnap.id,
+    ...data,
+  }) as Notification;
+}
+
+export async function deleteNotification(db: Firestore, id: string): Promise<void> {
+    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(id);
+    await docRef.delete();
+}
+
+export async function updateNotification(db: Firestore, id: string, data: Partial<Notification>): Promise<void> {
+    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(id);
+    await docRef.update(data);
+}

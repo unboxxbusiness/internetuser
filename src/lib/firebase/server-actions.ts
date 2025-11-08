@@ -21,6 +21,9 @@ import {
     getUserPayments as getUserPaymentsFirestore,
     createNotification as createNotificationFirestore,
     getNotifications as getNotificationsFirestore,
+    getNotification as getNotificationFirestore,
+    deleteNotification as deleteNotificationFirestore,
+    updateNotification as updateNotificationFirestore,
 } from "./firestore";
 import type { AppUser } from "@/app/auth/actions";
 import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
@@ -110,7 +113,7 @@ export async function sendPushNotification(title: string, body: string, userId?:
         console.log(`Successfully sent ${response.successCount} messages`);
         
         // Save to notification history
-        if (response.successCount > 0) {
+        if (response.successCount > 0 && !userId) { // Only log bulk notifications
             await createNotificationFirestore(db, title, body);
         }
 
@@ -132,4 +135,16 @@ export async function sendPushNotification(title: string, body: string, userId?:
 
 export async function getNotifications(): Promise<Notification[]> {
     return getNotificationsFirestore(db);
+}
+
+export async function getNotification(id: string): Promise<Notification | null> {
+    return getNotificationFirestore(db, id);
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+    return deleteNotificationFirestore(db, id);
+}
+
+export async function updateNotification(id: string, data: Partial<Notification>): Promise<void> {
+    return updateNotificationFirestore(db, id, data);
 }

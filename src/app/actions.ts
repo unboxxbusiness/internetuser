@@ -13,13 +13,14 @@ import {
     getPlan as getPlanServer,
     getUsers as getUsersServer,
     createUser,
-    sendPushNotification
+    sendPushNotification,
+    deleteNotification as deleteNotificationServer,
+    updateNotification as updateNotificationServer,
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
-import { revalidateTag } from "next/cache";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -361,4 +362,28 @@ export async function sendBulkNotificationAction(prevState: any, formData: FormD
         console.error("Error sending bulk notification:", error);
         return { error: 'Failed to send notifications.' };
     }
+}
+
+
+export async function deleteNotificationAction(id: string) {
+  try {
+    await deleteNotificationServer(id);
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    return { error: "Failed to delete notification." };
+  }
+  revalidatePath("/admin/notifications");
+}
+
+export async function updateNotificationAction(id: string, prevState: any, formData: FormData) {
+  try {
+    const subject = formData.get("subject") as string;
+    const message = formData.get("message") as string;
+    await updateNotificationServer(id, { subject, message });
+  } catch (error) {
+    console.error("Error updating notification:", error);
+    return { error: "Failed to update notification." };
+  }
+  revalidatePath("/admin/notifications");
+  redirect("/admin/notifications");
 }
