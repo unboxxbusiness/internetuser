@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Notification } from "@/lib/types"
+import { ClientTimeAgo } from "../client-time-ago"
 
 // This is a placeholder as deleting notifications might not be implemented yet.
 // If not, this can be built out later.
@@ -37,8 +38,7 @@ export const columns: ColumnDef<Notification>[] = [
       )
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue("sentAt"))
-      return <div>{date.toLocaleString()}</div>
+      return <ClientTimeAgo date={row.getValue("sentAt")} />
     },
   },
   {
