@@ -45,8 +45,8 @@ export async function getUser(): Promise<AppUser | null> {
     };
   } catch (error) {
     console.error("Error verifying session cookie:", error);
-    // Clear the invalid cookie
-    cookies().delete("session");
+    // An invalid cookie is not a critical error, just treat the user as logged out.
+    // The invalid cookie will be overwritten on next login or cleared on logout.
     return null;
   }
 }
