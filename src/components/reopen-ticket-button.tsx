@@ -13,6 +13,7 @@ export function ReopenTicketButton({ ticketId }: { ticketId: string }) {
       startTransition(async () => {
         const result = await reopenSupportTicketAction(ticketId);
         if (result?.error) {
+          // This will now only be shown if the action explicitly returns an error.
           alert(`Error: ${result.error}`);
         }
       });
