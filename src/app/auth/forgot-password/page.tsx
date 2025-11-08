@@ -31,12 +31,24 @@ function SubmitButton() {
 export default function ForgotPasswordPage() {
   const [state, formAction] = useFormState(resetPasswordAction, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
 
    useEffect(() => {
     if (state?.message) {
       setShowSuccess(true);
     }
   }, [state]);
+
+  const handleFormAction = (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        setClientError("Please enter a valid email address.");
+        return;
+    }
+    setClientError(null);
+    formAction(formData);
+  }
 
   return (
      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] w-full">
@@ -64,7 +76,7 @@ export default function ForgotPasswordPage() {
                     </AlertDescription>
                 </Alert>
             ) : (
-                <form action={formAction} className="grid gap-4">
+                <form action={handleFormAction} className="grid gap-4" noValidate>
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -75,12 +87,12 @@ export default function ForgotPasswordPage() {
                         required
                         />
                     </div>
-                     {state?.error && (
+                     {(clientError || state?.error) && (
                         <Alert variant="destructive">
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>
-                                {state.error}
+                                {clientError || state?.error}
                             </AlertDescription>
                         </Alert>
                     )}
