@@ -17,6 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TicketReplyForm } from "@/components/ticket-reply-form";
 import { CloseTicketButton } from "@/components/close-ticket-button";
 import { TicketMessages } from "@/components/ticket-messages";
+import { ReopenTicketButton } from "@/components/reopen-ticket-button";
 
 
 export default async function TicketDetailPage({ params }: { params: { id: string } }) {
@@ -54,7 +55,11 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets
            </Link>
          </Button>
-         {ticket.status !== 'closed' && <CloseTicketButton ticketId={ticket.id} />}
+         {ticket.status !== 'closed' ? (
+            <CloseTicketButton ticketId={ticket.id} />
+         ) : (
+            <ReopenTicketButton ticketId={ticket.id} />
+         )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -74,6 +79,17 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
             <TicketMessages messages={ticket.messages} />
 
             {ticket.status !== 'closed' && <TicketReplyForm ticketId={ticket.id} />}
+            
+            {ticket.status === 'closed' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Ticket Closed</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                       <p className="text-muted-foreground">This ticket has been closed. You can re-open it to continue the conversation.</p>
+                    </CardContent>
+                </Card>
+            )}
 
         </div>
 
@@ -93,11 +109,11 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
                     </div>
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Created</span>
-                        <span>{ticket.createdAt?.toLocaleString()}</span>
+                        <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : 'N/A'}</span>
                     </div>
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Last Updated</span>
-                        <span>{ticket.lastUpdated?.toLocaleString()}</span>
+                        <span>{ticket.lastUpdated ? new Date(ticket.lastUpdated).toLocaleString() : 'N/A'}</span>
                     </div>
                 </CardContent>
             </Card>
