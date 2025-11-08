@@ -71,7 +71,7 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Users
                 </Link>
                 </Button>
-                 <WhatsAppSupportButton user={userData} />
+                 <WhatsAppSupportButton user={userData} isAdmin={true} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

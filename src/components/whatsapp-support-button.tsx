@@ -1,24 +1,20 @@
-
 "use client";
 
 import { AppUser } from "@/app/auth/actions";
 import { Button } from "./ui/button";
 import { MessageSquare } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 interface WhatsAppSupportButtonProps {
     user?: AppUser;
+    isAdmin?: boolean;
 }
 
-export function WhatsAppSupportButton({ user }: WhatsAppSupportButtonProps) {
-    const pathname = usePathname();
-    const isAdminPath = pathname.startsWith('/admin');
-    
+export function WhatsAppSupportButton({ user, isAdmin = false }: WhatsAppSupportButtonProps) {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "1234567890"; // Fallback number
     
-    let message = "Hello, I need some help."; // Default for users
+    let message = "Hello, I need some help."; // Default for unauthenticated users
     
-    if (user && isAdminPath) {
+    if (user && isAdmin) {
         // Message from an admin to a user
         message = `Hello ${user.name}, this is a message from support regarding your account.`;
     } else if (user) {
