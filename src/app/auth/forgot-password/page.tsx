@@ -90,10 +90,12 @@ export default function ForgotPasswordPage() {
                      {(clientError || state?.error) && (
                         <Alert variant="destructive">
                             <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>
-                                {clientError || state?.error}
-                            </AlertDescription>
+                            <div className="ml-7">
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {clientError || state?.error}
+                                </AlertDescription>
+                            </div>
                         </Alert>
                     )}
                     <SubmitButton />
