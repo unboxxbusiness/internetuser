@@ -82,4 +82,30 @@
         50% { transform: translateY(-10px); }
         100% { transform: translateY(0px); }
     }
+
+    .meteor {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background-color: #ccc;
+      animation: meteor-fall linear infinite;
+    }
+
+    .meteor::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 300px;
+      height: 1px;
+      background: linear-gradient(to left, #ccc, transparent);
+    }
+
+    @keyframes meteor-fall {
+      to {
+        transform: translateX(-500px) translateY(500px);
+        opacity: 0;
+      }
+    }
 }

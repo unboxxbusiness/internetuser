@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { CTASection } from "@/components/cta-section";
 import Image from "next/image";
 import { AuroraHero } from "@/components/aurora-hero";
+import { Meteors } from "@/components/ui/meteors";
 
 const whyChooseUsPoints = [
   {
@@ -95,7 +96,27 @@ export default function LandingPage() {
 
   return (
     <div className="bg-background text-foreground">
-      <AuroraHero />
+      <div className="relative">
+          <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-blue-500 to-teal-500 transform scale-[0.80] bg-red-500 rounded-full blur-3xl" />
+          <div className="relative shadow-xl bg-gray-900 border border-gray-800  px-4 py-8 h-full overflow-hidden rounded-2xl flex flex-col justify-end items-start">
+            <Meteors number={20} />
+             <main id="about" className="w-full min-h-screen flex flex-col items-center justify-center px-6 py-20 text-white">
+                <div className="max-w-6xl mx-auto text-center">
+                    <div className="mb-8 float-animation">
+                        <h1 className="md:text-6xl lg:text-7xl leading-[1.1] text-5xl font-bold tracking-tight mb-4">
+                            Fast, Reliable, Local Internet
+                            <span className="gradient-text block tracking-tight">for Aali Village, Delhi.</span>
+                        </h1>
+                        <p className="md:text-xl max-w-3xl leading-relaxed text-lg font-light text-white/80 mx-auto">Experience smooth streaming, lag-free gaming, and dependable connectivity — powered by your trusted local ISP right here in Aali Village.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <Link href="/auth/signup" className="primary-button px-6 py-3 rounded-lg font-medium text-sm min-w-[180px] text-center">🚀 Check Availability</Link>
+                        <Link href="tel:9999999999" className="glass-button min-w-[180px] text-sm font-medium rounded-lg px-6 py-3 text-center">📞 Call Now</Link>
+                    </div>
+                </div>
+            </main>
+          </div>
+      </div>
       
       {/* Plans & Pricing */}
       <section id="plans" className="py-16 md:py-24">

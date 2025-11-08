@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import Link from 'next/link';
+import { Meteors } from "./ui/meteors";
 
 // --- INTERNAL ANIMATED BACKGROUND COMPONENT ---
 const AuroraBackground: React.FC = () => {
@@ -63,8 +64,9 @@ export const AuroraHero: React.FC = () => {
 
   return (
     <div className="relative">
-      <AuroraBackground />
-      <div className="relative z-10">
+      <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-blue-500 to-teal-500 transform scale-[0.80] bg-red-500 rounded-full blur-3xl" />
+        <div className="relative shadow-xl bg-gray-900 border border-gray-800  px-4 py-8 h-full overflow-hidden rounded-2xl flex flex-col justify-end items-start">
+        <Meteors number={20} />
         <main id="about" className="w-full min-h-screen flex flex-col items-center justify-center px-6 py-20 text-white">
             <div className="max-w-6xl mx-auto text-center">
                 <div className="mb-8 float-animation">
