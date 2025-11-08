@@ -96,15 +96,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="#"
-                    className="ml-auto inline-block text-sm underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -129,6 +121,14 @@ export default function LoginPage() {
                     </span>
                   </button>
                 </div>
+                 <div className="text-right">
+                    <Link
+                        href="/auth/forgot-password"
+                        className="text-sm underline"
+                    >
+                        Forgot your password?
+                    </Link>
+                 </div>
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
