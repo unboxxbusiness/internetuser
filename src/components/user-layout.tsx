@@ -24,7 +24,6 @@ export function UserLayout({ user, branding, children }: UserLayoutProps) {
         <UserSidebar user={user} branding={branding} />
         <div className="flex-1 flex flex-col">
           <main className="flex-1 p-4 sm:p-8 pt-6">{children}</main>
-          <Footer branding={branding} />
         </div>
       </>
     );
