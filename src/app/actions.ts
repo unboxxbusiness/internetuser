@@ -12,7 +12,6 @@ import {
     updateHeroSettings as updateHeroSettingsServer,
     getPlan as getPlanServer,
     getUsers as getUsersServer,
-    sendPushNotification,
     createUser,
 } from "@/lib/firebase/server-actions";
 
