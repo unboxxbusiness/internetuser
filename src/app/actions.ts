@@ -40,16 +40,19 @@ export async function deleteUserAction(uid: string) {
 export async function resetPasswordAction(email: string): Promise<{ message?: string; error?: string }> {
     try {
         const link = await adminAuth.generatePasswordResetLink(email);
-        // Here you would typically send an email with this link.
-        // For this example, we'll just log it and return a success message.
-        console.log("Password reset link:", link);
+        // In a real app, you would typically send an email with the link.
+        // For this example, we'll just return a success message.
+        console.log("Password reset link (for demonstration):", link);
         return { message: `A password reset link has been sent to ${email}.` };
     } catch (error: any) {
         console.error("Error generating password reset link:", error);
-         if (error.code === 'auth/user-not-found') {
+        if (error.code === 'auth/user-not-found') {
             return { error: "User with this email does not exist." };
         }
-        return { error: "Failed to send password reset email." };
+        if (error.code === 'auth/invalid-email') {
+            return { error: "Invalid email address format." };
+        }
+        return { error: "Failed to send password reset email. Please try again later." };
     }
 }
 
