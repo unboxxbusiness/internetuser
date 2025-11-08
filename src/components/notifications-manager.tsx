@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Notification as NotificationType } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ClientTimeAgo } from "./client-time-ago";
 
 
 function getNotificationIcon(type: NotificationType['type']) {
@@ -39,21 +40,6 @@ function getNotificationIcon(type: NotificationType['type']) {
         default:
             return <Bell className="h-5 w-5 text-muted-foreground" />;
     }
-}
-
-function timeAgo(date: Date): string {
-  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + " years ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + " months ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + " days ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + " hours ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + " minutes ago";
-  return Math.floor(seconds) + " seconds ago";
 }
 
 interface NotificationsManagerProps {
@@ -148,7 +134,7 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
                         {notification.title}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                        {timeAgo(notification.createdAt)}
+                        <ClientTimeAgo date={notification.createdAt} />
                     </p>
                 </div>
                 <p className="text-sm text-muted-foreground">
