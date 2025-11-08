@@ -10,17 +10,13 @@ import {
     getHeroSettings as getHeroSettingsFirestore,
     getPayments as getPaymentsFirestore,
     getUserSubscription as getUserSubscriptionFirestore,
-    getSupportTickets as getSupportTicketsFirestore,
-    getSupportTicket as getSupportTicketFirestore,
     getAllNotifications as getAllNotificationsFirestore,
     getUserSettings as getUserSettingsFirestore,
     getUser as getUserFirestore,
     createUser as createUserFirestore,
     createNotification as createNotificationFirestore,
-    updateSupportTicket as updateSupportTicketFirestore,
     deleteAllNotifications as deleteAllNotificationsFirestore,
     updateUser as updateUserFirestore,
-    createSupportTicket as createSupportTicketFirestore,
     updateUserSettings as updateUserSettingsFirestore,
     updateHeroSettings as updateHeroSettingsFirestore,
     updateBrandingSettings as updateBrandingSettingsFirestore,
@@ -32,11 +28,9 @@ import {
     archiveAllReadUserNotifications as archiveAllReadUserNotificationsFirestore,
     getUserPayments as getUserPaymentsFirestore,
     getUserNotifications as getUserNotificationsFirestore,
-    getUserSupportTickets as getUserSupportTicketsFirestore,
-    addTicketMessage as addTicketMessageFirestore,
 } from "./firestore";
 import type { AppUser } from "@/app/auth/actions";
-import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, SupportTicket, TicketMessage, UserSettings } from "../types";
+import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
 
 export async function getUsers(): Promise<AppUser[]> {
     return getUsersFirestore(db);
@@ -78,18 +72,6 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     return getUserSubscriptionFirestore(db, userId);
 }
 
-export async function getSupportTickets(): Promise<SupportTicket[]> {
-    return getSupportTicketsFirestore(db);
-}
-
-export async function getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
-    return getUserSupportTicketsFirestore(db, userId);
-}
-
-export async function getSupportTicket(id: string): Promise<SupportTicket | null> {
-    return getSupportTicketFirestore(db, id);
-}
-
 export async function getAllNotifications(): Promise<Notification[]> {
     return getAllNotificationsFirestore(db);
 }
@@ -106,10 +88,6 @@ export async function createNotification(notificationData: Omit<Notification, 'i
     return createNotificationFirestore(db, notificationData);
 }
 
-export async function updateSupportTicket(ticketId: string, data: Partial<SupportTicket>): Promise<void> {
-    return updateSupportTicketFirestore(db, ticketId, data);
-}
-
 export async function deleteAllNotifications(): Promise<void> {
     return deleteAllNotificationsFirestore(db);
 }
@@ -117,15 +95,6 @@ export async function deleteAllNotifications(): Promise<void> {
 export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
     return updateUserFirestore(db, uid, data);
 }
-
-export async function createSupportTicket(ticketData: Omit<SupportTicket, 'id' | 'messages'>): Promise<string> {
-    return createSupportTicketFirestore(db, ticketData);
-}
-
-export async function addTicketMessage(ticketId: string, message: TicketMessage): Promise<void> {
-    return addTicketMessageFirestore(db, ticketId, message);
-}
-
 
 export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
     return updateUserSettingsFirestore(db, userId, settings);

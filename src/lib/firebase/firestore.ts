@@ -4,13 +4,12 @@
 import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
-import type { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings, TicketMessage } from "@/lib/types";
+import type { SubscriptionPlan, Payment, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings } from "@/lib/types";
 import type { Firestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
-const SUPPORT_TICKETS_COLLECTION = "supportTickets";
 const BRANDING_SETTINGS_COLLECTION = "branding";
 const NOTIFICATIONS_COLLECTION = "notifications";
 const LANDING_PAGE_COLLECTION = "landingPage";
@@ -207,73 +206,6 @@ export async function getUserPayments(db: Firestore, userId: string): Promise<Pa
             ...data,
         }) as Payment;
     });
-}
-
-
-// Support Ticket Functions
-export async function createSupportTicket(db: Firestore, ticketData: Omit<SupportTicket, 'id' | 'messages'>): Promise<string> {
-    const docRef = await db.collection(SUPPORT_TICKETS_COLLECTION).add({
-        ...ticketData,
-        createdAt: FieldValue.serverTimestamp(),
-        lastUpdated: FieldValue.serverTimestamp(),
-    });
-    return docRef.id;
-}
-
-export async function addTicketMessage(db: Firestore, ticketId: string, message: Omit<TicketMessage, 'timestamp'>): Promise<void> {
-    const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId);
-    const messageWithTimestamp = {
-        ...message,
-        timestamp: FieldValue.serverTimestamp()
-    };
-    await docRef.update({
-        messages: FieldValue.arrayUnion(messageWithTimestamp)
-    });
-}
-
-export async function updateSupportTicket(db: Firestore, ticketId: string, data: Partial<SupportTicket>): Promise<void> {
-    const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId);
-    await docRef.update({ ...data, lastUpdated: FieldValue.serverTimestamp() });
-}
-
-export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]> {
-  const q = db.collection(SUPPORT_TICKETS_COLLECTION).orderBy("lastUpdated", "desc");
-  const snapshot = await q.get();
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return toSerializableObject({
-      id: doc.id,
-      ...data,
-    }) as SupportTicket;
-  });
-}
-
-export async function getUserSupportTickets(db: Firestore, userId: string): Promise<SupportTicket[]> {
-    const q = db.collection(SUPPORT_TICKETS_COLLECTION).where('userId', '==', userId).orderBy('lastUpdated', 'desc');
-    const snapshot = await q.get();
-
-    return snapshot.docs.map((doc) => {
-        const data = doc.data();
-         return toSerializableObject({
-          id: doc.id,
-          ...data,
-        }) as SupportTicket;
-    });
-}
-
-export async function getSupportTicket(db: Firestore, id: string): Promise<SupportTicket | null> {
-    const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(id);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-        return null;
-    }
-    const data = docSnap.data();
-    if (!data) return null;
-
-     return toSerializableObject({
-        id: docSnap.id,
-        ...data,
-    }) as SupportTicket;
 }
 
 // Branding Functions

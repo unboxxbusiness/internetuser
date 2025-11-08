@@ -12,6 +12,7 @@ import {
   LifeBuoy,
 } from "lucide-react";
 import { CTASection } from "@/components/cta-section";
+import { WhatsAppSupportButton } from "@/components/whatsapp-support-button";
 
 const features = [
   {
@@ -50,9 +51,9 @@ const features = [
     index: 4,
   },
   {
-    title: "24/7 Customer Support",
+    title: "24/7 WhatsApp Support",
     description:
-      "Need help? Create and track support tickets directly from your dashboard, anytime you need assistance.",
+      "Need help? Chat with our support team directly on WhatsApp, anytime you need assistance.",
     icon: <LifeBuoy size={28} />,
     index: 5,
   },

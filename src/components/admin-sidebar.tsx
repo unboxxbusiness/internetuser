@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -13,7 +14,6 @@ import {
   Package,
   CreditCard,
   Bell,
-  LifeBuoy,
   SlidersHorizontal
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
@@ -41,7 +41,6 @@ const navigationItems: NavigationItem[] = [
   { id: "plans", name: "Plans", icon: Package, href: "/admin/plans" },
   { id: "payments", name: "Payments", icon: CreditCard, href: "/admin/payments" },
   { id: "notifications", name: "Notifications", icon: Bell, href: "/admin/notifications" },
-  { id: "support", name: "Support", icon: LifeBuoy, href: "/admin/support" },
   { id: "settings", name: "Settings", icon: SlidersHorizontal, href: "/admin/settings" },
 ];
 

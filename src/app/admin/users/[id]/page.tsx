@@ -5,7 +5,6 @@ import {
     getUser as getUserData,
     getUserSubscription,
     getUserPayments,
-    getUserSupportTickets,
 } from "@/lib/firebase/server-actions";
 import {
   Card,
@@ -18,12 +17,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Wifi, IndianRupee, LifeBuoy } from "lucide-react";
+import { ArrowLeft, Wifi, IndianRupee, MessageSquare, LifeBuoy } from "lucide-react";
 import { PaymentTable } from "@/components/payment-table";
-import { UserSupportTicketTable } from "@/components/user-support-ticket-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { StartChatDialog } from "@/components/start-chat-dialog";
+import { WhatsAppSupportButton } from "@/components/whatsapp-support-button";
 
 function getInitials(name?: string) {
   if (!name) return 'U';
@@ -59,10 +57,9 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
     }
     
     // Fetch all user-related data in parallel
-    const [subscription, payments, supportTickets] = await Promise.all([
+    const [subscription, payments] = await Promise.all([
         getUserSubscription(userData.uid),
         getUserPayments(userData.uid),
-        getUserSupportTickets(userData.uid)
     ]);
 
 
@@ -74,7 +71,7 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Users
                 </Link>
                 </Button>
-                 <StartChatDialog admin={adminUser} targetUser={userData} />
+                 <WhatsAppSupportButton user={userData} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,21 +143,6 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                         </CardHeader>
                         <CardContent>
                             <PaymentTable payments={payments} />
-                        </CardContent>
-                    </Card>
-
-                     <Card>
-                        <CardHeader>
-                           <CardTitle className="flex items-center gap-2">
-                                <LifeBuoy className="w-5 h-5 text-primary" />
-                                <span>Support Tickets</span>
-                            </CardTitle>
-                             <CardDescription>
-                                Support tickets submitted by this user.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <UserSupportTicketTable tickets={supportTickets} />
                         </CardContent>
                     </Card>
                 </div>

@@ -7,49 +7,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { PlusCircle } from "lucide-react";
 import { getUser } from "@/app/auth/actions";
-import { getUserSupportTickets } from "@/lib/firebase/server-actions";
-import { UserSupportTicketTable } from "@/components/user-support-ticket-table";
-import { SupportTicket } from "@/lib/types";
-import { FloatingActionButton } from "@/components/floating-action-button";
+import { LifeBuoy, MessageSquare } from "lucide-react";
+import { WhatsAppSupportButton } from "@/components/whatsapp-support-button";
 
 export default async function UserSupportPage() {
   const user = await getUser();
   if (!user) {
     redirect("/auth/login");
   }
-  
-  const tickets: SupportTicket[] = await getUserSupportTickets(user.uid);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">My Support Tickets</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Support</h2>
           <p className="text-muted-foreground">
-            Track and manage your support requests.
+            Get help and assistance from our team.
           </p>
         </div>
-        <Button asChild className="hidden sm:inline-flex">
-          <Link href="/user/support/new">
-            <PlusCircle className="mr-2 h-4 w-4" /> Create New Ticket
-          </Link>
-        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Ticket History</CardTitle>
-          <CardDescription>A list of your past and current support tickets.</CardDescription>
+          <CardTitle>Contact Support</CardTitle>
+          <CardDescription>
+            Have a question or need help with your service? Chat with us directly on WhatsApp for the fastest response.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-            <UserSupportTicketTable tickets={tickets} />
+        <CardContent className="flex flex-col items-center justify-center text-center gap-6 p-10">
+            <div className="bg-green-100 dark:bg-green-900/50 p-6 rounded-full">
+                <MessageSquare className="h-16 w-16 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="space-y-2">
+                <h3 className="text-xl font-semibold">Live Chat via WhatsApp</h3>
+                <p className="text-muted-foreground max-w-md">
+                    Our support team is available to assist you. Click the button below to start a conversation.
+                </p>
+            </div>
+            <WhatsAppSupportButton user={user} />
         </CardContent>
       </Card>
-      <FloatingActionButton href="/user/support/new" />
     </div>
   );
 }

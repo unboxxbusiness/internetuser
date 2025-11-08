@@ -8,14 +8,11 @@ import { getUser } from "./auth/actions";
 import { 
     updateUser as updateUserServer,
     updateBrandingSettings as updateBrandingSettingsServer,
-    createSupportTicket as createSupportTicketServer,
     updateUserSettings as updateUserSettingsServer,
     updateHeroSettings as updateHeroSettingsServer,
     getPlan as getPlanServer,
     getUsers as getUsersServer, 
     createNotification, 
-    getSupportTicket, 
-    updateSupportTicket,
     deleteAllNotifications as deleteAllNotificationsServer,
     updateNotification as updateNotificationServer,
     deleteNotification as deleteNotificationServer,
@@ -23,11 +20,10 @@ import {
     markAllUserNotificationsAsRead as markAllUserNotificationsAsReadServer,
     archiveNotification as archiveNotificationServer,
     archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
-    addTicketMessage,
     createUser,
 } from "@/lib/firebase/server-actions";
 
-import { BrandingSettings, HeroSettings, SupportTicket, UserSettings } from "@/lib/types";
+import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
 
@@ -218,112 +214,6 @@ export async function updateHeroAction(prevState: any, formData: FormData): Prom
     }
 }
 
-
-export async function createSupportTicketAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
-    const user = await getUser();
-    if (!user) {
-        return { error: 'You must be logged in to create a ticket.' };
-    }
-
-    const subject = formData.get('subject') as string;
-    const description = formData.get('description') as string;
-    const priority = formData.get('priority') as 'low' | 'medium' | 'high';
-
-    if (!subject || !description || !priority) {
-        return { error: 'Please fill out all fields.' };
-    }
-
-    const ticketData: Omit<SupportTicket, 'id' | 'messages' | 'createdAt' | 'lastUpdated'> = {
-        subject,
-        description,
-        priority,
-        userId: user.uid,
-        user: {
-            name: user.name || 'N/A',
-            email: user.email || 'N/A'
-        },
-        status: 'open',
-    };
-
-    try {
-        const ticketId = await createSupportTicketServer(ticketData);
-        await addTicketMessage(ticketId, {
-            sender: user.name || 'User',
-            senderRole: 'user',
-            message: description,
-        });
-
-    } catch (error) {
-        console.error('Error creating support ticket:', error);
-        return { error: 'Failed to create support ticket.' };
-    }
-    
-    revalidatePath('/user/support');
-    redirect('/user/support');
-}
-
-
-export async function adminCreateTicketAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string; ticketId?: string }> {
-    const adminUser = await getUser();
-    if (!adminUser || adminUser.role !== 'admin') {
-        return { error: 'You do not have permission to perform this action.' };
-    }
-
-    const subject = formData.get('subject') as string;
-    const message = formData.get('message') as string;
-    const targetUserId = formData.get('targetUserId') as string;
-    const targetUserName = formData.get('targetUserName') as string;
-    const targetUserEmail = formData.get('targetUserEmail') as string;
-
-    if (!subject || !message || !targetUserId || !targetUserName || !targetUserEmail) {
-        return { error: 'Please fill out all fields.' };
-    }
-
-    const ticketData: Omit<SupportTicket, 'id' | 'messages' | 'createdAt' | 'lastUpdated'> = {
-        subject,
-        description: `Conversation started by admin: ${adminUser.name}`,
-        priority: 'medium', // Default priority for admin-initiated chats
-        userId: targetUserId,
-        user: {
-            name: targetUserName,
-            email: targetUserEmail
-        },
-        status: 'open',
-    };
-
-    try {
-        const ticketId = await createSupportTicketServer(ticketData);
-        
-        // Add the admin's first message
-        await addTicketMessage(ticketId, {
-            sender: adminUser.name || 'Admin',
-            senderRole: 'admin',
-            message: message,
-        });
-        
-        // Notify the user that a chat has been started
-        await createNotification({
-            userId: targetUserId,
-            title: `A new message from support: "${subject}"`,
-            message: message,
-            type: 'support',
-            isRead: false,
-            isArchived: false,
-            relatedId: ticketId
-        });
-
-        revalidatePath(`/admin/support`);
-        revalidatePath(`/user/support`);
-
-        return { message: "Chat started successfully.", ticketId: ticketId };
-
-    } catch (error) {
-        console.error('Error creating ticket by admin:', error);
-        return { error: 'Failed to start chat.' };
-    }
-}
-
-
 export async function changeUserPasswordAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const user = await getUser();
     if (!user) {
@@ -373,109 +263,6 @@ export async function updateUserPreferencesAction(prevState: any, formData: Form
         return { error: "Failed to update preferences." };
     }
 }
-
-export async function replyToSupportTicketAction(ticketId: string, prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
-    const user = await getUser();
-    if (!user || user.role !== 'admin') {
-        return { error: "You do not have permission to perform this action." };
-    }
-
-    const reply = formData.get('reply') as string;
-    if (!reply) {
-        return { error: "Reply message cannot be empty." };
-    }
-    
-    try {
-        const ticket = await getSupportTicket(ticketId);
-        if (!ticket) {
-            return { error: "Ticket not found." };
-        }
-
-        await addTicketMessage(ticketId, {
-            sender: user.name || 'Admin',
-            senderRole: 'admin',
-            message: reply,
-        });
-        
-        await createNotification({
-            userId: ticket.userId,
-            title: `Reply to your ticket: "${ticket.subject}"`,
-            message: reply,
-            type: 'support',
-            isRead: false,
-            isArchived: false,
-            relatedId: ticketId
-        });
-
-        await updateSupportTicket(ticketId, { status: 'in-progress' });
-        revalidatePath(`/admin/support/${ticketId}`);
-        revalidatePath(`/user/support/${ticketId}`);
-        revalidatePath(`/user/notifications`);
-        return { message: "Your reply has been sent and the ticket status is now 'in-progress'." };
-
-    } catch (error) {
-        console.error("Error replying to ticket:", error);
-        return { error: "Failed to send reply." };
-    }
-}
-
-export async function userReplyToTicketAction(ticketId: string, prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
-    const user = await getUser();
-    if (!user) return { error: "You must be logged in to reply." };
-
-    const reply = formData.get('reply') as string;
-    if (!reply) return { error: "Reply message cannot be empty." };
-
-    try {
-        await addTicketMessage(ticketId, {
-            sender: user.name || 'User',
-            senderRole: 'user',
-            message: reply,
-        });
-        await updateSupportTicket(ticketId, { status: 'in-progress' });
-        revalidatePath(`/user/support/${ticketId}`);
-        revalidatePath(`/admin/support/${ticketId}`);
-        return { message: "Your reply has been submitted." };
-    } catch (error) {
-        console.error("Error submitting user reply:", error);
-        return { error: "Failed to submit reply." };
-    }
-}
-
-
-export async function closeSupportTicketAction(ticketId: string) {
-    const user = await getUser();
-    if (!user || user.role !== 'admin') {
-        return { error: "You do not have permission to perform this action." };
-    }
-
-    try {
-        await updateSupportTicket(ticketId, { status: 'closed' });
-        revalidatePath(`/admin/support/${ticketId}`);
-    } catch (error) {
-        console.error("Error closing ticket:", error);
-        return { error: "Failed to close the ticket." };
-    }
-}
-
-export async function reopenSupportTicketAction(ticketId: string): Promise<{ message?: string; error?: string }> {
-    const user = await getUser();
-    if (!user) {
-        return { error: "You must be logged in to perform this action." };
-    }
-    
-    try {
-        await updateSupportTicket(ticketId, { status: 'open' });
-        revalidatePath(`/user/support/${ticketId}`);
-        revalidatePath(`/admin/support/${ticketId}`);
-        revalidatePath(`/admin/support`);
-        return { message: "Ticket re-opened successfully." };
-    } catch (error) {
-        console.error("Error reopening ticket:", error);
-        return { error: "Failed to reopen the ticket." };
-    }
-}
-
 
 export async function createPayUTransactionAction(planId: string) {
   const user = await getUser();
@@ -668,5 +455,3 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
 
     return results;
 }
-
-    

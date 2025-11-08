@@ -1,27 +1,4 @@
 
-export interface TicketMessage {
-    sender: string;
-    senderRole: 'user' | 'admin';
-    message: string;
-    timestamp: string;
-}
-
-export interface SupportTicket {
-    id: string;
-    userId: string;
-    subject: string;
-    description?: string;
-    user: {
-        name: string;
-        email: string;
-    };
-    status: 'open' | 'in-progress' | 'closed';
-    priority: 'low' | 'medium' | 'high';
-    createdAt?: string;
-    lastUpdated: string;
-    messages?: TicketMessage[];
-}
-
 export interface SubscriptionPlan {
   id: string;
   name: string;
