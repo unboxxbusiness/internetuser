@@ -3,7 +3,7 @@ import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
 import type { SubscriptionPlan, Payment, SupportTicket, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings, TicketMessage } from "@/lib/types";
-import type { Firestore, FieldValue } from "firebase-admin/firestore";
+import type { Firestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
@@ -223,16 +223,9 @@ export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]>
     const data = doc.data();
     return {
       id: doc.id,
-      userId: data.userId,
-      subject: data.subject,
-      description: data.description,
-      user: data.user,
-      status: data.status,
-      priority: data.priority,
-      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-      lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
-      messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
-    };
+      ...data,
+      messages: data.messages?.map((m: any) => ({...m})) || [],
+    } as SupportTicket;
   });
 }
 
@@ -243,17 +236,10 @@ export async function getUserSupportTickets(db: Firestore, userId: string): Prom
     return snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
-            id: doc.id,
-            userId: data.userId,
-            subject: data.subject,
-            description: data.description,
-            user: data.user,
-            status: data.status,
-            priority: data.priority,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-            lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
-            messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
-        };
+          id: doc.id,
+          ...data,
+          messages: data.messages?.map((m: any) => ({...m})) || [],
+        } as SupportTicket;
     });
 }
 
@@ -268,16 +254,9 @@ export async function getSupportTicket(db: Firestore, id: string): Promise<Suppo
 
     return {
         id: docSnap.id,
-        userId: data.userId,
-        subject: data.subject,
-        description: data.description,
-        user: data.user,
-        status: data.status,
-        priority: data.priority,
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-        lastUpdated: data.lastUpdated?.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated),
-        messages: data.messages?.map((m: any) => ({...m, timestamp: m.timestamp.toDate()})) || [],
-    };
+        ...data,
+        messages: data.messages?.map((m: any) => ({...m})) || [],
+    } as SupportTicket;
 }
 
 // Branding Functions
@@ -340,9 +319,9 @@ export async function getUserNotifications(db: Firestore, userId: string): Promi
             type: data.type,
             isRead: data.isRead,
             isArchived: data.isArchived,
-            createdAt: data.createdAt.toDate(),
+            createdAt: data.createdAt,
             relatedId: data.relatedId,
-        };
+        } as Notification;
     });
 }
 
@@ -360,9 +339,9 @@ export async function getAllNotifications(db: Firestore): Promise<Notification[]
             type: data.type,
             isRead: data.isRead,
             isArchived: data.isArchived,
-            createdAt: data.createdAt.toDate(),
+            createdAt: data.createdAt,
             relatedId: data.relatedId,
-        };
+        } as Notification;
     });
 }
 
