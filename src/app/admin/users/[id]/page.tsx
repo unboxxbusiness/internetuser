@@ -23,6 +23,7 @@ import { PaymentTable } from "@/components/payment-table";
 import { UserSupportTicketTable } from "@/components/user-support-ticket-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { StartChatDialog } from "@/components/start-chat-dialog";
 
 function getInitials(name?: string) {
   if (!name) return 'U';
@@ -73,6 +74,7 @@ export default async function AdminUserDetailsPage({ params }: { params: { id: s
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Users
                 </Link>
                 </Button>
+                 <StartChatDialog admin={adminUser} targetUser={userData} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -266,6 +266,72 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
     redirect('/user/support');
 }
 
+
+export async function adminCreateTicketAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string; ticketId?: string }> {
+    const adminUser = await getUser();
+    if (!adminUser || adminUser.role !== 'admin') {
+        return { error: 'You do not have permission to perform this action.' };
+    }
+
+    const subject = formData.get('subject') as string;
+    const message = formData.get('message') as string;
+    const targetUserId = formData.get('targetUserId') as string;
+    const targetUserName = formData.get('targetUserName') as string;
+    const targetUserEmail = formData.get('targetUserEmail') as string;
+
+    if (!subject || !message || !targetUserId || !targetUserName || !targetUserEmail) {
+        return { error: 'Please fill out all fields.' };
+    }
+
+    const ticketData: Omit<SupportTicket, 'id' | 'messages'> = {
+        subject,
+        description: `Conversation started by admin: ${adminUser.name}`,
+        priority: 'medium', // Default priority for admin-initiated chats
+        userId: targetUserId,
+        user: {
+            name: targetUserName,
+            email: targetUserEmail
+        },
+        status: 'open',
+        lastUpdated: new Date(),
+        createdAt: new Date(),
+    };
+
+    try {
+        const ticketId = await createSupportTicketServer(ticketData);
+        
+        // Add the admin's first message
+        await addTicketMessage(ticketId, {
+            sender: adminUser.name || 'Admin',
+            senderRole: 'admin',
+            message: message,
+            timestamp: new Date(),
+        });
+        
+        // Notify the user that a chat has been started
+        await createNotification({
+            userId: targetUserId,
+            title: `A new message from support: "${subject}"`,
+            message: message,
+            type: 'support',
+            isRead: false,
+            isArchived: false,
+            createdAt: new Date(),
+            relatedId: ticketId
+        });
+
+        revalidatePath(`/admin/support`);
+        revalidatePath(`/user/support`);
+
+        return { message: "Chat started successfully.", ticketId: ticketId };
+
+    } catch (error) {
+        console.error('Error creating ticket by admin:', error);
+        return { error: 'Failed to start chat.' };
+    }
+}
+
+
 export async function changeUserPasswordAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const user = await getUser();
     if (!user) {
