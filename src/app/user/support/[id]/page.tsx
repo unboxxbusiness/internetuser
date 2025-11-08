@@ -26,7 +26,8 @@ export default async function UserTicketDetailPage({ params }: { params: { id: s
 
   const ticket = await getSupportTicket(params.id);
 
-  if (!ticket || ticket.userId !== user.uid) {
+  // An admin should be able to see any ticket, but a user can only see their own.
+  if (!ticket || (user.role !== 'admin' && ticket.userId !== user.uid)) {
       return (
          <div className="flex-1 space-y-4">
             <Button variant="outline" asChild>
