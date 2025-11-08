@@ -45,8 +45,9 @@ export async function resetPasswordAction(prevState: any, formData: FormData): P
     try {
         const link = await adminAuth.generatePasswordResetLink(email);
         // In a real app, this link would be emailed. The current environment cannot send emails.
-        // IMPORTANT: This is for demonstration only. Do not expose this link in production.
-        return { message: `IMPORTANT: In a real app, this link would be emailed. For demonstration, your password reset link is: ${link}` };
+        // The link is logged to the server console for demonstration purposes.
+        console.log("Password Reset Link (for demonstration):", link);
+        return { message: `Password reset instructions have been processed. In a real app, an email would be sent to ${email}.` };
     } catch (error: any) {
         console.error("Error generating password reset link:", error);
         if (error.code === 'auth/user-not-found') {

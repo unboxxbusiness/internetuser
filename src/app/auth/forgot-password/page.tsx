@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
     if (state?.message) {
       setShowSuccess(true);
       setClientError(null);
-      // Don't reset the form, so the user can see the link
+      formRef.current?.reset();
     }
     if (state?.error) {
         setShowSuccess(false);
@@ -89,46 +89,45 @@ export default function ForgotPasswordPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Forgot Password</CardTitle>
             <CardDescription>
-              Enter your email address and we'll generate a link to reset your password.
+              Enter your email address and we'll send a link to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {showSuccess ? (
-                 <Alert variant="default" className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
-                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    <AlertTitle className="text-green-800 dark:text-green-300">Reset Link Generated</AlertTitle>
-                    <AlertDescription className="text-green-700 dark:text-green-400 break-words">
-                        {state?.message}
-                    </AlertDescription>
-                </Alert>
-            ) : (
-                <form ref={formRef} action={handleFormAction} className="grid gap-4" noValidate>
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        placeholder="m@example.com"
-                        required
-                        value={emailValue}
-                        onChange={handleInputChange}
-                        />
-                    </div>
-                     {(clientError || state?.error) && (
-                        <Alert variant="destructive">
-                            <AlertCircle className="h-4 w-4" />
-                            <div className="ml-2 pl-5">
-                                <AlertTitle>Error</AlertTitle>
-                                <AlertDescription>
-                                    {clientError || state?.error}
-                                </AlertDescription>
-                            </div>
-                        </Alert>
-                    )}
-                    <SubmitButton />
-                </form>
-            )}
+            <form ref={formRef} action={handleFormAction} className="grid gap-4" noValidate>
+                <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="m@example.com"
+                    required
+                    value={emailValue}
+                    onChange={handleInputChange}
+                    />
+                </div>
+                 {(clientError || state?.error) && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <div className="ml-2 pl-5">
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>
+                                {clientError || state?.error}
+                            </AlertDescription>
+                        </div>
+                    </Alert>
+                )}
+                 {showSuccess && state.message && (
+                     <Alert variant="default" className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <AlertTitle className="text-green-800 dark:text-green-300">Request Sent</AlertTitle>
+                        <AlertDescription className="text-green-700 dark:text-green-400 break-words">
+                            {state.message}
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <SubmitButton />
+            </form>
           </CardContent>
         </Card>
       </div>
