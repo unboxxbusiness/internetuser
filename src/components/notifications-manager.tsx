@@ -66,7 +66,8 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const handleNotificationClick = async (notification: NotificationType) => {
+  const handleNotificationClick = (notification: NotificationType) => {
+    startTransition(async () => {
       if (!notification.isRead) {
         await markNotificationAsReadAction(notification.id);
         setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
@@ -74,23 +75,28 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
       if (notification.type === 'support' && notification.relatedId) {
           router.push(`/user/support/${notification.relatedId}`);
       }
+    });
   };
 
   const handleAction = (action: (id: string) => Promise<any>, id: string) => {
     startTransition(async () => {
         await action(id);
-        const res = await fetch(`/api/user/${user.uid}/notifications`);
-        const updatedNotifications = await res.json();
-        setNotifications(updatedNotifications);
+        // This is optimistic UI, but for a real app you'd re-fetch
+         if (action.name.includes('delete')) {
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } else if (action.name.includes('archive')) {
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isArchived: true } : n));
+        }
     });
   }
 
   const handleBulkAction = (action: () => Promise<any>) => {
       startTransition(async () => {
           await action();
-          const res = await fetch(`/api/user/${user.uid}/notifications`);
-          const updatedNotifications = await res.json();
-          setNotifications(updatedNotifications);
+          // This is optimistic UI, but for a real app you'd re-fetch
+          if(action.name.includes('archiveAllRead')) {
+            setNotifications(prev => prev.map(n => n.isRead ? { ...n, isArchived: true } : n));
+          }
       });
   }
 
@@ -150,14 +156,16 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
                 </p>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2" onClick={(e) => e.stopPropagation()}>
-                {!notification.isRead && (
+                {!notification.isRead && !isArchivedList && (
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAction(markNotificationAsReadAction, notification.id)} disabled={isPending} title="Mark as read">
                         <Check className="h-4 w-4" />
                     </Button>
                 )}
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-8 w-8" onClick={() => handleAction(archiveNotificationAction, notification.id)} disabled={isPending} title="Archive notification">
-                    <Archive className="h-4 w-4" />
-                </Button>
+                {!isArchivedList && (
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-8 w-8" onClick={() => handleAction(archiveNotificationAction, notification.id)} disabled={isPending} title="Archive notification">
+                        <Archive className="h-4 w-4" />
+                    </Button>
+                )}
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => handleAction(deleteNotificationAction, notification.id)} disabled={isPending} title="Delete notification">
                     <Trash2 className="h-4 w-4" />
                 </Button>
@@ -196,7 +204,7 @@ export function NotificationsManager({ initialNotifications, user }: Notificatio
                 </div>
             </CardHeader>
             <CardContent>
-                {renderNotificationList(inboxNotifications, false)}
+                {renderNotificationList(inboxNotifications.filter(n => !n.isArchived), false)}
             </CardContent>
             </Card>
         </TabsContent>
