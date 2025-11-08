@@ -13,6 +13,7 @@ import {
     getPlan as getPlanServer,
     getUsers as getUsersServer,
     createUser,
+    sendPushNotification
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
@@ -337,4 +338,26 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
     }
 
     return results;
+}
+
+export async function sendBulkNotificationAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const adminUser = await getUser();
+    if (!adminUser || adminUser.role !== 'admin') {
+        return { error: 'Permission denied.' };
+    }
+
+    const subject = formData.get('subject') as string;
+    const message = formData.get('message') as string;
+
+    if (!subject || !message) {
+        return { error: 'Title and message are required.' };
+    }
+
+    try {
+        const result = await sendPushNotification(subject, message);
+        return { message: `Notification sent to ${result.success} subscribers.` };
+    } catch (error) {
+        console.error("Error sending bulk notification:", error);
+        return { error: 'Failed to send notifications.' };
+    }
 }
