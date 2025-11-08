@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useScroll, useTransform } from "framer-motion";
@@ -13,51 +14,50 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { CTASection } from "@/components/cta-section";
 import Image from "next/image";
-import { AuroraHero } from "@/components/aurora-hero";
 import { Meteors } from "@/components/ui/meteors";
 
 const whyChooseUsPoints = [
   {
     icon: <Zap className="h-8 w-8 text-primary" />,
-    title: "High-Speed Plans",
-    description: "Up to 1 Gbps for streaming, gaming, and remote work.",
+    title: "Super-Fast Speeds",
+    description: "Stream, game, and video call without lag.",
+  },
+  {
+    icon: <DollarSign className="h-8 w-8 text-primary" />,
+    title: "Affordable Plans",
+    description: "Internet for every budget, starting at just ₹499/month.",
   },
   {
     icon: <MessageCircle className="h-8 w-8 text-primary" />,
     title: "Local Support",
-    description: "Friendly customer care, right here in South Delhi.",
-  },
-  {
-    icon: <DollarSign className="h-8 w-8 text-primary" />,
-    title: "No Hidden Charges",
-    description: "Simple, honest pricing you can trust.",
+    description: "Get quick help from real people right here in South Delhi.",
   },
   {
     icon: <Signal className="h-8 w-8 text-primary" />,
-    title: "Stable Connectivity",
-    description: "Consistent speeds even during peak hours.",
+    title: "Stable Connection",
+    description: "Smooth, uninterrupted performance all day.",
   },
   {
     icon: <Wifi className="h-8 w-8 text-primary" />,
-    title: "Proudly Local",
-    description: "We live where you live. Your support builds our community.",
+    title: "Trusted by Locals",
+    description: "Hundreds of happy users in Aali Village & nearby.",
   },
 ];
 
 const testimonials = [
     {
-        quote: "Best local internet in Aali Village! Great speed and quick support.",
-        author: "Rajesh K.",
+        quote: "Best internet in Aali Village! Reliable and super fast.",
+        author: "Rahul S.",
         avatar: "https://picsum.photos/seed/1/100/100"
     },
     {
-        quote: "Finally, no buffering! My kids love it for online classes and gaming.",
-        author: "Suman R.",
+        quote: "Affordable and perfect for work from home.",
+        author: "Meena K.",
         avatar: "https://picsum.photos/seed/2/100/100"
     },
     {
-        quote: "Affordable and honest service — way better than the big companies.",
-        author: "Deepak M.",
+        quote: "Their support team is amazing — quick and local!",
+        author: "Sunil D.",
         avatar: "https://picsum.photos/seed/3/100/100"
     }
 ]
@@ -92,7 +92,7 @@ export default function LandingPage() {
     fetchData();
   }, []);
 
-  const displayPlans = data?.plans.slice(0, 3) || [];
+  const displayPlans = data?.plans.slice(0, 4) || [];
 
   return (
     <div className="bg-background text-foreground">
@@ -104,14 +104,14 @@ export default function LandingPage() {
                 <div className="max-w-6xl mx-auto text-center">
                     <div className="mb-8 float-animation">
                         <h1 className="md:text-6xl lg:text-7xl leading-[1.1] text-5xl font-bold tracking-tight mb-4">
-                            Fast, Reliable, Local Internet
-                            <span className="gradient-text block tracking-tight">for Aali Village, Delhi.</span>
+                            Fast, Reliable & Affordable Internet
+                            <span className="gradient-text block tracking-tight">in Aali Village, Delhi</span>
                         </h1>
-                        <p className="md:text-xl max-w-3xl leading-relaxed text-lg font-light text-white/80 mx-auto">Experience smooth streaming, lag-free gaming, and dependable connectivity — powered by your trusted local ISP right here in Aali Village.</p>
+                        <p className="md:text-xl max-w-3xl leading-relaxed text-lg font-light text-white/80 mx-auto">Say goodbye to slow connections! Enjoy super-fast broadband, unlimited data, and friendly local support — all from your trusted neighborhood Internet provider.</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <Link href="/auth/signup" className="primary-button px-6 py-3 rounded-lg font-medium text-sm min-w-[180px] text-center">🚀 Check Availability</Link>
-                        <Link href="tel:9999999999" className="glass-button min-w-[180px] text-sm font-medium rounded-lg px-6 py-3 text-center">📞 Call Now</Link>
+                        <Link href="#plans" className="primary-button px-6 py-3 rounded-lg font-medium text-sm min-w-[180px] text-center">🚀 Check Internet Plans</Link>
+                        <Link href="tel:9999999999" className="glass-button min-w-[180px] text-sm font-medium rounded-lg px-6 py-3 text-center">📞 Call 9999-XXX-XXX</Link>
                     </div>
                 </div>
             </main>
@@ -122,11 +122,11 @@ export default function LandingPage() {
       <section id="plans" className="py-16 md:py-24">
           <div className="container mx-auto px-4">
               <div className="text-center mb-12">
-                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Choose a Plan That Fits Your Lifestyle</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Choose the Right Internet Plan for You</h2>
                   <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">Simple, transparent pricing with no hidden fees. Get connected with the best plan for you.</p>
-                   <Badge variant="secondary" className="mt-4 text-sm">No setup fee for new connections in Aali Village this month!</Badge>
+                   <Badge variant="secondary" className="mt-4 text-sm">🎉 Free installation for new connections this month!</Badge>
               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
                     {displayPlans.map((plan) => (
                         <Card key={plan.id} className="flex flex-col shadow-lg hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300">
                             <CardHeader>
@@ -143,11 +143,16 @@ export default function LandingPage() {
                                 <ul className="space-y-3 text-sm">
                                     <li className="flex items-center gap-2">
                                         <Check className="h-5 w-5 text-green-500" />
-                                        <span>{plan.dataLimit} GB Data Limit</span>
+                                        <span>Unlimited Data</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Check className="h-5 w-5 text-green-500" />
-                                        <span>Ideal for {plan.speed <= 50 ? "Browsing & Streaming" : plan.speed <= 150 ? "HD Streaming & Families" : "4K, Gaming & WFH"}</span>
+                                        <span>Ideal for {
+                                            plan.name === 'Basic Plan' ? 'Browsing, WhatsApp, YouTube' :
+                                            plan.name === 'Family Plan' ? 'HD streaming, work from home' :
+                                            plan.name === 'Pro Plan' ? 'Gamers, multiple users' :
+                                            'Offices & professionals'
+                                        }</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Check className="h-5 w-5 text-green-500" />
@@ -165,7 +170,7 @@ export default function LandingPage() {
               </div>
               <div className="text-center mt-12">
                 <Button variant="outline" asChild>
-                  <Link href="/user/plans">View All Plans</Link>
+                  <Link href="/auth/signup">🚀 Get Connected in 24 Hours</Link>
                 </Button>
               </div>
           </div>
@@ -175,8 +180,8 @@ export default function LandingPage() {
       <section id="features" className="py-16 md:py-24 bg-muted dark:bg-card">
           <div className="container mx-auto px-4">
               <div className="text-center mb-12">
-                  <h2 className="text-3xl md:text-4xl font-bold">Why Aali Village Chooses Us</h2>
-                   <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">Internet that just works, backed by people you know.</p>
+                  <h2 className="text-3xl md:text-4xl font-bold">Delhi’s Most Reliable Local Internet Service</h2>
+                   <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">We’re not a big company — we’re your neighbors. That’s why we care more, respond faster, and deliver better value.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
                   {whyChooseUsPoints.map((point) => (
@@ -187,11 +192,31 @@ export default function LandingPage() {
                       </div>
                   ))}
               </div>
+               <div className="text-center mt-12">
+                <Button asChild>
+                  <Link href="#plans">✨ View Plans & Prices</Link>
+                </Button>
+              </div>
           </div>
       </section>
 
+       {/* Coverage Area */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold">Now Available Across Aali Village & South Delhi</h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">We proudly serve homes and businesses in: 📍 Aali Village • Jasola • Sarita Vihar • Badarpur • Shaheen Bagh • Okhla</p>
+                <div className="mt-8">
+                     <Button asChild variant="outline">
+                        <Link href="/auth/signup">📍 Check Availability in Your Area</Link>
+                    </Button>
+                </div>
+            </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-       <section className="py-16 md:py-24">
+       <section className="py-16 md:py-24 bg-muted dark:bg-card">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold">What Your Neighbors Are Saying</h2>
@@ -221,17 +246,23 @@ export default function LandingPage() {
                         </Card>
                     ))}
                 </div>
+                 <div className="text-center mt-12">
+                    <Button asChild variant="secondary">
+                        <Link href="#">⭐ See More Local Reviews</Link>
+                    </Button>
+                 </div>
             </div>
        </section>
 
         {/* Final CTA */}
         <CTASection 
             badge={{ text: "Get Started Today" }}
-            title="Ready for Faster Internet in Aali Village?"
-            description="Join hundreds of happy local customers already connected with us. Setup takes less than 24 hours."
-            action={{ text: "✅ Check Availability", href: "/auth/signup" }}
+            title="Switch to Faster, Better Internet Today"
+            description="Join hundreds of happy users already connected with Aali Village’s favorite ISP. Installation in under 24 hours!"
+            action={{ text: "✅ Check Plans & Pricing", href: "#plans" }}
         />
-
     </div>
   );
 }
+
+    

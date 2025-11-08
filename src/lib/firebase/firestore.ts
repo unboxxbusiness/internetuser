@@ -129,7 +129,7 @@ export async function getUsers(db: Firestore): Promise<AppUser[]> {
 
 // Subscription Plan Functions
 export async function getPlans(db: Firestore): Promise<SubscriptionPlan[]> {
-  const q = db.collection(PLANS_COLLECTION);
+  const q = db.collection(PLANS_COLLECTION).orderBy('price', 'asc');
   const snapshot = await q.get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -288,7 +288,7 @@ export async function createNotification(db: Firestore, subject: string, message
 }
 
 export async function getNotifications(db: Firestore): Promise<Notification[]> {
-  const q = db.collection(NOTIFICATIONS_COLlection).orderBy("sentAt", "desc");
+  const q = db.collection(NOTIFICATIONS_COLLECTION).orderBy("sentAt", "desc");
   const snapshot = await q.get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
@@ -323,3 +323,5 @@ export async function updateNotification(db: Firestore, id: string, data: Partia
     const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(id);
     await docRef.update(data);
 }
+
+    
