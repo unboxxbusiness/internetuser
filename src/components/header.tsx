@@ -29,6 +29,7 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { ThemeToggle } from "./theme-toggle";
 
 interface HeaderProps {
   user: AppUser | null;
@@ -83,6 +84,7 @@ export function Header({ user, branding }: HeaderProps) {
 
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
