@@ -21,6 +21,8 @@ import {
     archiveNotification as archiveNotificationServer,
     archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
     createUser,
+    reopenSupportTicket,
+    updateSupportTicket
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
@@ -455,3 +457,5 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
 
     return results;
 }
+
+    

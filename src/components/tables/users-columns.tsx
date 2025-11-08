@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -148,3 +149,5 @@ export const columns: ColumnDef<AppUser>[] = [
     header: () => <div className="text-right">Actions</div>,
   },
 ]
+
+    
