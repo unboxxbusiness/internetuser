@@ -1,5 +1,4 @@
 
-
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -38,6 +37,7 @@ export interface Subscription {
     price: number;
     speed: number;
     dataLimit: number | 'Unlimited';
+    dataUsage: number;
     nextBillingDate: string;
 }
 

@@ -1,5 +1,4 @@
 
-
 "use server";
 
 import "server-only";
@@ -175,6 +174,9 @@ export async function getUserSubscription(db: Firestore, userId: string): Promis
     const plan = await getPlan(db, planId);
     if (!plan) return null;
 
+    // Simulate data usage
+    const dataUsage = plan.dataLimit === 0 ? 0 : Math.round(Math.random() * (plan.dataLimit * 0.9) + (plan.dataLimit * 0.1));
+
     const nextBillingDate = new Date();
     nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
@@ -185,6 +187,7 @@ export async function getUserSubscription(db: Firestore, userId: string): Promis
         price: plan.price,
         speed: plan.speed,
         dataLimit: plan.dataLimit === 0 ? 'Unlimited' : plan.dataLimit,
+        dataUsage: dataUsage,
         nextBillingDate: nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     };
 }
@@ -285,7 +288,7 @@ export async function createNotification(db: Firestore, subject: string, message
 }
 
 export async function getNotifications(db: Firestore): Promise<Notification[]> {
-  const q = db.collection(NOTIFICATIONS_COLLECTION).orderBy("sentAt", "desc");
+  const q = db.collection(NOTIFICATIONS_COLlection).orderBy("sentAt", "desc");
   const snapshot = await q.get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
