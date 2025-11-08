@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import {
@@ -29,25 +29,44 @@ function SubmitButton() {
 }
 
 export default function ForgotPasswordPage() {
-  const [state, formAction] = useFormState(resetPasswordAction, undefined);
+  const [state, formAction] = useFormState(resetPasswordAction, { error: undefined, message: undefined });
   const [showSuccess, setShowSuccess] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
    useEffect(() => {
     if (state?.message) {
       setShowSuccess(true);
+      setClientError(null);
+      formRef.current?.reset();
+    }
+    if (state?.error) {
+        setShowSuccess(false);
     }
   }, [state]);
 
   const handleFormAction = (formData: FormData) => {
     const email = formData.get("email") as string;
+    if (!email) {
+        setClientError("Please enter an email address.");
+        return;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         setClientError("Please enter a valid email address.");
         return;
     }
-    setClientError(null);
+    
+    setClientError(null); // Clear client error before submitting
     formAction(formData);
+  }
+
+  const handleInputChange = () => {
+    if (clientError) setClientError(null);
+    if (state?.error) {
+        // This won't clear the server state, but good practice for UI state
+        // You might need a more complex state management if you want to clear server errors this way
+    }
   }
 
   return (
@@ -76,7 +95,7 @@ export default function ForgotPasswordPage() {
                     </AlertDescription>
                 </Alert>
             ) : (
-                <form action={handleFormAction} className="grid gap-4" noValidate>
+                <form ref={formRef} action={handleFormAction} className="grid gap-4" noValidate>
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -85,12 +104,13 @@ export default function ForgotPasswordPage() {
                         name="email"
                         placeholder="m@example.com"
                         required
+                        onChange={handleInputChange}
                         />
                     </div>
                      {(clientError || state?.error) && (
                         <Alert variant="destructive">
                             <AlertCircle className="h-4 w-4" />
-                            <div className="ml-7">
+                            <div className="ml-2 pl-5">
                                 <AlertTitle>Error</AlertTitle>
                                 <AlertDescription>
                                     {clientError || state?.error}

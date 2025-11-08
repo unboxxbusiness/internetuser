@@ -37,7 +37,11 @@ export async function deleteUserAction(uid: string) {
     return { message: "User deleted successfully." };
 }
 
-export async function resetPasswordAction(email: string): Promise<{ message?: string; error?: string }> {
+export async function resetPasswordAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+    const email = formData.get('email') as string;
+    if (!email) {
+        return { error: "Email is required." };
+    }
     try {
         const link = await adminAuth.generatePasswordResetLink(email);
         // In a real app, you would typically send an email with the link.
