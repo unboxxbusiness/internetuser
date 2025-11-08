@@ -355,6 +355,7 @@ export async function sendBulkNotificationAction(prevState: any, formData: FormD
 
     try {
         const result = await sendPushNotification(subject, message);
+        revalidatePath("/admin/notifications");
         return { message: `Notification sent to ${result.success} subscribers.` };
     } catch (error) {
         console.error("Error sending bulk notification:", error);
