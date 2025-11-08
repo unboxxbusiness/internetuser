@@ -13,20 +13,34 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
-import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Bell, ArrowRight } from "lucide-react";
-import { getUserSubscription, getUserPayments } from "@/lib/firebase/server-actions";
+import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Bell, ArrowRight, Clock } from "lucide-react";
+import { getUserSubscription, getUserPayments, getUserSettings } from "@/lib/firebase/server-actions";
 import Link from "next/link";
 import { UserPaymentTable } from "@/components/user-payment-table";
 import { UserDashboardSkeleton } from "@/components/user-dashboard-skeleton";
 
 
 async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<typeof getUser>>> }) {
-  const [subscription, recentPayments] = await Promise.all([
+  const [subscription, recentPayments, userSettings] = await Promise.all([
     getUserSubscription(user.uid),
     getUserPayments(user.uid),
+    getUserSettings(user.uid),
   ]);
 
   const latestPayments = recentPayments.slice(0, 5);
+
+  const shouldShowReminder = () => {
+    if (!subscription || !userSettings?.paymentReminders) {
+        return false;
+    }
+    const nextBilling = new Date(subscription.nextBillingDate);
+    const today = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+    return nextBilling <= sevenDaysFromNow && nextBilling >= today;
+  }
+
+  const showPaymentReminder = shouldShowReminder();
 
   return (
     <div className="space-y-6">
@@ -41,6 +55,21 @@ async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<ty
           </AlertDescription>
         </Alert>
        )}
+
+      {showPaymentReminder && subscription && (
+           <Alert variant="default" className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800">
+            <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <AlertTitle className="font-semibold text-yellow-800 dark:text-yellow-300">Payment Reminder</AlertTitle>
+            <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <p>Your payment for the <strong>{subscription.planName}</strong> plan is due on <strong>{subscription.nextBillingDate}</strong>.</p>
+                     <Button asChild size="sm" variant="accent" className="bg-yellow-400 hover:bg-yellow-500 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-yellow-900 dark:text-white mt-2 sm:mt-0">
+                        <Link href="/user/billing">Pay Now</Link>
+                    </Button>
+                </div>
+            </AlertDescription>
+          </Alert>
+      )}
 
 
       {subscription ? (
