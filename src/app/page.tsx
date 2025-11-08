@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useScroll, useTransform } from "framer-motion";
@@ -14,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { CTASection } from "@/components/cta-section";
 import Image from "next/image";
+import { AuroraHero } from "@/components/aurora-hero";
 
 const whyChooseUsPoints = [
   {
@@ -81,18 +81,6 @@ async function LandingPageData() {
 }
 
 export default function LandingPage() {
-  const ref = React.useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
- 
-  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
-  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
-  const pathLengthThird = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
-  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.8], [0.05, 1.2]);
-  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0, 1.2]);
-
   const [data, setData] = React.useState<{plans: any[], branding: any} | null>(null);
 
   React.useEffect(() => {
@@ -107,22 +95,7 @@ export default function LandingPage() {
 
   return (
     <div className="bg-background text-foreground">
-        <div
-        className="h-[300vh] bg-black w-full dark:border dark:border-white/[0.1] rounded-md relative pt-40 overflow-clip"
-        ref={ref}
-        >
-            <GoogleGeminiEffect
-                title="Fast, Reliable, Local Internet for Aali Village, Delhi."
-                description="Experience smooth streaming, lag-free gaming, and dependable connectivity — powered by your trusted local ISP right here in Aali Village."
-                pathLengths={[
-                    pathLengthFirst,
-                    pathLengthSecond,
-                    pathLengthThird,
-                    pathLengthFourth,
-                    pathLengthFifth,
-                ]}
-            />
-        </div>
+      <AuroraHero />
       
       {/* Plans & Pricing */}
       <section id="plans" className="py-16 md:py-24">
@@ -211,7 +184,7 @@ export default function LandingPage() {
                                 </div>
                                 <blockquote className="text-lg font-medium">“{testimonial.quote}”</blockquote>
                             </CardContent>
-                            <CardFooter className="flex items-center gap-4 mt-4">
+                             <CardFooter className="flex items-center gap-4 mt-4">
                                <img
                                  width={40} 
                                  height={40} 
