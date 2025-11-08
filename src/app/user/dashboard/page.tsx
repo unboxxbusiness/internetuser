@@ -14,39 +14,34 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getUser } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
 import { Wifi, Gauge, PieChart, Download, AlertTriangle, IndianRupee, Bell, ArrowRight } from "lucide-react";
-import { getUserSubscription, getUserPayments, getUserNotifications } from "@/lib/firebase/server-actions";
+import { getUserSubscription, getUserPayments } from "@/lib/firebase/server-actions";
 import Link from "next/link";
 import { UserPaymentTable } from "@/components/user-payment-table";
 import { UserDashboardSkeleton } from "@/components/user-dashboard-skeleton";
 
 
 async function DashboardData({ user }: { user: NonNullable<Awaited<ReturnType<typeof getUser>>> }) {
-  const [subscription, recentPayments, notifications] = await Promise.all([
+  const [subscription, recentPayments] = await Promise.all([
     getUserSubscription(user.uid),
     getUserPayments(user.uid),
-    getUserNotifications(user.uid),
   ]);
 
   const latestPayments = recentPayments.slice(0, 5);
-  const unreadNotifications = notifications.filter(n => !n.isRead);
-  const latestUnreadNotification = unreadNotifications.length > 0 ? unreadNotifications[0] : null;
 
   return (
     <div className="space-y-6">
-      {latestUnreadNotification && (
-        <Alert>
+       {!user.fcmToken && (
+         <Alert>
           <Bell className="h-4 w-4" />
-          <AlertTitle className="font-semibold">{latestUnreadNotification.title}</AlertTitle>
+          <AlertTitle className="font-semibold">Enable Notifications</AlertTitle>
           <AlertDescription>
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <p className="text-sm">{latestUnreadNotification.message}</p>
-                  <Button asChild variant="link" className="p-0 h-auto self-start sm:self-center">
-                      <Link href="/user/notifications">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                  </Button>
+                  <p className="text-sm">Click the button in your browser to enable push notifications and stay updated.</p>
               </div>
           </AlertDescription>
         </Alert>
-      )}
+       )}
+
 
       {subscription ? (
         <>

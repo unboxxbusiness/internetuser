@@ -3,6 +3,7 @@ import "server-only";
 import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 
 const serviceAccount = {
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -18,5 +19,6 @@ const app = !getApps().length
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const messaging = getMessaging(app);
 
-export { app, auth, db };
+export { app, auth, db, messaging };

@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Users can create their own document, and read/update it.
-    // They cannot delete their own account from the client, nor see other user docs.
+    // An fcmToken can be written by the user.
     match /users/{userId} {
       allow read, update: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null;

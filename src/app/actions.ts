@@ -11,23 +11,15 @@ import {
     updateUserSettings as updateUserSettingsServer,
     updateHeroSettings as updateHeroSettingsServer,
     getPlan as getPlanServer,
-    getUsers as getUsersServer, 
-    createNotification, 
-    deleteAllNotifications as deleteAllNotificationsServer,
-    updateNotification as updateNotificationServer,
-    deleteNotification as deleteNotificationServer,
-    deleteAllUserNotifications as deleteAllUserNotificationsServer,
-    markAllUserNotificationsAsRead as markAllUserNotificationsAsReadServer,
-    archiveNotification as archiveNotificationServer,
-    archiveAllReadUserNotifications as archiveAllReadUserNotificationsServer,
+    getUsers as getUsersServer,
+    sendPushNotification,
     createUser,
-    reopenSupportTicket,
-    updateSupportTicket
 } from "@/lib/firebase/server-actions";
 
 import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
+import { revalidateTag } from "next/cache";
 
 export async function deleteUserAction(uid: string) {
     try {
@@ -112,7 +104,7 @@ export async function deletePlanAction(id: string) {
   revalidatePath("/admin/plans");
 }
 
-export async function sendNotificationAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
+export async function sendBulkNotificationAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
     const subject = formData.get('subject') as string;
     const message = formData.get('message') as string;
 
@@ -121,21 +113,9 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
     }
 
     try {
-        const users = await getUsersServer();
-        const notificationPromises = users.map(user => 
-            createNotification({
-                userId: user.uid,
-                title: subject,
-                message: message,
-                type: 'general',
-                isRead: false,
-                isArchived: false,
-            })
-        );
-        await Promise.all(notificationPromises);
-        
+        const result = await sendPushNotification(subject, message);
         revalidatePath('/admin/notifications');
-        return { message: `Notification has been successfully sent to ${users.length} users.` };
+        return { message: `Notification has been successfully sent to ${result.success} users.` };
 
     } catch (error) {
         console.error('Error sending notification:', error);
@@ -153,11 +133,18 @@ export async function updateUserProfileAction(
   }
 
   const name = formData.get("name") as string;
-  const updates: { name?: string } = {};
+  const updates: { name?: string, fcmToken?: string | null } = {};
 
   if (name && name !== user.name) {
     updates.name = name;
   }
+  
+  // Logic to clear FCM token if notifications are disabled
+  // This part would need a UI element, for now we can assume it can be cleared.
+  // if (formData.has('disable-notifications')) {
+  //   updates.fcmToken = null;
+  // }
+
 
   if (Object.keys(updates).length === 0) {
     return { message: "No changes to save." };
@@ -307,92 +294,6 @@ export async function createPayUTransactionAction(planId: string) {
     hash: hash,
     payu_url: "https://sandboxsecure.payu.in/_payment", // Sandbox URL, change for production
   };
-}
-
-export async function markNotificationAsReadAction(notificationId: string) {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await updateNotificationServer(notificationId, { isRead: true });
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error marking notification as read:", error);
-        return { error: "Failed to mark notification as read." };
-    }
-}
-
-export async function markAllNotificationsAsReadAction() {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await markAllUserNotificationsAsReadServer(user.uid);
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error marking all notifications as read:", error);
-        return { error: "Failed to mark all notifications as read." };
-    }
-}
-
-export async function archiveNotificationAction(notificationId: string) {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await archiveNotificationServer(notificationId);
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error archiving notification:", error);
-        return { error: "Failed to archive notification." };
-    }
-}
-
-export async function archiveAllReadNotificationsAction() {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await archiveAllReadUserNotificationsServer(user.uid);
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error archiving all read notifications:", error);
-        return { error: "Failed to archive all read notifications." };
-    }
-}
-
-export async function deleteNotificationAction(notificationId: string) {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await deleteNotificationServer(notificationId);
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error deleting notification:", error);
-        return { error: "Failed to delete notification." };
-    }
-}
-
-export async function deleteAllUserNotificationsAction() {
-    const user = await getUser();
-    if (!user) return { error: "User not found" };
-    try {
-        await deleteAllUserNotificationsServer(user.uid);
-        revalidatePath('/user/notifications');
-    } catch (error) {
-        console.error("Error deleting all notifications:", error);
-        return { error: "Failed to delete all notifications." };
-    }
-}
-
-export async function deleteAllNotificationsAction() {
-     const user = await getUser();
-    if (!user || user.role !== 'admin') {
-      return { error: "You do not have permission to perform this action." };
-    }
-    try {
-        await deleteAllNotificationsServer();
-        revalidatePath('/admin/notifications');
-    } catch (error) {
-        console.error("Error deleting all notifications:", error);
-        return { error: "Failed to delete all notifications." };
-    }
 }
 
 interface NewUser {

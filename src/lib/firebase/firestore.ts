@@ -4,36 +4,44 @@
 import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
-import type { SubscriptionPlan, Payment, BrandingSettings, Subscription, Notification, UserSettings, HeroSettings } from "@/lib/types";
+import type { SubscriptionPlan, Payment, BrandingSettings, Subscription, UserSettings, HeroSettings } from "@/lib/types";
 import type { Firestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const USERS_COLLECTION = "users";
 const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
 const BRANDING_SETTINGS_COLLECTION = "branding";
-const NOTIFICATIONS_COLLECTION = "notifications";
 const LANDING_PAGE_COLLECTION = "landingPage";
 
-
 // Helper to convert Timestamps to serializable strings
-const toSerializableObject = (obj: any) => {
+const toSerializableObject = (obj: any): any => {
     if (!obj) return obj;
-    for (const key in obj) {
-        if (!obj.hasOwnProperty(key)) continue;
 
-        const value = obj[key];
-        if (value && typeof value.toDate === 'function') { // Firestore Timestamp
-            obj[key] = value.toDate().toISOString();
-        } else if (value instanceof Date) { // JavaScript Date
-            obj[key] = value.toISOString();
-        } else if (Array.isArray(value)) {
-            obj[key] = value.map(item => toSerializableObject(item));
-        } else if (typeof value === 'object' && value !== null) {
-            toSerializableObject(value);
+    if (Array.isArray(obj)) {
+        return obj.map(toSerializableObject);
+    }
+    
+    if (typeof obj !== 'object') {
+        return obj;
+    }
+
+    const newObj: { [key: string]: any } = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            if (value && typeof value.toDate === 'function') { // Firestore Timestamp
+                newObj[key] = value.toDate().toISOString();
+            } else if (value instanceof Date) { // JavaScript Date
+                newObj[key] = value.toISOString();
+            } else if (typeof value === 'object' && value !== null) {
+                newObj[key] = toSerializableObject(value);
+            } else {
+                newObj[key] = value;
+            }
         }
     }
-    return obj;
-}
+    return newObj;
+};
 
 
 // User & Role Functions
@@ -44,6 +52,7 @@ export async function createUser(db: Firestore, uid: string, name:string, email:
     email,
     role,
     photoURL,
+    fcmToken: null,
     settings: {
         paperlessBilling: true,
         paymentReminders: true,
@@ -75,6 +84,7 @@ export async function getUser(db: Firestore, uid: string): Promise<AppUser | nul
     name: data.name,
     photoURL: data.photoURL,
     role: data.role,
+    fcmToken: data.fcmToken || null,
     accountStatus: 'active', // Placeholder
     paymentStatus: paymentStatus,
   };
@@ -109,6 +119,7 @@ export async function getUsers(db: Firestore): Promise<AppUser[]> {
       email: data.email,
       role: data.role,
       photoURL: data.photoURL,
+      fcmToken: data.fcmToken || null,
       accountStatus: 'active', // Placeholder, can be enhanced later
       paymentStatus: paymentStatus,
     };
@@ -248,105 +259,6 @@ export async function updateHeroSettings(db: Firestore, settings: HeroSettings):
     await docRef.set(settings, { merge: true });
 }
 
-
-// Notification Functions
-export async function createNotification(db: Firestore, notificationData: Omit<Notification, 'id'>): Promise<void> {
-    await db.collection(NOTIFICATIONS_COLLECTION).add({
-        ...notificationData,
-        createdAt: FieldValue.serverTimestamp()
-    });
-}
-
-export async function getUserNotifications(db: Firestore, userId: string): Promise<Notification[]> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION).where('userId', '==', userId).orderBy('createdAt', 'desc');
-    const snapshot = await q.get();
-
-    return snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return toSerializableObject({
-            id: doc.id,
-            ...data,
-        }) as Notification;
-    });
-}
-
-export async function getAllNotifications(db: Firestore): Promise<Notification[]> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION).orderBy('createdAt', 'desc');
-    const snapshot = await q.get();
-
-    return snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return toSerializableObject({
-            id: doc.id,
-            ...data,
-        }) as Notification;
-    });
-}
-
-export async function updateNotification(db: Firestore, notificationId: string, data: Partial<Notification>): Promise<void> {
-    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId);
-    await docRef.update(data);
-}
-
-export async function deleteNotification(db: Firestore, notificationId: string): Promise<void> {
-    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId);
-    await docRef.delete();
-}
-
-export async function deleteAllUserNotifications(db: Firestore, userId: string): Promise<void> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION).where('userId', '==', userId);
-    const snapshot = await q.get();
-    
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-}
-
-export async function markAllUserNotificationsAsRead(db: Firestore, userId: string): Promise<void> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION).where('userId', '==', userId).where('isRead', '==', false);
-    const snapshot = await q.get();
-    
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-        batch.update(doc.ref, { isRead: true });
-    });
-
-    await batch.commit();
-}
-
-export async function archiveNotification(db: Firestore, notificationId: string): Promise<void> {
-    const docRef = db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId);
-    await docRef.update({ isArchived: true });
-}
-
-export async function archiveAllReadUserNotifications(db: Firestore, userId: string): Promise<void> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION).where('userId', '==', userId).where('isRead', '==', true).where('isArchived', '==', false);
-    const snapshot = await q.get();
-    
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-        batch.update(doc.ref, { isArchived: true });
-    });
-
-    await batch.commit();
-}
-
-export async function deleteAllNotifications(db: Firestore): Promise<void> {
-    const q = db.collection(NOTIFICATIONS_COLLECTION);
-    const snapshot = await q.get();
-    
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-}
-
-
 // User Settings
 export async function getUserSettings(db: Firestore, userId: string): Promise<UserSettings | null> {
     const docRef = db.collection(USERS_COLLECTION).doc(userId);
@@ -360,5 +272,3 @@ export async function updateUserSettings(db: Firestore, userId: string, settings
     const docRef = db.collection(USERS_COLLECTION).doc(userId);
     await docRef.update({ settings: settings });
 }
-
-    

@@ -7,13 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUser } from "@/app/auth/actions";
 import { NotificationForm } from "@/components/notification-form";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getAllNotifications } from "@/lib/firebase/server-actions";
-import { NotificationHistory } from "@/components/notification-history";
+
 
 export default async function AdminNotificationsPage() {
   const user = await getUser();
@@ -21,72 +19,29 @@ export default async function AdminNotificationsPage() {
     redirect("/auth/login");
   }
 
-  const allNotifications = await getAllNotifications();
-
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Notifications & Alerts</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Push Notifications</h2>
       </div>
-      <Tabs defaultValue="bulk">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="bulk">Bulk Notifications</TabsTrigger>
-          <TabsTrigger value="automated">Automated Alerts</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-        </TabsList>
-        <TabsContent value="bulk">
-            <Card>
-                <CardHeader>
-                <CardTitle>Send a Bulk Notification</CardTitle>
-                <CardDescription>
-                    Compose and send a message to all registered users. This is useful for announcements, promotions, or service updates.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <NotificationForm />
-                </CardContent>
-            </Card>
-        </TabsContent>
-        <TabsContent value="automated">
-            <Card>
-                <CardHeader>
-                <CardTitle>Automated Alerts</CardTitle>
-                <CardDescription>
-                    These notifications are typically triggered automatically based on system events. (Configuration required).
-                </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Payment Failure Notifications</AlertTitle>
-                        <AlertDescription>
-                            These are sent to users when a recurring payment fails. This would require integration with a payment provider like Stripe to trigger a webhook.
-                        </AlertDescription>
-                    </Alert>
-                     <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Subscription Expiry Reminders</AlertTitle>
-                        <AlertDescription>
-                            These are sent to users a few days before their subscription plan is set to expire. This requires a scheduled task (cron job) on the server to check for upcoming expirations daily.
-                        </AlertDescription>
-                    </Alert>
-                </CardContent>
-            </Card>
-        </TabsContent>
-         <TabsContent value="history">
-            <Card>
-                <CardHeader>
-                <CardTitle>Notification History</CardTitle>
-                <CardDescription>
-                    A log of all sent notifications to all users.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <NotificationHistory notifications={allNotifications} />
-                </CardContent>
-            </Card>
-        </TabsContent>
-      </Tabs>
+        <Card>
+            <CardHeader>
+            <CardTitle>Send a Push Notification</CardTitle>
+            <CardDescription>
+                Compose and send a message to all registered users who have enabled notifications.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <NotificationForm />
+            </CardContent>
+        </Card>
+         <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>How It Works</AlertTitle>
+            <AlertDescription>
+                This system uses Firebase Cloud Messaging (FCM) to send push notifications directly to users' devices (desktops and mobile phones). Users must first grant permission in their browser to receive these alerts. Notifications will appear even if the user does not have the app open.
+            </AlertDescription>
+        </Alert>
     </div>
   );
 }

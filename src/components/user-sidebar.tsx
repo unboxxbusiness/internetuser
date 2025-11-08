@@ -14,7 +14,6 @@ import {
   ChevronLeft, 
   ChevronRight,
   LayoutGrid,
-  Bell,
   LifeBuoy,
 } from 'lucide-react';
 import { logout, type AppUser } from "@/app/auth/actions";
@@ -39,7 +38,6 @@ const navigationItems: NavigationItem[] = [
   { id: "dashboard", name: "Dashboard", icon: Home, href: "/user/dashboard" },
   { id: "plans", name: "Plans", icon: LayoutGrid, href: "/user/plans" },
   { id: "billing", name: "Billing", icon: ShoppingCart, href: "/user/billing" },
-  { id: "notifications", name: "Notifications", icon: Bell, href: "/user/notifications" },
   { id: "support", name: "Support", icon: LifeBuoy, href: "/user/support" },
   { id: "settings", name: "Settings", icon: Settings, href: "/user/profile" },
 ];

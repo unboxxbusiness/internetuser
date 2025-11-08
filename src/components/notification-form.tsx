@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { sendNotificationAction } from "@/app/actions";
+import { sendBulkNotificationAction } from "@/app/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, CheckCircle } from "lucide-react";
 
@@ -15,13 +16,13 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Sending..." : "Send Notification"}
+      {pending ? "Sending..." : "Send Notification to All Users"}
     </Button>
   );
 }
 
 export function NotificationForm() {
-  const [state, formAction] = useFormState(sendNotificationAction, undefined);
+  const [state, formAction] = useFormState(sendBulkNotificationAction, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -39,7 +40,7 @@ export function NotificationForm() {
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
       <div className="grid gap-2">
-        <Label htmlFor="subject">Subject</Label>
+        <Label htmlFor="subject">Title</Label>
         <Input
           id="subject"
           name="subject"
@@ -48,7 +49,7 @@ export function NotificationForm() {
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="message">Message</Label>
+        <Label htmlFor="message">Message Body</Label>
         <Textarea
             id="message"
             name="message"

@@ -40,18 +40,6 @@ export interface Subscription {
     nextBillingDate: string;
 }
 
-export interface Notification {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'billing' | 'plan-change' | 'general' | 'warning' | 'support';
-  isRead: boolean;
-  isArchived: boolean;
-  createdAt: string;
-  relatedId?: string;
-}
-
 export interface UserSettings {
     paperlessBilling: boolean;
     paymentReminders: boolean;

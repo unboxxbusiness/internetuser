@@ -26,6 +26,7 @@ async function createClientUser(uid: string, name:string, email: string, role: s
     email,
     role,
     photoURL,
+    fcmToken: null,
     settings: {
         paperlessBilling: true,
         paymentReminders: true,

@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db } from "./server";
+import { db, messaging } from "./server";
 import { 
     getUsers as getUsersFirestore,
     getPlans as getPlansFirestore,
@@ -10,27 +10,18 @@ import {
     getHeroSettings as getHeroSettingsFirestore,
     getPayments as getPaymentsFirestore,
     getUserSubscription as getUserSubscriptionFirestore,
-    getAllNotifications as getAllNotificationsFirestore,
     getUserSettings as getUserSettingsFirestore,
     getUser as getUserFirestore,
     createUser as createUserFirestore,
-    createNotification as createNotificationFirestore,
-    deleteAllNotifications as deleteAllNotificationsFirestore,
     updateUser as updateUserFirestore,
     updateUserSettings as updateUserSettingsFirestore,
     updateHeroSettings as updateHeroSettingsFirestore,
     updateBrandingSettings as updateBrandingSettingsFirestore,
-    updateNotification as updateNotificationFirestore,
-    deleteNotification as deleteNotificationFirestore,
-    deleteAllUserNotifications as deleteAllUserNotificationsFirestore,
-    markAllUserNotificationsAsRead as markAllUserNotificationsAsReadFirestore,
-    archiveNotification as archiveNotificationFirestore,
-    archiveAllReadUserNotifications as archiveAllReadUserNotificationsFirestore,
     getUserPayments as getUserPaymentsFirestore,
-    getUserNotifications as getUserNotificationsFirestore,
 } from "./firestore";
 import type { AppUser } from "@/app/auth/actions";
-import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
+import type { BrandingSettings, HeroSettings, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
+import { MulticastMessage } from "firebase-admin/messaging";
 
 export async function getUsers(): Promise<AppUser[]> {
     return getUsersFirestore(db);
@@ -72,24 +63,8 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     return getUserSubscriptionFirestore(db, userId);
 }
 
-export async function getAllNotifications(): Promise<Notification[]> {
-    return getAllNotificationsFirestore(db);
-}
-
-export async function getUserNotifications(userId: string): Promise<Notification[]> {
-    return getUserNotificationsFirestore(db, userId);
-}
-
 export async function getUserSettings(userId: string): Promise<UserSettings | null> {
     return getUserSettingsFirestore(db, userId);
-}
-
-export async function createNotification(notificationData: Omit<Notification, 'id'>): Promise<void> {
-    return createNotificationFirestore(db, notificationData);
-}
-
-export async function deleteAllNotifications(): Promise<void> {
-    return deleteAllNotificationsFirestore(db);
 }
 
 export async function updateUser(uid: string, data: Partial<AppUser>): Promise<void> {
@@ -108,26 +83,40 @@ export async function updateBrandingSettings(settings: BrandingSettings): Promis
     return updateBrandingSettingsFirestore(db, settings);
 }
 
-export async function updateNotification(notificationId: string, data: Partial<Notification>): Promise<void> {
-    return updateNotificationFirestore(db, notificationId, data);
-}
+export async function sendPushNotification(title: string, body: string, userId?: string) {
+    const users = await getUsers();
+    const targetUsers = userId ? users.filter(u => u.uid === userId) : users;
 
-export async function deleteNotification(notificationId: string): Promise<void> {
-    return deleteNotificationFirestore(db, notificationId);
-}
+    const tokens = targetUsers.map(u => u.fcmToken).filter(Boolean) as string[];
 
-export async function deleteAllUserNotifications(userId: string): Promise<void> {
-    return deleteAllUserNotificationsFirestore(db, userId);
-}
+    if (tokens.length === 0) {
+        console.log("No FCM tokens found for target users.");
+        return { success: 0, failure: targetUsers.length };
+    }
 
-export async function markAllUserNotificationsAsRead(userId: string): Promise<void> {
-    return markAllUserNotificationsAsReadFirestore(db, userId);
-}
+    const message: MulticastMessage = {
+        notification: {
+            title: title,
+            body: body,
+        },
+        tokens: tokens,
+    };
 
-export async function archiveNotification(notificationId: string): Promise<void> {
-    return archiveNotificationFirestore(db, notificationId);
-}
-
-export async function archiveAllReadUserNotifications(userId: string): Promise<void> {
-    return archiveAllReadUserNotificationsFirestore(db, userId);
+    try {
+        const response = await messaging.sendEachForMulticast(message);
+        console.log(`Successfully sent ${response.successCount} messages`);
+        if (response.failureCount > 0) {
+            const failedTokens: string[] = [];
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    failedTokens.push(tokens[idx]);
+                }
+            });
+            console.log('List of failed tokens:', failedTokens);
+        }
+        return { success: response.successCount, failure: response.failureCount };
+    } catch (error) {
+        console.error('Error sending multicast message:', error);
+        return { success: 0, failure: tokens.length };
+    }
 }

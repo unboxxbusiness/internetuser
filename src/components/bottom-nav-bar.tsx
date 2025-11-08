@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutGrid, LifeBuoy, Settings, LogOut, Grid3x3, ShoppingCart, Bell } from 'lucide-react';
+import { Home, LayoutGrid, LifeBuoy, Settings, LogOut, Grid3x3, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dock, DockIcon } from './ui/dock';
 import {
@@ -28,7 +28,6 @@ const mainNavItems = [
 
 const moreNavItems = [
     { href: "/user/billing", icon: ShoppingCart, label: "Billing" },
-    { href: "/user/notifications", icon: Bell, label: "Notifications" },
     { href: "/user/support", icon: LifeBuoy, label: "Support" },
 ]
 

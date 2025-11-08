@@ -14,6 +14,7 @@ export interface AppUser {
   name: string | undefined;
   photoURL: string | undefined;
   role: string;
+  fcmToken: string | null;
   accountStatus: 'active' | 'suspended';
   paymentStatus: 'paid' | 'pending' | 'N/A';
 }
@@ -40,6 +41,7 @@ export async function getUser(): Promise<AppUser | null> {
       name: firestoreUser.name,
       photoURL: firestoreUser.photoURL,
       role: firestoreUser.role,
+      fcmToken: firestoreUser.fcmToken,
       accountStatus: firestoreUser.accountStatus,
       paymentStatus: firestoreUser.paymentStatus,
     };
