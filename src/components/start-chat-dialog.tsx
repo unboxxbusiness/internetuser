@@ -66,8 +66,8 @@ export function StartChatDialog({ admin, targetUser }: StartChatDialogProps) {
         <form action={formAction} className="space-y-4 py-4">
            {/* Hidden fields to pass user data */}
            <input type="hidden" name="targetUserId" value={targetUser.uid} />
-           <input type="hidden" name="targetUserName" value={targetUser.name} />
-           <input type="hidden" name="targetUserEmail" value={targetUser.email} />
+           <input type="hidden" name="targetUserName" value={targetUser.name || ""} />
+           <input type="hidden" name="targetUserEmail" value={targetUser.email || ""} />
 
           <div className="grid gap-2">
             <Label htmlFor="subject">Subject</Label>
