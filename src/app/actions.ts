@@ -18,7 +18,7 @@ import {
     updateNotification as updateNotificationServer,
 } from "@/lib/firebase/server-actions";
 
-import { BrandingSettings, HeroSettings, UserSettings } from "@/lib/types";
+import { BrandingSettings, HeroSettings, UserSettings, Notification } from "@/lib/types";
 import { randomBytes } from "crypto";
 import { sha512 } from "js-sha512";
 
@@ -44,10 +44,10 @@ export async function resetPasswordAction(prevState: any, formData: FormData): P
     }
     try {
         const link = await adminAuth.generatePasswordResetLink(email);
-        // In a real app, you would typically send an email with the link.
-        // For this example, we'll just return a success message.
+        // In a real app, this link would be emailed. The current environment cannot send emails.
         console.log("Password reset link (for demonstration):", link);
-        return { message: `A password reset link has been sent to ${email}.` };
+        // IMPORTANT: This is for demonstration only. Do not expose this link in production.
+        return { message: `Password reset link generated. In a real app, this would be sent to ${email}.` };
     } catch (error: any) {
         console.error("Error generating password reset link:", error);
         if (error.code === 'auth/user-not-found') {
@@ -394,3 +394,5 @@ export async function updateNotificationAction(id: string, prevState: any, formD
   revalidatePath("/admin/notifications");
   redirect("/admin/notifications");
 }
+
+    
