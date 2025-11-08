@@ -458,7 +458,7 @@ export async function closeSupportTicketAction(ticketId: string) {
     }
 }
 
-export async function reopenSupportTicketAction(ticketId: string) {
+export async function reopenSupportTicketAction(ticketId: string): Promise<{ message?: string, error?: string }> {
     const user = await getUser();
     if (!user) {
         return { error: "You must be logged in to perform this action." };
@@ -469,6 +469,7 @@ export async function reopenSupportTicketAction(ticketId: string) {
         revalidatePath(`/user/support/${ticketId}`);
         revalidatePath(`/admin/support/${ticketId}`);
         revalidatePath(`/admin/support`);
+        return { message: "Ticket re-opened successfully." };
     } catch (error) {
         console.error("Error reopening ticket:", error);
         return { error: "Failed to reopen the ticket." };
@@ -666,5 +667,7 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
 
     return results;
 }
+
+    
 
     
