@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { db, messaging } from "./server";
@@ -18,9 +19,11 @@ import {
     updateHeroSettings as updateHeroSettingsFirestore,
     updateBrandingSettings as updateBrandingSettingsFirestore,
     getUserPayments as getUserPaymentsFirestore,
+    createNotification as createNotificationFirestore,
+    getNotifications as getNotificationsFirestore,
 } from "./firestore";
 import type { AppUser } from "@/app/auth/actions";
-import type { BrandingSettings, HeroSettings, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
+import type { BrandingSettings, HeroSettings, Notification, Payment, Subscription, SubscriptionPlan, UserSettings } from "../types";
 import { MulticastMessage } from "firebase-admin/messaging";
 
 export async function getUsers(): Promise<AppUser[]> {
@@ -105,6 +108,12 @@ export async function sendPushNotification(title: string, body: string, userId?:
     try {
         const response = await messaging.sendEachForMulticast(message);
         console.log(`Successfully sent ${response.successCount} messages`);
+        
+        // Save to notification history
+        if (response.successCount > 0) {
+            await createNotificationFirestore(db, title, body);
+        }
+
         if (response.failureCount > 0) {
             const failedTokens: string[] = [];
             response.responses.forEach((resp, idx) => {
@@ -119,4 +128,8 @@ export async function sendPushNotification(title: string, body: string, userId?:
         console.error('Error sending multicast message:', error);
         return { success: 0, failure: tokens.length };
     }
+}
+
+export async function getNotifications(): Promise<Notification[]> {
+    return getNotificationsFirestore(db);
 }

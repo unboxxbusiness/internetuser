@@ -1,4 +1,5 @@
 
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -43,4 +44,11 @@ export interface Subscription {
 export interface UserSettings {
     paperlessBilling: boolean;
     paymentReminders: boolean;
+}
+
+export interface Notification {
+  id: string;
+  subject: string;
+  message: string;
+  sentAt: string;
 }

@@ -5,7 +5,7 @@
 import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
-import type { SubscriptionPlan, Payment, BrandingSettings, Subscription, UserSettings, HeroSettings } from "@/lib/types";
+import type { SubscriptionPlan, Payment, BrandingSettings, Subscription, UserSettings, HeroSettings, Notification } from "@/lib/types";
 import type { Firestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const USERS_COLLECTION = "users";
@@ -13,6 +13,7 @@ const PLANS_COLLECTION = "subscriptionPlans";
 const PAYMENTS_COLLECTION = "payments";
 const BRANDING_SETTINGS_COLLECTION = "branding";
 const LANDING_PAGE_COLLECTION = "landingPage";
+const NOTIFICATIONS_COLLECTION = "notifications";
 
 // Helper to convert Timestamps to serializable strings
 const toSerializableObject = (obj: any): any => {
@@ -272,4 +273,25 @@ export async function getUserSettings(db: Firestore, userId: string): Promise<Us
 export async function updateUserSettings(db: Firestore, userId: string, settings: UserSettings): Promise<void> {
     const docRef = db.collection(USERS_COLLECTION).doc(userId);
     await docRef.update({ settings: settings });
+}
+
+// Notification Functions
+export async function createNotification(db: Firestore, subject: string, message: string): Promise<void> {
+  await db.collection(NOTIFICATIONS_COLLECTION).add({
+    subject,
+    message,
+    sentAt: new Date(),
+  });
+}
+
+export async function getNotifications(db: Firestore): Promise<Notification[]> {
+  const q = db.collection(NOTIFICATIONS_COLLECTION).orderBy("sentAt", "desc");
+  const snapshot = await q.get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return toSerializableObject({
+      id: doc.id,
+      ...data,
+    }) as Notification;
+  });
 }
