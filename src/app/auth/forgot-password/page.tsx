@@ -33,12 +33,14 @@ export default function ForgotPasswordPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [emailValue, setEmailValue] = useState("");
+
 
    useEffect(() => {
     if (state?.message) {
       setShowSuccess(true);
       setClientError(null);
-      formRef.current?.reset();
+      // Don't reset the form, so the user can see the link
     }
     if (state?.error) {
         setShowSuccess(false);
@@ -61,11 +63,16 @@ export default function ForgotPasswordPage() {
     formAction(formData);
   }
 
-  const handleInputChange = () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailValue(e.target.value);
     if (clientError) setClientError(null);
-    if (state?.error) {
-        // This won't clear the server state, but good practice for UI state
-        // You might need a more complex state management if you want to clear server errors this way
+    if (state?.error || state?.message) {
+       // Reset state when user types again
+       setShowSuccess(false);
+       // A more advanced solution would be to use a new key on the form component
+       // to fully reset the useFormState, but for this case, just hiding the message is enough.
+       state.error = undefined;
+       state.message = undefined;
     }
   }
 
@@ -82,15 +89,15 @@ export default function ForgotPasswordPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Forgot Password</CardTitle>
             <CardDescription>
-              Enter your email address and we will send you a link to reset your password.
+              Enter your email address and we'll generate a link to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {showSuccess ? (
                  <Alert variant="default" className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
                     <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    <AlertTitle className="text-green-800 dark:text-green-300">Email Sent</AlertTitle>
-                    <AlertDescription className="text-green-700 dark:text-green-400">
+                    <AlertTitle className="text-green-800 dark:text-green-300">Reset Link Generated</AlertTitle>
+                    <AlertDescription className="text-green-700 dark:text-green-400 break-words">
                         {state?.message}
                     </AlertDescription>
                 </Alert>
@@ -104,6 +111,7 @@ export default function ForgotPasswordPage() {
                         name="email"
                         placeholder="m@example.com"
                         required
+                        value={emailValue}
                         onChange={handleInputChange}
                         />
                     </div>
