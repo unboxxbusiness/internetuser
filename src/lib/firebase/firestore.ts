@@ -1,4 +1,6 @@
 
+"use server";
+
 import "server-only";
 
 import type { AppUser } from "@/app/auth/actions";
@@ -16,14 +18,19 @@ const LANDING_PAGE_COLLECTION = "landingPage";
 
 // Helper to convert Timestamps to serializable strings
 const toSerializableObject = (obj: any) => {
+    if (!obj) return obj;
     for (const key in obj) {
-        if (obj[key] instanceof Date || (obj[key] && typeof obj[key].toDate === 'function')) {
-             // Handle both JS Date and Firestore Timestamp
-            obj[key] = obj[key].toISOString();
-        } else if (Array.isArray(obj[key])) {
-             obj[key] = obj[key].map(toSerializableObject);
-        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-            toSerializableObject(obj[key]);
+        if (!obj.hasOwnProperty(key)) continue;
+
+        const value = obj[key];
+        if (value && typeof value.toDate === 'function') { // Firestore Timestamp
+            obj[key] = value.toDate().toISOString();
+        } else if (value instanceof Date) { // JavaScript Date
+            obj[key] = value.toISOString();
+        } else if (Array.isArray(value)) {
+            obj[key] = value.map(item => toSerializableObject(item));
+        } else if (typeof value === 'object' && value !== null) {
+            toSerializableObject(value);
         }
     }
     return obj;
@@ -421,3 +428,5 @@ export async function updateUserSettings(db: Firestore, userId: string, settings
     const docRef = db.collection(USERS_COLLECTION).doc(userId);
     await docRef.update({ settings: settings });
 }
+
+    
