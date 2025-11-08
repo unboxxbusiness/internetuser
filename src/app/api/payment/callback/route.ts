@@ -67,11 +67,13 @@ export async function POST(req: NextRequest) {
             });
 
             // 3. Send a push notification to the user
-            await sendPushNotification(
-                'Subscription Changed Successfully', 
-                `Your plan has been successfully updated to ${plan?.name}.`,
-                userId
-            );
+            if (process.env.NODE_ENV !== 'development') { // Example: avoid sending notifications in dev
+                await sendPushNotification(
+                    'Subscription Changed Successfully', 
+                    `Your plan has been successfully updated to ${plan?.name}.`,
+                    userId
+                );
+            }
             
             return NextResponse.redirect(new URL('/user/billing?payment=success', req.url));
 

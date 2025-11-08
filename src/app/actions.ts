@@ -104,25 +104,6 @@ export async function deletePlanAction(id: string) {
   revalidatePath("/admin/plans");
 }
 
-export async function sendBulkNotificationAction(prevState: any, formData: FormData): Promise<{ message?: string; error?: string }> {
-    const subject = formData.get('subject') as string;
-    const message = formData.get('message') as string;
-
-    if (!subject || !message) {
-        return { error: 'Subject and message are required.' };
-    }
-
-    try {
-        const result = await sendPushNotification(subject, message);
-        revalidatePath('/admin/notifications');
-        return { message: `Notification has been successfully sent to ${result.success} users.` };
-
-    } catch (error) {
-        console.error('Error sending notification:', error);
-        return { error: 'Failed to send notification.' };
-    }
-}
-
 export async function updateUserProfileAction(
   prevState: any,
   formData: FormData
@@ -358,5 +339,3 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
 
     return results;
 }
-
-    

@@ -40,7 +40,6 @@ const navigationItems: NavigationItem[] = [
   { id: "users", name: "Users", icon: Users2, href: "/admin/users" },
   { id: "plans", name: "Plans", icon: Package, href: "/admin/plans" },
   { id: "payments", name: "Payments", icon: CreditCard, href: "/admin/payments" },
-  { id: "notifications", name: "Notifications", icon: Bell, href: "/admin/notifications" },
   { id: "settings", name: "Settings", icon: SlidersHorizontal, href: "/admin/settings" },
 ];
 
