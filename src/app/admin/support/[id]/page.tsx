@@ -17,7 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TicketReplyForm } from "@/components/ticket-reply-form";
 import { CloseTicketButton } from "@/components/close-ticket-button";
 import { TicketMessages } from "@/components/ticket-messages";
-import { ReopenTicketButton } from "@/components/reopen-ticket-button";
+import { AdminReopenTicketButton } from "@/components/admin-reopen-ticket-button";
 
 
 export default async function TicketDetailPage({ params }: { params: { id: string } }) {
@@ -58,7 +58,7 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
          {ticket.status !== 'closed' ? (
             <CloseTicketButton ticketId={ticket.id} />
          ) : (
-            <ReopenTicketButton ticketId={ticket.id} />
+            <AdminReopenTicketButton ticketId={ticket.id} />
          )}
       </div>
 
@@ -132,3 +132,5 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
     </div>
   );
 }
+
+    

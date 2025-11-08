@@ -467,12 +467,29 @@ export async function reopenSupportTicketAction(ticketId: string) {
     try {
         await updateSupportTicket(ticketId, { status: 'open' });
         revalidatePath(`/user/support/${ticketId}`);
-         revalidatePath(`/admin/support/${ticketId}`);
+        revalidatePath(`/admin/support/${ticketId}`);
     } catch (error) {
         console.error("Error reopening ticket:", error);
         return { error: "Failed to reopen the ticket." };
     }
 }
+
+export async function adminReopenSupportTicketAction(ticketId: string) {
+    const user = await getUser();
+    if (!user || user.role !== 'admin') {
+        return { error: "You do not have permission to perform this action." };
+    }
+    
+    try {
+        await updateSupportTicket(ticketId, { status: 'open' });
+        revalidatePath(`/admin/support`);
+        revalidatePath(`/admin/support/${ticketId}`);
+    } catch (error) {
+        console.error("Error reopening ticket:", error);
+        return { error: "Failed to reopen the ticket." };
+    }
+}
+
 
 export async function createPayUTransactionAction(planId: string) {
   const user = await getUser();
@@ -665,3 +682,5 @@ export async function bulkCreateUsersAction(users: NewUser[]): Promise<BulkCreat
 
     return results;
 }
+
+    
