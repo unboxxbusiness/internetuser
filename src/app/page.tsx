@@ -1,4 +1,9 @@
 
+"use client";
+
+import { useScroll, useTransform } from "framer-motion";
+import React from "react";
+import { GoogleGeminiEffect } from "@/components/google-gemini-effect";
 import { redirect } from "next/navigation";
 import { getUser } from "./auth/actions";
 import { getPlans, getBrandingSettings } from "@/lib/firebase/server-actions";
@@ -7,7 +12,6 @@ import Link from "next/link";
 import { Check, Phone, Zap, MessageCircle, DollarSign, Signal, Star, Wifi, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HeroGeometric } from "@/components/hero-geometric";
 import { CTASection } from "@/components/cta-section";
 import Image from "next/image";
 
@@ -57,7 +61,8 @@ const testimonials = [
     }
 ]
 
-export default async function LandingPage() {
+// This is a server component to fetch initial data
+async function LandingPageData() {
   const user = await getUser();
 
   if (user) {
@@ -67,23 +72,58 @@ export default async function LandingPage() {
       redirect("/user/dashboard");
     }
   }
-
   const [plans, branding] = await Promise.all([
       getPlans(),
       getBrandingSettings(),
   ]);
 
-  const displayPlans = plans.slice(0, 3); // Take first 3 for the cards
+  return { plans, branding };
+}
+
+export default function LandingPage() {
+  const ref = React.useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+ 
+  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
+  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
+  const pathLengthThird = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
+  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.8], [0.05, 1.2]);
+  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0, 1.2]);
+
+  const [data, setData] = React.useState<{plans: any[], branding: any} | null>(null);
+
+  React.useEffect(() => {
+    async function fetchData() {
+        const result = await LandingPageData();
+        setData(result);
+    }
+    fetchData();
+  }, []);
+
+  const displayPlans = data?.plans.slice(0, 3) || [];
 
   return (
     <div className="bg-background text-foreground">
-
-      <HeroGeometric 
-        badge={branding?.brandName || "Gc Fiber Net"}
-        title1="Fast, Reliable, Local."
-        title2="Internet for Aali Village."
-      />
-
+        <div
+        className="h-[400vh] bg-black w-full dark:border dark:border-white/[0.1] rounded-md relative pt-40 overflow-clip"
+        ref={ref}
+        >
+            <GoogleGeminiEffect
+                title="Fast, Reliable, Local Internet for Aali Village, Delhi."
+                description="Experience smooth streaming, lag-free gaming, and dependable connectivity — powered by your trusted local ISP right here in Aali Village."
+                pathLengths={[
+                    pathLengthFirst,
+                    pathLengthSecond,
+                    pathLengthThird,
+                    pathLengthFourth,
+                    pathLengthFifth,
+                ]}
+            />
+        </div>
+      
       {/* Plans & Pricing */}
       <section id="plans" className="py-16 md:py-24">
           <div className="container mx-auto px-4">
