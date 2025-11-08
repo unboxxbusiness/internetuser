@@ -281,7 +281,7 @@ export async function createPayUTransactionAction(planId: string) {
   return {
     ...payUData,
     hash: hash,
-    payu_url: "https://sandboxsecure.payu.in/_payment", // Sandbox URL, change for production
+    payu_url: "https://secure.payu.in/_payment", // Production URL
   };
 }
 
