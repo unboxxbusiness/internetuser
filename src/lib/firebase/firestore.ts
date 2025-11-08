@@ -13,6 +13,23 @@ const BRANDING_SETTINGS_COLLECTION = "branding";
 const NOTIFICATIONS_COLLECTION = "notifications";
 const LANDING_PAGE_COLLECTION = "landingPage";
 
+
+// Helper to convert Timestamps to serializable strings
+const toSerializableObject = (obj: any) => {
+    for (const key in obj) {
+        if (obj[key] instanceof Date || (obj[key] && typeof obj[key].toDate === 'function')) {
+             // Handle both JS Date and Firestore Timestamp
+            obj[key] = obj[key].toISOString();
+        } else if (Array.isArray(obj[key])) {
+             obj[key] = obj[key].map(toSerializableObject);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            toSerializableObject(obj[key]);
+        }
+    }
+    return obj;
+}
+
+
 // User & Role Functions
 export async function createUser(db: Firestore, uid: string, name:string, email: string, role: string, photoURL?: string): Promise<void> {
   await db.collection(USERS_COLLECTION).doc(uid).set({
@@ -165,16 +182,10 @@ export async function getPayments(db: Firestore): Promise<Payment[]> {
   const snapshot = await q.get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
-    return {
+    return toSerializableObject({
       id: doc.id,
-      userId: data.userId,
-      customer: data.customer,
-      email: data.email,
-      plan: data.plan,
-      status: data.status,
-      amount: data.amount,
-      date: (data.date.toDate ? data.date.toDate() : new Date(data.date)),
-    };
+      ...data,
+    }) as Payment;
   });
 }
 
@@ -184,36 +195,38 @@ export async function getUserPayments(db: Firestore, userId: string): Promise<Pa
 
     return snapshot.docs.map((doc) => {
         const data = doc.data();
-        return {
+        return toSerializableObject({
             id: doc.id,
-            userId: data.userId,
-            customer: data.customer,
-            email: data.email,
-            plan: data.plan,
-            status: data.status,
-            amount: data.amount,
-            date: (data.date.toDate ? data.date.toDate() : new Date(data.date)),
-        };
+            ...data,
+        }) as Payment;
     });
 }
 
 
 // Support Ticket Functions
 export async function createSupportTicket(db: Firestore, ticketData: Omit<SupportTicket, 'id' | 'messages'>): Promise<string> {
-    const docRef = await db.collection(SUPPORT_TICKETS_COLLECTION).add(ticketData);
+    const docRef = await db.collection(SUPPORT_TICKETS_COLLECTION).add({
+        ...ticketData,
+        createdAt: FieldValue.serverTimestamp(),
+        lastUpdated: FieldValue.serverTimestamp(),
+    });
     return docRef.id;
 }
 
-export async function addTicketMessage(db: Firestore, ticketId: string, message: TicketMessage): Promise<void> {
+export async function addTicketMessage(db: Firestore, ticketId: string, message: Omit<TicketMessage, 'timestamp'>): Promise<void> {
     const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId);
+    const messageWithTimestamp = {
+        ...message,
+        timestamp: FieldValue.serverTimestamp()
+    };
     await docRef.update({
-        messages: FieldValue.arrayUnion(message)
+        messages: FieldValue.arrayUnion(messageWithTimestamp)
     });
 }
 
 export async function updateSupportTicket(db: Firestore, ticketId: string, data: Partial<SupportTicket>): Promise<void> {
     const docRef = db.collection(SUPPORT_TICKETS_COLLECTION).doc(ticketId);
-    await docRef.update(data);
+    await docRef.update({ ...data, lastUpdated: FieldValue.serverTimestamp() });
 }
 
 export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]> {
@@ -221,11 +234,10 @@ export async function getSupportTickets(db: Firestore): Promise<SupportTicket[]>
   const snapshot = await q.get();
   return snapshot.docs.map((doc) => {
     const data = doc.data();
-    return {
+    return toSerializableObject({
       id: doc.id,
       ...data,
-      messages: data.messages?.map((m: any) => ({...m})) || [],
-    } as SupportTicket;
+    }) as SupportTicket;
   });
 }
 
@@ -235,11 +247,10 @@ export async function getUserSupportTickets(db: Firestore, userId: string): Prom
 
     return snapshot.docs.map((doc) => {
         const data = doc.data();
-        return {
+         return toSerializableObject({
           id: doc.id,
           ...data,
-          messages: data.messages?.map((m: any) => ({...m})) || [],
-        } as SupportTicket;
+        }) as SupportTicket;
     });
 }
 
@@ -252,11 +263,10 @@ export async function getSupportTicket(db: Firestore, id: string): Promise<Suppo
     const data = docSnap.data();
     if (!data) return null;
 
-    return {
+     return toSerializableObject({
         id: docSnap.id,
         ...data,
-        messages: data.messages?.map((m: any) => ({...m})) || [],
-    } as SupportTicket;
+    }) as SupportTicket;
 }
 
 // Branding Functions
@@ -302,7 +312,10 @@ export async function updateHeroSettings(db: Firestore, settings: HeroSettings):
 
 // Notification Functions
 export async function createNotification(db: Firestore, notificationData: Omit<Notification, 'id'>): Promise<void> {
-    await db.collection(NOTIFICATIONS_COLLECTION).add(notificationData);
+    await db.collection(NOTIFICATIONS_COLLECTION).add({
+        ...notificationData,
+        createdAt: FieldValue.serverTimestamp()
+    });
 }
 
 export async function getUserNotifications(db: Firestore, userId: string): Promise<Notification[]> {
@@ -311,17 +324,10 @@ export async function getUserNotifications(db: Firestore, userId: string): Promi
 
     return snapshot.docs.map((doc) => {
         const data = doc.data();
-        return {
+        return toSerializableObject({
             id: doc.id,
-            userId: data.userId,
-            title: data.title,
-            message: data.message,
-            type: data.type,
-            isRead: data.isRead,
-            isArchived: data.isArchived,
-            createdAt: data.createdAt,
-            relatedId: data.relatedId,
-        } as Notification;
+            ...data,
+        }) as Notification;
     });
 }
 
@@ -331,17 +337,10 @@ export async function getAllNotifications(db: Firestore): Promise<Notification[]
 
     return snapshot.docs.map((doc) => {
         const data = doc.data();
-        return {
+        return toSerializableObject({
             id: doc.id,
-            userId: data.userId,
-            title: data.title,
-            message: data.message,
-            type: data.type,
-            isRead: data.isRead,
-            isArchived: data.isArchived,
-            createdAt: data.createdAt,
-            relatedId: data.relatedId,
-        } as Notification;
+            ...data,
+        }) as Notification;
     });
 }
 

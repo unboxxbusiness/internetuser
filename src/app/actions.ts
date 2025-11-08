@@ -132,7 +132,6 @@ export async function sendNotificationAction(prevState: any, formData: FormData)
                 type: 'general',
                 isRead: false,
                 isArchived: false,
-                createdAt: new Date(),
             })
         );
         await Promise.all(notificationPromises);
@@ -234,7 +233,7 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
         return { error: 'Please fill out all fields.' };
     }
 
-    const ticketData: Omit<SupportTicket, 'id' | 'messages'> = {
+    const ticketData: Omit<SupportTicket, 'id' | 'messages' | 'createdAt' | 'lastUpdated'> = {
         subject,
         description,
         priority,
@@ -244,8 +243,6 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
             email: user.email || 'N/A'
         },
         status: 'open',
-        lastUpdated: new Date(),
-        createdAt: new Date(),
     };
 
     try {
@@ -254,7 +251,6 @@ export async function createSupportTicketAction(prevState: any, formData: FormDa
             sender: user.name || 'User',
             senderRole: 'user',
             message: description,
-            timestamp: new Date(),
         });
 
     } catch (error) {
@@ -283,7 +279,7 @@ export async function adminCreateTicketAction(prevState: any, formData: FormData
         return { error: 'Please fill out all fields.' };
     }
 
-    const ticketData: Omit<SupportTicket, 'id' | 'messages'> = {
+    const ticketData: Omit<SupportTicket, 'id' | 'messages' | 'createdAt' | 'lastUpdated'> = {
         subject,
         description: `Conversation started by admin: ${adminUser.name}`,
         priority: 'medium', // Default priority for admin-initiated chats
@@ -293,8 +289,6 @@ export async function adminCreateTicketAction(prevState: any, formData: FormData
             email: targetUserEmail
         },
         status: 'open',
-        lastUpdated: new Date(),
-        createdAt: new Date(),
     };
 
     try {
@@ -305,7 +299,6 @@ export async function adminCreateTicketAction(prevState: any, formData: FormData
             sender: adminUser.name || 'Admin',
             senderRole: 'admin',
             message: message,
-            timestamp: new Date(),
         });
         
         // Notify the user that a chat has been started
@@ -316,7 +309,6 @@ export async function adminCreateTicketAction(prevState: any, formData: FormData
             type: 'support',
             isRead: false,
             isArchived: false,
-            createdAt: new Date(),
             relatedId: ticketId
         });
 
@@ -403,7 +395,6 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
             sender: user.name || 'Admin',
             senderRole: 'admin',
             message: reply,
-            timestamp: new Date(),
         });
         
         await createNotification({
@@ -413,11 +404,10 @@ export async function replyToSupportTicketAction(ticketId: string, prevState: an
             type: 'support',
             isRead: false,
             isArchived: false,
-            createdAt: new Date(),
             relatedId: ticketId
         });
 
-        await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
+        await updateSupportTicket(ticketId, { status: 'in-progress' });
         revalidatePath(`/admin/support/${ticketId}`);
         revalidatePath(`/user/support/${ticketId}`);
         revalidatePath(`/user/notifications`);
@@ -441,9 +431,8 @@ export async function userReplyToTicketAction(ticketId: string, prevState: any, 
             sender: user.name || 'User',
             senderRole: 'user',
             message: reply,
-            timestamp: new Date(),
         });
-        await updateSupportTicket(ticketId, { status: 'in-progress', lastUpdated: new Date() });
+        await updateSupportTicket(ticketId, { status: 'in-progress' });
         revalidatePath(`/user/support/${ticketId}`);
         revalidatePath(`/admin/support/${ticketId}`);
         return { message: "Your reply has been submitted." };
@@ -461,7 +450,7 @@ export async function closeSupportTicketAction(ticketId: string) {
     }
 
     try {
-        await updateSupportTicket(ticketId, { status: 'closed', lastUpdated: new Date() });
+        await updateSupportTicket(ticketId, { status: 'closed' });
         revalidatePath(`/admin/support/${ticketId}`);
     } catch (error) {
         console.error("Error closing ticket:", error);
@@ -476,7 +465,7 @@ export async function reopenSupportTicketAction(ticketId: string) {
     }
     
     try {
-        await updateSupportTicket(ticketId, { status: 'open', lastUpdated: new Date() });
+        await updateSupportTicket(ticketId, { status: 'open' });
         revalidatePath(`/user/support/${ticketId}`);
          revalidatePath(`/admin/support/${ticketId}`);
     } catch (error) {

@@ -3,7 +3,7 @@ export interface TicketMessage {
     sender: string;
     senderRole: 'user' | 'admin';
     message: string;
-    timestamp: Date;
+    timestamp: string;
 }
 
 export interface SupportTicket {
@@ -17,8 +17,8 @@ export interface SupportTicket {
     };
     status: 'open' | 'in-progress' | 'closed';
     priority: 'low' | 'medium' | 'high';
-    createdAt?: Date;
-    lastUpdated: Date;
+    createdAt?: string;
+    lastUpdated: string;
     messages?: TicketMessage[];
 }
 
@@ -38,7 +38,7 @@ export interface Payment {
   plan: string;
   status: "succeeded" | "failed" | "refunded";
   amount: number;
-  date: Date;
+  date: string;
 }
 
 export interface BrandingSettings {
@@ -71,7 +71,7 @@ export interface Notification {
   type: 'billing' | 'plan-change' | 'general' | 'warning' | 'support';
   isRead: boolean;
   isArchived: boolean;
-  createdAt: Date;
+  createdAt: string;
   relatedId?: string;
 }
 
